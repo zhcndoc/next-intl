@@ -6,25 +6,25 @@ import Steps from '@/components/Steps';
 import Details from '@/components/Details';
 import CourseBanner, {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Next.js App Router internationalization (i18n)
+# Next.js 应用路由国际化 (i18n)
 
-Prefer to watch a video?
+想看视频教程吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/03-translations/01-setup"
-  title="Set up next-intl"
+  title="设置 next-intl"
 />
 
-## Getting started
+## 开始入门
 
-If you haven't done so already, [create a Next.js app](https://nextjs.org/docs/getting-started/installation) that uses the App Router and run:
+如果你还没有这样做，[创建一个使用 App Router 的 Next.js 应用](https://nextjs.org/docs/getting-started/installation)，然后运行：
 
 ```sh
 npm install next-intl
 ```
 
-Now, we're going to create the following file structure:
+现在，我们将创建以下文件结构：
 
 ```
 ├── messages
@@ -39,33 +39,33 @@ Now, we're going to create the following file structure:
         └── page.tsx
 ```
 
-**Let's set up the files:**
+**让我们来设置这些文件：**
 
 <Steps>
 
 ### `messages/en.json` [#messages]
 
-Messages represent the translations that are available per language and can be provided either locally or loaded from a remote data source.
+Messages 代表每种语言可用的翻译，可以是本地提供，也可以从远程数据源加载。
 
-The simplest option is to add JSON files in your local project folder:
+最简单的做法是将 JSON 文件添加到你的本地项目文件夹：
 
 ```json filename="messages/en.json"
 {
   "HomePage": {
-    "title": "Hello world!"
+    "title": "你好，世界！"
   }
 }
 ```
 
 ### `i18n/request.ts` [#i18n-request]
 
-`next-intl` creates a request-scoped configuration object, which you can use to provide messages and other options based on the user's locale to Server Components.
+`next-intl` 会创建一个请求作用域的配置对象，你可以使用它基于用户的语言环境为服务器组件提供消息和其他选项。
 
 ```tsx filename="src/i18n/request.ts"
 import {getRequestConfig} from 'next-intl/server';
 
 export default getRequestConfig(async () => {
-  // Static for now, we'll change this later
+  // 目前是静态的，稍后会更改
   const locale = 'en';
 
   return {
@@ -76,15 +76,15 @@ export default getRequestConfig(async () => {
 ```
 
 <Details id="i18n-request-path">
-<summary>Can I move this file somewhere else?</summary>
+<summary>我可以把这个文件放到别的地方吗？</summary>
 
-This file is supported out-of-the-box as `./i18n/request.ts` both in the `src` folder as well as in the project root with the extensions `.ts`, `.tsx`, `.js` and `.jsx`.
+此文件在 `src` 目录下以及项目根目录中以 `.ts`、`.tsx`、`.js` 和 `.jsx` 扩展名存在时，均可开箱即用，路径为 `./i18n/request.ts`。
 
-If you prefer to move this file somewhere else, you can optionally provide a path to the plugin:
+如果你想将此文件放到其他位置，可以选择性地向插件提供路径：
 
 ```js filename="next.config.ts"
 const withNextIntl = createNextIntlPlugin(
-  // Specify a custom path here
+  // 在这里指定自定义路径
   './somewhere/else/request.ts'
 );
 ```
@@ -93,7 +93,7 @@ const withNextIntl = createNextIntlPlugin(
 
 ### `next.config.ts` [#next-config]
 
-Now, set up the plugin which links your `i18n/request.ts` file to `next-intl`.
+现在设置插件，将你的 `i18n/request.ts` 文件链接到 `next-intl`。
 
 <Tabs items={['next.config.ts', 'next.config.js']}>
 <Tabs.Tab>
@@ -127,7 +127,7 @@ module.exports = withNextIntl(nextConfig);
 
 ### `app/layout.tsx` [#layout]
 
-To make your request configuration available to Client Components, you can wrap the `children` in your root layout with `NextIntlClientProvider`.
+为了让你的请求配置在客户端组件中可用，可以用 `NextIntlClientProvider` 包裹根布局中的 `children`。
 
 ```tsx filename="app/layout.tsx" {11}
 import {NextIntlClientProvider} from 'next-intl';
@@ -149,7 +149,7 @@ export default async function RootLayout({children}: Props) {
 
 ### `app/page.tsx` [#page]
 
-Use translations in your page components or anywhere else!
+在页面组件或其他任何地方使用翻译！
 
 ```tsx filename="app/page.tsx"
 import {useTranslations} from 'next-intl';
@@ -160,7 +160,7 @@ export default function HomePage() {
 }
 ```
 
-In case of async components, you can use the awaitable `getTranslations` function instead:
+对于异步组件，则可以使用可等待的 `getTranslations` 函数：
 
 ```tsx filename="app/page.tsx"
 import {getTranslations} from 'next-intl/server';
@@ -173,21 +173,21 @@ export default async function HomePage() {
 
 </Steps>
 
-## Next steps
+## 后续步骤
 
-### Locale-based routing
+### 基于语言环境的路由
 
-If you’d like to use unique pathnames for every language that your app supports (e.g. `/en/about` or `example.de/über-uns`), you can continue to set up a top-level `[locale]` segment for your app.
+如果你想为应用支持的每种语言使用唯一的路径名（例如 `/en/about` 或 `example.de/über-uns`），可以继续为应用设置顶层的 `[locale]` 路由段。
 
 <div className="mt-8 max-w-[300px]">
-  <Card title="Set up locale-based routing" href="/docs/routing" />
+  <Card title="设置基于语言环境的路由" href="/docs/routing" />
 </div>
 
-### Provide a locale
+### 提供语言环境
 
-If your app doesn't require unique pathnames per locale, you can provide a locale to `next-intl` based on user preferences or other application logic.
+如果你的应用不需要为每个语言环境使用唯一路径名，可以基于用户偏好或其他应用逻辑向 `next-intl` 提供语言环境。
 
-The simplest option is to use a cookie:
+最简单的做法是使用 cookie：
 
 ```tsx filename="src/i18n/request.ts"
 import {cookies} from 'next/headers';
@@ -204,20 +204,20 @@ export default getRequestConfig(async () => {
 });
 ```
 
-### Internationalization isn't just translating words
+### 国际化不只是翻译文字
 
-`next-intl` provides the essential foundation for internationalization in Next.js apps. It handles aspects like translations, date and number formatting, as well as internationalized routing.
+`next-intl` 提供 Next.js 应用国际化的基础设施。它处理翻译、日期和数字格式化，以及国际化路由等方面。
 
-However, building for a global audience spans a wider range of topics:
+然而，为全球用户构建应用涵盖更广泛的内容：
 
-- Choosing the right **architecture and routing strategy** for your app
-- Integrating with **backend services or a CMS**
-- Leveraging **generative AI** for content localization
-- Streamlining your **development workflow** with TypeScript and IDE tooling
-- Collaborating with your team using a **translation management system**
-- Understanding all the pieces that contribute to a **truly localized experience**
-- **Mastering SEO** for multilingual apps to reach global audiences
+- 为你的应用选择合适的 **架构和路由策略**
+- 集成 **后端服务或 CMS**
+- 利用 **生成式 AI** 进行内容本地化
+- 通过 TypeScript 和 IDE 工具优化 **开发工作流**
+- 使用 **翻译管理系统** 进行团队协作
+- 理解构建 **真正本地化体验** 所需的各个部分
+- 掌握多语言应用的 **SEO 优化**，以触达全球用户
 
 <div className="mt-8">
-  <CourseBanner title="Build international Next.js apps with confidence" />
+  <CourseBanner title="自信构建国际化 Next.js 应用" />
 </div>

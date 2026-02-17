@@ -1,9 +1,9 @@
 import Callout from '@/components/Callout';
 import Details from '@/components/Details';
 
-# Testing
+# 测试
 
-Components that use `next-intl` can be used in unit tests:
+使用 `next-intl` 的组件可以在单元测试中使用：
 
 ```tsx
 import {render} from '@testing-library/react';
@@ -21,13 +21,13 @@ it('renders', () => {
 });
 ```
 
-To avoid having to mock server components, it can be beneficial to define components as [non-async functions](/docs/environments/server-client-components#async-or-non-async), allowing you to flexibly render them in any environment.
+为了避免必须模拟服务器组件，将组件定义为[非异步函数](/docs/environments/server-client-components#async-or-non-async)可能会很有帮助，这样可以灵活地在任何环境中渲染它们。
 
 ## Vitest
 
-`next-intl` is bundled as ESM-only, which requires the usage of [explicit file extensions](https://nodejs.org/api/esm.html#mandatory-file-extensions) internally. However, in order to avoid a [deoptimization in Next.js](https://github.com/vercel/next.js/issues/77200), `next-intl` currently has to import from `next/navigation` instead of `next/navigation.js`.
+`next-intl` 被打包为仅支持 ESM，这要求在内部使用[显式文件扩展名](https://nodejs.org/api/esm.html#mandatory-file-extensions)。然而，为了避免在 Next.js 中发生[性能降级](https://github.com/vercel/next.js/issues/77200)，`next-intl` 目前必须从 `next/navigation` 而不是 `next/navigation.js` 进行导入。
 
-Vitest correctly assumes a file extension though, therefore for the time being, if you're using [`createNavigation`](/docs/routing/navigation), you need to ask Vitest to process imports within `next-intl`:
+Vitest 会正确地假定文件扩展名，因此暂时来说，如果你正在使用 [`createNavigation`](/docs/routing/navigation)，需要让 Vitest 处理 `next-intl` 内的导入：
 
 ```tsx filename="vitest.config.mts"
 import {defineConfig} from 'vitest/config';
@@ -46,7 +46,7 @@ export default defineConfig({
 
 ## Jest
 
-Since Jest doesn't have built-in ESM support, you need to instruct Jest to transform imports from `next-intl`:
+由于 Jest 不内置对 ESM 的支持，你需要指示 Jest 转换来自 `next-intl` 的导入：
 
 ```tsx filename="jest.config.js"
 const nextJest = require('next/jest');

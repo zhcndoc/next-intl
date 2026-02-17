@@ -1,27 +1,27 @@
 import Callout from '@/components/Callout';
 import Image from 'next/image';
 
-# Validating messages
+# 验证消息
 
-To ensure quality and completeness of your messages, you can use [i18n-check](https://github.com/lingualdev/i18n-check).
+为了确保消息的质量和完整性，您可以使用 [i18n-check](https://github.com/lingualdev/i18n-check)。
 
-This CLI helps you validate against issues like:
+这个 CLI 可帮助您验证以下问题：
 
-1. Missing translations in target locales
-2. Inconsistent usage of ICU arguments across translations
+1. 目标语言中缺失的翻译
+2. 翻译中 ICU 参数使用不一致
 
-**Usage:**
+**用法：**
 
 ```bash
 npx @lingual/i18n-check@latest --source en --locales messages
 ```
 
-**Output:**
+**输出：**
 
 ```
-Found missing keys!
+发现缺失的键！
 ┌────────────────────┬───────────────────────────────┐
-│ file               │ key                           │
+│ 文件               │ 键                           │
 ├────────────────────┼───────────────────────────────┤
 │  messages/de.json  │  NewsArticle.title            │
 └────────────────────┴───────────────────────────────┘
@@ -29,6 +29,6 @@ Found missing keys!
 
 <Callout>
 
-You can also use the [`--unused`](https://github.com/lingualdev/i18n-check#--unused--u) flag to detect keys that are defined in your messages, but are not referenced anywhere in your codebase (currently experimental).
+您还可以使用 [`--unused`](https://github.com/lingualdev/i18n-check#--unused--u) 标志检测定义在消息中的键，但在代码库中未被引用的键（目前为实验功能）。
 
 </Callout>

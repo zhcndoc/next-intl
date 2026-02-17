@@ -2,22 +2,22 @@ import Callout from '@/components/Callout';
 import Details from '@/components/Details';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Server Actions, Metadata & Route Handlers
+# 服务器操作、元数据 & 路由处理器
 
-There are a few places in Next.js apps where you can apply internationalization outside of React components:
+在 Next.js 应用中，有几个地方可以在 React 组件外实现国际化：
 
-1. [Metadata API](https://nextjs.org/docs/app/building-your-application/optimizing/metadata)
-2. [Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
-3. [Open Graph images](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image)
-4. [Manifest](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest)
-5. [Sitemap](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap)
-6. [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/router-handlers)
+1. [元数据 API](https://nextjs.org/docs/app/building-your-application/optimizing/metadata)
+2. [服务器操作](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
+3. [Open Graph 图片](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image)
+4. [Manifest 清单](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest)
+5. [网站地图](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap)
+6. [路由处理器](https://nextjs.org/docs/app/building-your-application/routing/router-handlers)
 
-`next-intl/server` provides a set of [awaitable functions](/docs/environments/server-client-components#async-components) that can be used in these cases.
+`next-intl/server` 提供了一组可等待的[异步函数](/docs/environments/server-client-components#async-components)，可用于这些场景。
 
-### Metadata API
+### 元数据 API
 
-To internationalize metadata like the page title, you can use functionality from `next-intl` in the [`generateMetadata`](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#generatemetadata-function) function that can be exported from pages and layouts.
+要对页面标题等元数据进行国际化，可以在页面和布局中导出的 [`generateMetadata`](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#generatemetadata-function) 函数中使用 `next-intl` 的功能。
 
 ```tsx filename="layout.tsx"
 import {getTranslations} from 'next-intl/server';
@@ -33,15 +33,14 @@ export async function generateMetadata({params}) {
 ```
 
 <Callout>
-  By passing an explicit `locale` to the awaitable functions from `next-intl`,
-  you can make the metadata handler eligible for [static
-  rendering](/docs/routing/setup#static-rendering) if you're using [locale-based
-  routing](/docs/routing).
+  通过向 `next-intl` 的异步函数显式传入 `locale`，
+  如果你使用[基于语言环境的路由](/docs/routing)，
+  你可以使元数据处理器支持[静态渲染](/docs/routing/setup#static-rendering)。
 </Callout>
 
-### Server Actions
+### 服务器操作
 
-[Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations) provide a mechanism to execute server-side code that is invoked by the client. In case you're returning user-facing messages, you can use `next-intl` to localize them based on the user's locale.
+[服务器操作](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations) 提供了一种机制，可以执行由客户端触发的服务器端代码。如果需要返回面向用户的消息，可以使用 `next-intl` 根据用户的语言环境为这些消息进行本地化。
 
 ```tsx
 import {getTranslations} from 'next-intl/server';
@@ -57,12 +56,12 @@ async function loginAction(data: FormData) {
 }
 ```
 
-Note that when you're displaying messages generated in Server Actions to the user, you should consider the case if the user can switch the locale while the message is displayed to ensure that the UI is localized consistently. If you're using [a `[locale]` segment](/docs/routing) as part of your routing strategy then this is handled automatically. If you're not, you might want to clear the message manually, e.g. by [resetting the state](https://react.dev/learn/preserving-and-resetting-state#resetting-a-form-with-a-key) of the respective component via `key={locale}`.
+注意，当你向用户展示服务器操作生成的消息时，应考虑用户在消息显示期间切换语言环境的情况，以确保界面的一致本地化。如果你使用了作为路由策略一部分的[ `[locale]` 片段](/docs/routing)，则会自动处理该情况。如果没有，可能需要手动清除消息，例如通过给相关组件使用 `key={locale}` 来[重置状态](https://react.dev/learn/preserving-and-resetting-state#resetting-a-form-with-a-key)。
 
 <Details id="server-actions-zod">
-<summary>When using Zod for validation, how can I localize error messages?</summary>
+<summary>使用 Zod 进行验证时，如何本地化错误消息？</summary>
 
-[Zod](https://zod.dev/) allows you to provide [contextual error maps](https://zod.dev/ERROR_HANDLING?id=contextual-error-map) that can be used to customize error messages per parse invocation. Since the locale is specific to a particular request, this mechanism comes in handy to turn structured errors from `zod` into localized messages:
+[Zod](https://zod.dev/) 支持提供[上下文错误映射](https://zod.dev/ERROR_HANDLING?id=contextual-error-map)，用于自定义每次解析的错误消息。由于语言环境针对具体请求，该机制非常适合将来自 `zod` 的结构化错误转换为本地化消息：
 
 ```tsx
 import {getTranslations} from 'next-intl/server';
@@ -100,9 +99,9 @@ async function loginAction(data: FormData) {
 
 </Details>
 
-### Open Graph images
+### Open Graph 图片
 
-If you're programmatically generating [Open Graph images](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image), you can call functions from `next-intl` in the exported component:
+如果你正在以编程方式生成[Open Graph 图片](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image)，可以在导出的组件中调用 `next-intl` 的函数：
 
 ```tsx filename="app/[locale]/opengraph-image.tsx"
 import {ImageResponse} from 'next/og';
@@ -115,22 +114,22 @@ export default async function OpenGraphImage({params}) {
 }
 ```
 
-Next.js will create a public route based on the segment where `opengraph-image.tsx` is placed, e.g.:
+Next.js 会基于 `opengraph-image.tsx` 所在路径段创建一个公开路由，例如：
 
 ```
 http://localhost:3000/en/opengraph-image?f87b2d56cee109c7
 ```
 
-However, if you're using [locale-based routing](/docs/routing) and you've customized the [`localePrefix`](/docs/routing/configuration#locale-prefix) setting, this route might not be accessible since Next.js doesn't know about potential rewrites of the middleware.
+然而，如果你使用了[基于语言环境的路由](/docs/routing)，且自定义了 [`localePrefix`](/docs/routing/configuration#locale-prefix) 设置，这个路由可能无法访问，因为 Next.js 不知道中间件可能的重写规则。
 
-If this applies to your app, you can adapt your [matcher](/docs/routing/middleware#matcher-config) to bypass requests to the `opengraph-image.tsx` file:
+如果你的应用存在这种情况，可以调整你的[匹配器](/docs/routing/middleware#matcher-config)，忽略对 `opengraph-image.tsx` 文件的请求：
 
 ```tsx filename="proxy.ts"
 // ...
 
 export const config = {
   matcher: [
-    // Skip all paths that should not be internationalized
+    // 跳过所有不应国际化的路径
     '/((?!api|_next|_vercel|.*/opengraph-image|.*\\..*).*)'
 
     // ...
@@ -138,16 +137,16 @@ export const config = {
 };
 ```
 
-### Manifest
+### Manifest 清单
 
-Since the [manifest file](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest) needs to be placed in the root of the `app` folder (outside the `[locale]` dynamic segment), you need to provide a locale explicitly since `next-intl` can't infer it from the pathname:
+由于[manifest 文件](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest) 需放置在 `app` 文件夹根目录（即 `[locale]` 动态段之外），你需要显式提供语言环境，因为 `next-intl` 无法从路径推断：
 
 ```tsx filename="app/manifest.ts"
 import {MetadataRoute} from 'next';
 import {getTranslations} from 'next-intl/server';
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  // Pick a locale that is representative of the app
+  // 选择一个代表应用的语言环境
   const locale = 'en';
 
   const t = await getTranslations({
@@ -163,13 +162,13 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
 }
 ```
 
-### Sitemap
+### 网站地图
 
-If you're using a sitemap to inform search engines about all pages of your site, you can attach locale-specific [alternate entries](https://developers.google.com/search/docs/specialty/international/localized-versions#sitemap) to every URL to indicate that a particular page is available in multiple languages or regions.
+如果你使用网站地图告知搜索引擎你站点的所有页面，可以为每个 URL 附加特定语言的[备用条目](https://developers.google.com/search/docs/specialty/international/localized-versions#sitemap)，表示该页面支持多语言或多地区。
 
-Note that by default, `next-intl` returns the [`link`](/docs/routing/configuration#alternate-links) response header to instruct search engines that a page is available in multiple languages. While this sufficiently links localized pages for search engines, you may choose to provide this information in a sitemap instead if you have more specific requirements (e.g. when using CMS-driven URLs like `/news/[articleSlug]` where `articleSlug` depends on the locale).
+注意，默认情况下，`next-intl` 会返回 [`link`](/docs/routing/configuration#alternate-links) 响应头，通知搜索引擎页面支持多语言。虽然这对搜索引擎而言足够，但如果你有更具体的要求（例如使用基于 CMS 的 URL，如 `/news/[articleSlug]`，且 `articleSlug` 随语言环境变化），可以选择在网站地图中提供此信息。
 
-Next.js supports providing alternate URLs per language via the [`alternates`](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap#generate-a-localized-sitemap) entry which can be combined with [`getPathname`](/docs/routing/navigation#getpathname) to construct URLs for each locale:
+Next.js 支持通过 [`alternates`](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap#generate-a-localized-sitemap) 条目为每种语言提供备选 URL，结合 [`getPathname`](/docs/routing/navigation#getpathname) 构建每种语言的路径：
 
 ```tsx
 import {MetadataRoute} from 'next';
@@ -193,23 +192,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 }
 ```
 
-**Learn more:**
+**了解更多：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/08-seo/04-sitemap"
-  title="Sitemaps"
+  title="网站地图"
 />
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/07-content/03-cms-driven-urls"
-  title="CMS-driven URLs"
+  title="基于 CMS 的 URL"
 />
 
-### Route Handlers
+### 路由处理器
 
-You can use `next-intl` in [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) too. The `locale` can either be received from a search param, a layout segment or by parsing the `accept-language` header of the request.
+你也可以在[路由处理器](https://nextjs.org/docs/app/building-your-application/routing/router-handlers)中使用 `next-intl`。`locale` 可通过查询参数、布局片段或解析请求头的 `accept-language` 获得。
 
 ```tsx filename="app/api/hello/route.tsx"
 import {NextResponse} from 'next/server';
@@ -218,7 +217,7 @@ import {getTranslations} from 'next-intl/server';
 import {routing} from '@/i18n/routing';
 
 export async function GET(request) {
-  // Example: Receive the `locale` via a search param
+  // 示例：通过查询参数接收 `locale`
   const {searchParams} = new URL(request.url);
   const locale = searchParams.get('locale');
   if (!hasLocale(routing.locales, locale)) {

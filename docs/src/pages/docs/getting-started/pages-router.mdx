@@ -1,15 +1,15 @@
 import {Tabs} from 'nextra/components';
 import Callout from '@/components/Callout';
 
-# Next.js Pages Router internationalization (i18n)
+# Next.js Pages 路由国际化 (i18n)
 
-While it's recommended to [use `next-intl` with the App Router](/docs/getting-started/app-router), the Pages Router is still fully supported.
+虽然推荐[在 App Router 中使用 `next-intl`](/docs/getting-started/app-router)，Pages 路由仍然完全支持。
 
-<Tabs items={['Multiple languages', 'Single language']}>
+<Tabs items={['多语言', '单语言']}>
 <Tabs.Tab>
 1. `npm install next-intl`
-2. Set up [internationalized routing](https://nextjs.org/docs/advanced-features/i18n-routing)
-3. Add the provider in `_app.tsx`
+2. 设置[国际化路由](https://nextjs.org/docs/advanced-features/i18n-routing)
+3. 在 `_app.tsx` 中添加 provider
 
 ```jsx filename="_app.tsx" /NextIntlClientProvider/
 import {NextIntlClientProvider} from 'next-intl';
@@ -30,30 +30,29 @@ export default function App({Component, pageProps}) {
 }
 ```
 
-4. Provide messages on a page-level
+4. 在页面级别提供消息
 
 ```js filename="pages/index.tsx"
 export async function getStaticProps(context) {
   return {
     props: {
-      // You can get the messages from anywhere you like. The recommended
-      // pattern is to put them in JSON files separated by locale and read
-      // the desired one based on the `locale` received from Next.js.
+      // 你可以从任何地方获取消息。推荐的模式是将它们放入按 locale 分开的 JSON 文件中，
+      // 然后根据 Next.js 提供的 `locale` 读取所需消息。
       messages: (await import(`../../messages/${context.locale}.json`)).default
     }
   };
 }
 ```
 
-5. Use translations in your components!
+5. 在你的组件中使用翻译内容！
 
 </Tabs.Tab>
 <Tabs.Tab>
-Even if you only support a single language, `next-intl` can still be helpful to separate your labels and formatting concerns from your application logic.
+即使只支持单语言，`next-intl` 依然可以帮助你将标签和格式化相关逻辑与应用逻辑分离。
 
 1. `npm install next-intl`
 
-2. Add the provider in `_app.tsx`
+2. 在 `_app.tsx` 中添加 provider
 
 ```jsx filename="_app.tsx" /NextIntlClientProvider/
 import {NextIntlClientProvider} from 'next-intl';
@@ -71,7 +70,7 @@ export default function App({Component, pageProps}) {
 }
 ```
 
-3. Provide messages on a page-level
+3. 在页面级别提供消息
 
 ```js filename="pages/index.tsx"
 export async function getStaticProps() {
@@ -79,32 +78,29 @@ export async function getStaticProps() {
 
   return {
     props: {
-      // You can get the messages from anywhere you like. The recommended pattern
-      // is to put them in JSON files separated by locale (e.g. `en.json`).
+      // 你可以从任何地方获取消息。推荐的模式是将它们放入按 locale 分开的 JSON 文件（例如 `en.json`）中。
       messages: (await import(`../../messages/${locale}.json`)).default
     }
   };
 }
 ```
 
-4. Use translations in your components!
+4. 在你的组件中使用翻译内容！
 
 </Tabs.Tab>
 </Tabs>
 
 <Callout>
 
-**Next steps:**
+**下一步:**
 
 <ul className="ml-4 list-disc">
-  <li>Exploring `next-intl`? Check out the [usage guide](/docs/usage).</li>
+  <li>想要深入了解 `next-intl`？查看[使用指南](/docs/usage)。</li>
   <li>
-    Ran into an issue? Have a look at the [Pages Router
-    example](/examples#pages-router) to explore a working app.
+    遇到问题？查看[Pages 路由示例](/examples#pages-router)，了解一个可运行的应用。
   </li>
   <li>
-    Are you transitioning from the Pages to the App Router? Check out [the
-    migration example](/examples#app-router-migration).
+    正在从 Pages 路由迁移到 App Router？查看[迁移示例](/examples#app-router-migration)。
   </li>
 </ul>
 

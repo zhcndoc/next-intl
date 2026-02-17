@@ -1,9 +1,9 @@
 import Callout from '@/components/Callout';
 import Details from '@/components/Details';
 
-# `useExtracted` (experimental)
+# `useExtracted`（实验性功能）
 
-As an alternative to managing namespaces and keys manually, `next-intl` provides an additional API that works similar to [`useTranslations`](/docs/usage/translations) but automatically extracts messages from your source files.
+作为手动管理命名空间和键的替代方案，`next-intl` 提供了一个额外的 API，它的工作方式类似于 [`useTranslations`](/docs/usage/translations)，但会自动从你的源文件中提取消息。
 
 ```tsx
 import {useExtracted} from 'next-intl';
@@ -14,11 +14,11 @@ function InlineMessages() {
 }
 ```
 
-Extraction integrates automatically with `next dev` and `next build` via a Turbo- or Webpack loader, you don't need to manually trigger it.
+提取会通过 Turbo 或 Webpack loader 自动集成到 `next dev` 和 `next build`，你无需手动触发。
 
-When the above file is compiled, this will:
+当上述文件被编译时，会执行以下操作：
 
-1. Extract the inline message with an automatically assigned key to your source locale:
+1. 将内联消息以自动分配的键提取到你的源语言文件中：
 
 ```json filename="messages/en.json"
 {
@@ -26,7 +26,7 @@ When the above file is compiled, this will:
 }
 ```
 
-2. Keeps target locales in sync by either adding empty entries or removing outdated ones:
+2. 通过添加空条目或删除过时条目，保持目标语言文件同步：
 
 ```json filename="messages/de.json"
 {
@@ -34,7 +34,7 @@ When the above file is compiled, this will:
 }
 ```
 
-3. Compiles the file to replace `useExtracted` with `useTranslations`
+3. 编译文件，将 `useExtracted` 替换成 `useTranslations`：
 
 ```tsx
 import {useTranslations} from 'next-intl';
@@ -45,14 +45,14 @@ function InlineMessages() {
 }
 ```
 
-**Links:**
+**链接：**
 
-- [Introduction blog post](/blog/use-extracted)
-- [Example app](/examples#app-router-extracted)
+- [介绍博客文章](/blog/use-extracted)
+- [示例应用](/examples#app-router-extracted)
 
-## Getting started
+## 入门
 
-This API is currently experimental, and needs to be enabled in `next.config.ts`:
+该 API 当前为实验性功能，需要在 `next.config.ts` 中启用：
 
 ```tsx filename="next.config.ts"
 import {NextConfig} from 'next';
@@ -60,23 +60,22 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin({
   experimental: {
-    // Relative path(s) to source files
+    // 源文件的相对路径
     srcPath: './src',
 
     extract: {
-      // Defines which locale to extract to
+      // 定义提取到哪个语言
       sourceLocale: 'en'
     },
 
     messages: {
-      // Relative path to the directory
+      // 目录的相对路径
       path: './messages',
 
-      // Either 'json', 'po', or a custom format (see below)
+      // 格式为 'json'、'po' 或自定义格式（见下文）
       format: 'json',
 
-      // Either 'infer' to automatically detect locales based on
-      // matching files in `path` or an explicit array of locales
+      // 'infer' 表示根据 `path` 中匹配的文件自动检测语言，或显式指定语言数组
       locales: 'infer'
     }
   }
@@ -86,14 +85,14 @@ const config: NextConfig = {};
 export default withNextIntl(config);
 ```
 
-With this, every time you call `next dev` or `next build`, messages will be extracted as they are discovered and your messages will be kept in sync.
+这样，每次运行 `next dev` 或 `next build` 时，都会根据发现的消息自动提取，并保持你的消息同步。
 
-See [`createNextIntlPlugin`](/docs/usage/plugin#extract) for details.
+详情请参见 [`createNextIntlPlugin`](/docs/usage/plugin#extract)。
 
 <Details id="manual">
-<summary>Can I extract messages manually?</summary>
+<summary>我可以手动提取消息吗？</summary>
 
-While message extraction is designed to seamlessly integrate with your development workflow based on running `next dev` and `next build`, you can also extract messages manually:
+虽然消息提取设计为无缝集成你的开发工作流——基于运行 `next dev` 和 `next build`，你也可以手动提取消息：
 
 ```tsx
 import {unstable_extractMessages} from 'next-intl/extractor';
@@ -108,26 +107,26 @@ await unstable_extractMessages({
   }
 });
 
-console.log('✔ Messages extracted');
+console.log('✔ 消息已提取');
 ```
 
-This can be useful when you're developing a package like a component library, where you don't have a Next.js dev server running and you want to provide messages along with the package.
+这在你开发包（例如组件库）时非常有用，此时你没有运行 Next.js 开发服务器，但想连同包一起提供消息。
 
 </Details>
 
-## Inline messages
+## 内联消息
 
-### ICU messages
+### ICU 消息
 
-All [ICU features](/docs/usage/translations#icu-messages) you are familiar with from `useTranslations` are supported and can be used as usual:
+你熟悉的 `useTranslations` 中所有 [ICU 特性](/docs/usage/translations#icu-messages) 都支持，依然可以照常使用：
 
 ```tsx
-// Interpolation of arguments
+// 参数插值
 t('Hello {name}!', {name: 'Jane'});
 ```
 
 ```tsx
-// Cardinal pluralization
+// 基数复数形式
 t(
   'You have {count, plural, =0 {no followers yet} =1 {one follower} other {# followers}}.',
   {count: 3580}
@@ -135,7 +134,7 @@ t(
 ```
 
 ```tsx
-// Ordinal pluralization
+// 序数复数形式
 t(
   "It's your {year, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} birthday!",
   {year: 22}
@@ -143,24 +142,24 @@ t(
 ```
 
 ```tsx
-// Select values
+// 选择值
 t('{gender, select, female {She is} male {He is} other {They are}} online.', {
   gender: 'female'
 });
 ```
 
 ```tsx
-// Rich text
+// 富文本
 t.rich('Please refer to the <link>guidelines</link>.', {
   link: (chunks) => <Link href="/guidelines">{chunks}</Link>
 });
 ```
 
-The one exception is `t.raw`, this feature is not intended to be used with message extraction.
+唯一的例外是 `t.raw`，此功能不打算与消息提取一起使用。
 
-### Descriptions
+### 描述信息
 
-In order to provide more context about a message for (AI) translators, you can provide descriptions:
+为了给消息（AI）译者提供更多上下文，你可以添加描述信息：
 
 ```tsx
 <button onClick={onSlideRight}>
@@ -171,9 +170,9 @@ In order to provide more context about a message for (AI) translators, you can p
 </button>
 ```
 
-### Explicit IDs
+### 显式 ID
 
-If you want to use an explicit ID instead of the auto-generated one, you can optionally provide one:
+如果你想使用显式 ID 而非自动生成的，可以选择提供：
 
 ```tsx
 <button onClick={onSlideRight}>
@@ -184,11 +183,11 @@ If you want to use an explicit ID instead of the auto-generated one, you can opt
 </button>
 ```
 
-This can be useful when you have a label that is used in multiple places, but should have different translations in other languages. This is an escape hatch that should rarely be necessary.
+这在标签在多个地方使用但在其它语言需要不同翻译时非常有用。这是一个较少需要使用的“逃生舱”。
 
-### Namespaces
+### 命名空间
 
-If you want to organize your messages under a specific namespace, you can pass it to `useExtracted`:
+如果你希望将消息组织到特定命名空间下，可传递给 `useExtracted`：
 
 ```tsx
 function Modal() {
@@ -202,7 +201,7 @@ function Modal() {
 }
 ```
 
-This will extract messages associated with a call to `t` to the given namespace:
+这会将调用 `t` 的消息提取到对应的命名空间中：
 
 ```json
 {
@@ -212,16 +211,16 @@ This will extract messages associated with a call to `t` to the given namespace:
 }
 ```
 
-Namespaces are useful in situations like:
+命名空间适用于以下情况：
 
-1. **Libraries:** If you have multiple packages in a monorepo, you can merge messages from different packages into a single catalog and avoid key collisions between packages.
-2. **Splitting:** If you want to pass only certain messages to the client side, this can help to group them accordingly (e.g. `<NextIntlClientProvider messages={messages.client}>`).
+1. **库：** 如果你在 monorepo 中有多个包，可以将不同包的消息合并到同一个目录，避免包之间的键冲突。
+2. **拆分：** 如果你只想传递部分消息给客户端，这有助于相应地分组（例如 `<NextIntlClientProvider messages={messages.client}>`）。
 
-It's a good idea to not overuse namespaces, as they can make moving messages between components more difficult if this involves refactoring the namespace.
+建议不要过度使用命名空间，因为如果涉及重构命名空间，移动组件间的消息可能会变得困难。
 
 ### `await getExtracted()` [#get-extracted]
 
-For usage in async functions like Server Components, Metadata and Server Actions, you use an asynchronous variant from `next-intl/server`:
+在异步函数例如服务端组件、Metadata 和服务端 Action 中，使用来自 `next-intl/server` 的异步版本：
 
 ```tsx filename="page.tsx"
 import {getExtracted} from 'next-intl/server';
@@ -238,11 +237,11 @@ export default async function ProfilePage() {
 }
 ```
 
-### Optional compilation
+### 可选编译
 
-While message extraction is primarily designed to be used with a running Next.js app, `useExtracted` works perfectly fine without being compiled into `useTranslations`. In this case, the inline message will be used directly instead of being replaced with a translation key.
+虽然消息提取主要设计用于运行中的 Next.js 应用，`useExtracted` 也可以不被编译为 `useTranslations`，此时将直接使用内联消息而非替换成翻译键。
 
-This can for example be useful for tests:
+例如这对测试很有用：
 
 ```tsx
 import {expect, it} from 'vitest';
@@ -256,25 +255,25 @@ function Component() {
 
 it('renders', () => {
   const html = renderToString(
-    // No need to pass any messages
+    // 不需要传递任何消息
     <NextIntlClientProvider locale="en" timeZone="UTC">
       <Component />
     </NextIntlClientProvider>
   );
 
-  // ✅ The inline message will be used
+  // ✅ 将使用内联消息
   expect(html).toContain('Hello Jane!');
 });
 ```
 
-## Formats [#formats]
+## 格式 [#formats]
 
-Messages can be extracted as [`.json`](/docs/usage/plugin#formats-json), [`.po`](/docs/usage/plugin#formats-po), or with [custom file formats](/docs/usage/plugin#formats-custom)—see [`messages.format`](/docs/usage/plugin#format) for configuration details.
+消息可被提取为 [`.json`](/docs/usage/plugin#formats-json)、[`.po`](/docs/usage/plugin#formats-po)，或 [自定义文件格式](/docs/usage/plugin#formats-custom)—详情请见 [`messages.format`](/docs/usage/plugin#format) 配置。
 
-**Recommendation:** As keys are auto-generated with `useExtracted`, it's recommended to use **PO files** as they support providing more context about a message like file references and descriptions. This can be helpful for (AI) translators.
+**建议：** 由于 `useExtracted` 会自动生成键，推荐使用 **PO 文件**，因为它们支持为消息提供更多上下文信息，如文件引用和描述，对（AI）译者很有帮助。
 
 <Callout>
 
-AI-based translation can be automated with a translation management system like [Crowdin](/docs/workflows/localization-management).
+基于 AI 的翻译可以通过类似 [Crowdin](/docs/workflows/localization-management) 的翻译管理系统自动化完成。
 
 </Callout>

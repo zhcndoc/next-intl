@@ -1,25 +1,25 @@
 import Callout from '@/components/Callout';
 
-# Runtime requirements
+# 运行时需求
 
-## Browser
+## 浏览器
 
-The source code of `next-intl` is compiled for the same browsers that [Next.js supports](https://nextjs.org/docs/architecture/supported-browsers).
+`next-intl` 的源代码是针对 [Next.js 支持的浏览器](https://nextjs.org/docs/architecture/supported-browsers) 编译的。
 
-Based on the features you're using, you have to make sure your target browsers support the following APIs:
+根据你使用的功能，需要确保目标浏览器支持以下 API：
 
-- Basic usage: `Intl.Locale` ([compatibility](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#browser_compatibility))
-- Date & time formatting: `Intl.DateTimeFormat` ([compatibility](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#browser_compatibility))
-- Number formatting: `Intl.NumberFormat` ([compatibility](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#browser_compatibility))
-- Pluralization: `Intl.PluralRules` ([compatibility](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/PluralRules#browser_compatibility))
-- Relative time formatting: `Intl.RelativeTimeFormat` ([compatibility](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#browser_compatibility))
-- List formatting: `Intl.ListFormat` ([compatibility](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat#browser_compatibility))
+- 基本使用：`Intl.Locale`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#browser_compatibility)）
+- 日期与时间格式化：`Intl.DateTimeFormat`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#browser_compatibility)）
+- 数字格式化：`Intl.NumberFormat`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#browser_compatibility)）
+- 复数规则：`Intl.PluralRules`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/PluralRules#browser_compatibility)）
+- 相对时间格式化：`Intl.RelativeTimeFormat`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#browser_compatibility)）
+- 列表格式化：`Intl.ListFormat`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat#browser_compatibility)）
 
-If you target a browser that doesn't support all the required APIs, consider using polyfills.
+如果你的目标浏览器不支持所有必需的 API，建议使用 polyfill。
 
-Cloudflare provides a [polyfill service](https://cdnjs.cloudflare.com/polyfill/) that you can use to load the necessary polyfills for a given locale.
+Cloudflare 提供了一个 [polyfill 服务](https://cdnjs.cloudflare.com/polyfill/)，你可以用来为指定语言环境加载所需的 polyfill。
 
-**Example:**
+**示例：**
 
 ```js filename="IntlPolyfills.tsx"
 import {useLocale} from 'next-intl';
@@ -56,12 +56,10 @@ function IntlPolyfills() {
 ```
 
 <Callout type="warning">
-  Note that the polyfill service doesn't support every locale. You can find a
-  list of the available polyfills in the [`polyfill-service`
-  repository](https://github.com/cdnjs/polyfill-service/tree/main/polyfill-libraries/3.101.0/polyfills/__dist)
-  (e.g. search for `Intl.DateTimeFormat.~locale.de-AT`).
+  注意 polyfill 服务并不支持所有语言环境。你可以在 [`polyfill-service`仓库](https://github.com/cdnjs/polyfill-service/tree/main/polyfill-libraries/3.101.0/polyfills/__dist)
+  中找到可用 polyfill 的列表（例如搜索 `Intl.DateTimeFormat.~locale.de-AT`）。
 </Callout>
 
 ## Node.js
 
-The minimum version to support all relevant `Intl` APIs is **Node.js 13**. Starting from this version, all required APIs are available.
+支持所有相关 `Intl` API 的最低版本是 **Node.js 13**。从该版本开始，所有必需的 API 都已可用。

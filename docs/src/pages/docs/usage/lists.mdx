@@ -1,16 +1,16 @@
 import Callout from '@/components/Callout';
 import Details from '@/components/Details';
 
-# List formatting
+# 列表格式化
 
-When working with lists of items, you can format them as conjunctions or disjunctions.
+在处理项目列表时，可以将它们格式化为连词或选择词。
 
-Formatting aspects, like the used separators, differ per locale:
+格式化方面，如所用的分隔符，会因地区而异：
 
-- "HTML, CSS, and JavaScript" in `en-US`
-- "HTML, CSS und JavaScript" in `de-DE`
+- 在 `en-US` 中为 "HTML, CSS, and JavaScript"
+- 在 `de-DE` 中为 "HTML, CSS und JavaScript"
 
-List formatting can be applied with the `useFormatter` hook:
+列表格式化可以通过 `useFormatter` 钩子应用：
 
 ```js
 import {useFormatter} from 'next-intl';
@@ -19,30 +19,30 @@ function Component() {
   const format = useFormatter();
   const items = ['HTML', 'CSS', 'JavaScript'];
 
-  // Renders "HTML, CSS, and JavaScript"
+  // 渲染 "HTML, CSS, and JavaScript"
   format.list(items, {type: 'conjunction'});
 
-  // Renders "HTML, CSS, or JavaScript"
+  // 渲染 "HTML, CSS, or JavaScript"
   format.list(items, {type: 'disjunction'});
 }
 ```
 
-See the MDN docs about [`ListFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat) to learn more about the options that you can provide to the `list` function or try the [interactive explorer](https://www.intl-explorer.com/ListFormat) for `Intl.ListFormat`.
+参见 MDN 文档关于 [`ListFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat) 以了解更多关于你可以传给 `list` 函数的选项，或尝试 [交互式浏览器](https://www.intl-explorer.com/ListFormat) 来体验 `Intl.ListFormat`。
 
-Note that lists can currently only be formatted via `useFormatter`, there's no equivalent inline syntax for messages at this point.
+注意，目前列表只能通过 `useFormatter` 来格式化，消息中暂无等效的内联语法。
 
-To reuse list formats for multiple components, you can configure [global formats](/docs/usage/configuration#formats).
+要在多个组件间重用列表格式，可以配置 [全局格式](/docs/usage/configuration#formats)。
 
 <Details id="messages-array">
-<summary>How can I render an array of messages?</summary>
+<summary>如何渲染消息数组？</summary>
 
-See the [arrays of messages guide](/docs/usage/translations#arrays-of-messages).
+请参见 [消息数组指南](/docs/usage/translations#arrays-of-messages)。
 
 </Details>
 
-## Formatting of React elements [#react-elements]
+## React 元素的格式化 [#react-elements]
 
-Apart from string values, you can also pass arrays of React elements to the formatting function:
+除了字符串值之外，你还可以将 React 元素数组传递给格式化函数：
 
 ```tsx
 import {useFormatter} from 'next-intl';
@@ -66,7 +66,7 @@ function Component() {
 }
 ```
 
-**Result:**
+**结果：**
 
 ```html
 <p>
@@ -75,4 +75,4 @@ function Component() {
 </p>
 ```
 
-Note that `format.list` will return an `Iterable<ReactElement>` in this case.
+注意在这种情况下，`format.list` 将返回一个 `Iterable<ReactElement>`。

@@ -1,126 +1,126 @@
 import PartnerContentLink from '@/components/PartnerContentLink';
 
-# Design principles
+# 设计原则
 
-This page provides a deep dive about the design principles that `next-intl` is based on.
+本页深入介绍了 `next-intl` 所基于的设计原则。
 
-While this page doesn't need to be read in order to use the library effectively in a project, it can provide you with a better understanding of the philosophy behind the library and can help you evaluate if `next-intl` is a good fit for your project.
+虽然使用本页内容并非在项目中高效使用该库的必读内容，但它能帮助你更好地理解库背后的理念，并助于你评估 `next-intl` 是否适合你的项目。
 
-This page also links to planned improvements in order to act as a transparent reference for enhancements to expect from `next-intl` in the future.
+本页同时链接了一些计划中的改进，旨在作为未来期待的透明参考。
 
-## Holistic
+## 全面性
 
-Internationalization clearly requires flexibility from your codebase. However, even implementing a single language properly can already be a challenge by itself.
+国际化显然需要你的代码库具备灵活性。然而，即使是实现单一语言的完整支持，也已经是一个挑战。
 
-Using **dynamic text labels** is the most obvious aspect of internationalization, but supporting a language well also includes many other aspects:
+使用**动态文本标签**是国际化中最明显的方面，但良好支持一门语言还包括许多其他方面：
 
-1. **Pluralization rules**: While a language like English has only two plural forms (singular and plural), other languages have up to six different forms.
-2. **Date and time formatting**: Different languages have different conventions for formatting dates and times. Even the year displayed can vary from country to country; for example, Thailand uses the Buddhist calendar, which is 543 years ahead of the Gregorian one.
-3. **Number formatting**: Formatting conventions for numbers vary across different languages. For instance, when comparing English and German, the separators for thousands and decimals are flipped.
-4. **List formatting**: Formatting lists like "HTML, CSS, and JavaScript" is not only a matter of assembling strings in the right order, but also of using language-specific conjunctions and punctuation marks.
-5. **Text direction**: While most languages are written from left to right, some languages like Arabic are written from right to left and require a mirrored layout.
+1. **复数规则**：比如英语只有两种复数形式（单数和复数），而其他语言最多可有六种不同的形式。
+2. **日期和时间格式**：不同语言对日期和时间的格式有不同习惯。甚至年份的显示也会因国家而异，例如泰国采用的佛历比公历提前543年。
+3. **数字格式**：数字的格式化规则在语言之间不同。例如，英语和德语中千位分隔符和小数点符号是互换的。
+4. **列表格式**：像“HTML、CSS 和 JavaScript”这样的列表格式，不仅仅是字符串的简单拼接，还需要使用语言特定的连接词和标点符号。
+5. **文本方向**：大多数语言是从左到右书写，但阿拉伯语等语言是从右到左书写，需要镜像布局。
 
-On top of this come typical app problems like:
+此外，还有典型的应用问题，例如：
 
-1. **Rich text formatting**: Many apps need to support some way of rich text, e.g. to embed links into text labels ("Learn more in the [rich text docs](/docs/usage/translations#rich-text).").
-2. **Time zones**: Displaying dates requires consistent handling of time zones across the server and client, potentially even customized based on a preference of the user.
-3. **Relative time formatting**: Displaying relative times like "5 minutes ago" or "in 2 hours" requires special care to get the formatting right, and also requires a consistent reference value for the current time. Potentially, you also need a mechanism to update the displayed time regularly.
-4. **Localized URLs**: URLs should be localized to match the user's language preference (e.g. `/en/about-us` for English and `/es/sobre-nosotros` for Spanish). Implementation-wise this requires mapping incoming requests to the right pages and providing streamlined APIs for developers to link between pages in a locale-agnostic way.
-5. **Language negotiation**: The user's language preference should be detected based on browser settings, but should also be manually configurable—even if a user hasn't signed in.
-6. **SEO**: Search engines need to be informed about [localized versions of your pages](https://developers.google.com/search/docs/specialty/international/localized-versions) in order to present the best-matching content to your users.
-7. **Country-specifics**: If you provide services or products in different countries, you might need to consider aspects like different currencies and units of measurement.
-8. **Environment differences**: Your components might execute on the server, the client, or both. To achieve [consistent rendering](/blog/date-formatting-nextjs) across different environments, you need to ensure your whole app has unified access to properties like the user locale, time zone and a reference value for the current time.
+1. **富文本格式**：许多应用需要支持某种富文本格式，例如在文本标签中嵌入链接（“在[富文本文档](/docs/usage/translations#rich-text)中了解更多。”）。
+2. **时区**：日期展示需要服务器端和客户端对时区的统一处理，甚至可能基于用户偏好进行定制。
+3. **相对时间格式**：展示“5分钟前”或“2小时后”等相对时间需要特别注意格式，还需要一个统一的当前时间参考值。还可能需要定时更新显示的时间。
+4. **本地化 URL**：URL 应该本地化以匹配用户的语言偏好（如英语用 `/en/about-us`，西班牙语用 `/es/sobre-nosotros`）。实现上需要将请求映射到正确页面，并提供简化的 API 让开发者能以与语言无关的方式链接页面。
+5. **语言协商**：应基于浏览器设置检测用户语言偏好，同时支持手动配置——即使用户未登录。
+6. **SEO**：搜索引擎需要了解[页面的本地化版本](https://developers.google.com/search/docs/specialty/international/localized-versions)，以便向用户呈现最佳匹配内容。
+7. **国家特性**：如果你在多个国家提供服务或产品，可能需要考虑不同的货币和计量单位。
+8. **环境差异**：你的组件可能在服务器端、客户端或两者执行。为了实现[一致渲染](/blog/date-formatting-nextjs)，需要确保整个应用统一访问诸如用户区域设置、时区以及当前时间参考等属性。
 
-Considering this list, it might be apparent how large the problem space is and how interconnected different pieces of internationalization are.
+考虑上述内容，你可能已经能体会到国际化问题的庞大和不同部分之间的紧密联系。
 
-`next-intl` takes a holistic approach to internationalization that nudges you towards best practices for handling languages and country-specific conventions. This way, you have more time to focus on what makes your app unique.
+`next-intl` 采取全面的国际化方法，推动你遵循处理语言和国家特定习俗的最佳实践，从而让你更专注于打造应用的核心独特之处。
 
-→ [Planned enhancements](https://github.com/amannn/next-intl/labels/area%3A%20routing)
+→ [计划中的改进](https://github.com/amannn/next-intl/labels/area%3A%20routing)
 
-## Ergonomic
+## 易用性
 
-The bold claim of this library is that your app code will become simpler instead of complex when you implement internationalization.
+本库大胆宣称，当你实现国际化时，应用代码反而会变得更简单而非复杂。
 
-If you consider the [holistic picture](/docs/design-principles#holistic) of what internationalization entails, it's clear that a majority of your components will be involved with internationalization in one way or another. Due to this, `next-intl` makes it a priority to provide convenient APIs that ensure you feel productive and in control. As a developer, you should be able to focus solely on solving practical problems, with internationalization seamlessly integrated as a side effect of your efforts.
+如果你考虑国际化的[全局视角](/docs/design-principles#holistic)，显而易见大部分组件都会以某种方式涉及国际化。鉴于此，`next-intl`优先提供便利的 API，确保你在开发时高效且可控。作为开发者，你应只需专注于解决实际问题，国际化则作为副产品无缝集成其中。
 
-Once internationalization is set up, adding a new language is in the simplest case only a matter of adding a new JSON file with translations—everything else is being taken care of by `next-intl`.
+一旦完成国际化设置，添加新语言在最简单的情况下，仅需添加包含翻译的 JSON 文件——其他由 `next-intl` 自动处理。
 
-→ [Planned enhancements](https://github.com/amannn/next-intl/labels/area%3A%20ergonomics)
+→ [计划中的改进](https://github.com/amannn/next-intl/labels/area%3A%20ergonomics)
 
-## Standards-based
+## 基于标准
 
-With the introduction of the [ECMAScript Internationalization API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl), JavaScript has gotten very capable in the recent years in regard to formatting of dates, times, numbers, lists and pluralization. `next-intl` builds on top of this API and provides an ergonomic interface to work with these features, while considering your app-specific configuration & needs.
+随着[ECMAScript 国际化 API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl) 的引入，近年来 JavaScript 在日期、时间、数字、列表和复数格式化方面变得非常强大。`next-intl` 构建于此 API 之上，提供符合开发习惯的接口，同时结合应用的具体配置需求。
 
-For text formatting, `next-intl` is based on [International Components for Unicode (ICU)](https://unicode-org.github.io/icu/userguide/format_parse/). ICU is a mature and widely used standard for internationalization that is supported by many programming languages and frameworks. `next-intl` uses the ICU message syntax for defining text labels, which allows to express complex formatting requirements like interpolating variables and pluralization in a concise and readable way—also for non-developers like translators.
+在文本格式化方面，`next-intl` 基于[Unicode 国际组件（ICU）](https://unicode-org.github.io/icu/userguide/format_parse/)——ICU 是一个成熟且广泛使用的国际化标准，得到许多编程语言和框架支持。`next-intl` 使用 ICU 消息语法定义文本标签，能简明且易读地表达复杂格式需求，比如变量插值和复数规则，且对译者等非开发者友好。
 
-By being based on standards, `next-intl` ensures that your internationalization code is future-proof and feels familiar to developers who have existing experience with internationalization. Additionally, relying on standards ensures that `next-intl` integrates well with translation management systems like <PartnerContentLink href="https://crowdin.com/">Crowdin</PartnerContentLink>.
+基于标准，`next-intl` 确保你的国际化代码具备未来兼容性，并令已有国际化经验的开发者感到熟悉。此外，依赖标准也保证了 `next-intl` 可很好地与诸如 <PartnerContentLink href="https://crowdin.com/">Crowdin</PartnerContentLink> 等翻译管理系统集成。
 
-`next-intl` uses a [nested style](/docs/usage/translations#structuring-messages) to provide structure to messages, allowing to express hierarchies of messages without redundancy. By supporting only a single style, we can offer advanced features that rely on these assumptions like [type-safety for messages](/docs/workflows/typescript#messages). If you're coming from a different style, you can consider migrating to the nested style (see "Can I use a different style for structuring my messages?" in the [structuring messages docs](/docs/usage/translations#structuring-messages)).
+`next-intl` 使用[嵌套式结构](/docs/usage/translations#structuring-messages)来组织消息，允许以无冗余的方式表达消息层级。通过仅支持单一结构，我们能提供基于此假设的高级功能，如[消息的类型安全](/docs/workflows/typescript#messages)。若你使用不同结构风格，可考虑迁移到嵌套式结构（详见[消息结构文档](/docs/usage/translations#structuring-messages)中的“我可以用其他结构风格吗？”部分）。
 
-As standards can change, `next-intl` is expected to keep up with the latest developments in the ECMAScript standard (e.g. [`Temporal`](https://tc39.es/proposal-temporal/docs/) and [`Intl.MessageFormat`](https://github.com/tc39/proposal-intl-messageformat)).
+随着标准的变化，`next-intl` 也会跟进 ECMAScript 标准的最新发展（例如 [`Temporal`](https://tc39.es/proposal-temporal/docs/) 和 [`Intl.MessageFormat`](https://github.com/tc39/proposal-intl-messageformat)）。
 
-→ [Planned enhancements](https://github.com/amannn/next-intl/labels/area%3A%20standards)
+→ [计划中的改进](https://github.com/amannn/next-intl/labels/area%3A%20standards)
 
-## Compatible
+## 兼容性
 
-While `next-intl` is designed to tackle internationalization in [a holistic way](#holistic), it's important to consider that internationalization might require integration with other tools and services, enabling you to use the best tools for the job and to collaborate with non-developers.
+虽然 `next-intl` 设计为以[全面方式](#holistic)处理国际化，但国际化往往需要与其他工具和服务集成，允许你采用最合适的工具并与非开发者协作。
 
-Typical apps require some of the following integrations:
+典型应用可能需要以下集成：
 
-**Translation Management Systems (TMS)**
+**翻译管理系统（TMS）**
 
-These are typically used to manage translations and to [collaborate with translators](/docs/workflows/localization-management). Services like <PartnerContentLink href="https://crowdin.com/">Crowdin</PartnerContentLink> provide a wide range of features, allowing translators to work in a web-based interface on translations, while providing different mechanisms to sync translations with your app.
+通常用于管理翻译和[与译者协作](/docs/workflows/localization-management)。如 <PartnerContentLink href="https://crowdin.com/">Crowdin</PartnerContentLink> 提供丰富功能，支持译者在基于网页的界面处理翻译，并以多种机制同步翻译与应用。
 
-`next-intl` integrates well with these services as it uses ICU message syntax for defining text labels, which is a widely supported standard. The recommended way to store messages is in JSON files that are structured by locale since this is a popular format that can be imported into a TMS. While it's recommended to have at least the messages for the default locale available locally (e.g. for [type-safe messages](/docs/workflows/typescript#messages)), you can also load messages dynamically, e.g. from a CDN that your TMS provides.
+`next-intl` 与此类服务集成良好，因它使用广泛支持的 ICU 消息语法定义文本标签。推荐将消息存储为按语言划分的 JSON 文件，这是一种流行格式，便于导入进 TMS。虽然推荐至少将默认语言的消息本地保存（例如支持[类型安全消息](/docs/workflows/typescript#messages)），但你也可以动态加载消息，比如从 TMS 提供的 CDN。
 
-**Content Management Systems (CMS)**
+**内容管理系统（CMS）**
 
-If your app uses content from a CMS, you can use this alongside `next-intl`. For instance, you might want to manage content like blog posts or marketing copy in a CMS, while managing UI labels in `next-intl`.
+若你的应用使用 CMS 内容，可与 `next-intl` 配合使用。例如，你可能希望在 CMS 管理博客文章或营销文案，同时用 `next-intl` 管理 UI 标签。
 
-A CMS typically provides a way to define content for multiple languages, and to fetch this content via a REST API. By using the negotiated app locale that is returned from `next-intl` via [`getLocale`](/docs/environments/server-client-components#async-components) and passing it to requests to your CMS API, you can retrieve content for the user's preferred language.
+CMS 通常支持多语言内容定义，通过 REST API 获取内容。利用 `next-intl` 返回的协商后的应用语言（通过 [`getLocale`](/docs/environments/server-client-components#async-components)），并将其传入 CMS API 请求，可获取用户偏好语言的内容。
 
-**Backend data**
+**后端数据**
 
-Similar to a CMS, you might have data in a backend service or database that needs to be queried based on the language and country of the user. For instance, you might want to show different prices & currencies for different countries, or you might want to show localized product names. By using the negotiated app locale from `next-intl` for requests to your backend, you can ensure localization reaches all parts of your app.
+类似 CMS，你可能有后端服务或数据库中的数据需基于用户语言和国家查询。例如，根据国家显示不同价格和货币，或展示本地化的产品名称。通过使用 `next-intl` 协商的应用语言发起后端请求，可以确保本地化贯穿应用各处。
 
-**Other libraries**
+**其他库**
 
-Next.js has a rich ecosystem of libraries that can be used alongside `next-intl`, e.g. to handle authentication. By providing documentation and examples for [common integrations](/docs/routing/middleware#composing-other-middlewares), `next-intl` ensures that you'll have a frictionless experience when integrating with other libraries.
+Next.js 拥有丰富的生态库，可与 `next-intl` 配合使用，比如处理认证。通过提供[常见集成](/docs/routing/middleware#composing-other-middlewares)的文档和示例，`next-intl` 确保你在与其他库集成时体验顺畅无阻。
 
-→ [Planned enhancements](https://github.com/amannn/next-intl/labels/area%3A%20integrations)
+→ [计划中的改进](https://github.com/amannn/next-intl/labels/area%3A%20integrations)
 
-## Performance-obsessed
+## 性能优化
 
-`next-intl` was designed with high-traffic sites in mind that need to deliver a fast and reliable user experience and has proven to work on complex e-commerce pages with outstanding Core Web Vitals.
+`next-intl` 从设计之初就面向高流量网站，旨在提供快速且可靠的用户体验，并在复杂电商页面中已证明其卓越的核心网络性能指标（Core Web Vitals）。
 
-To achieve this, `next-intl` primarly relies on these techniques currently:
+为实现此目标，`next-intl` 当前主要依赖以下技术：
 
-1. **RSC-first**: By integrating deeply with React Server Components, we can offload work to a build step or a capable server, therefore reducing the runtime footprint of your app on the client side.
-2. **Splitting of messages**: By splitting messages by locale, and optionally also by server, client and component, we can reduce the amount of messages that are sent to the client. This is especially important for apps that support many languages and have a large amount of messages.
-3. **Caching**: Parsing of messages, as well as the instantiation of [`Intl`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl) constructors is cached across your app, therefore reducing the amount of necessary computation.
-4. **Shortcuts**: Better than caching the result of repetitive work is not doing it in the first place (e.g. by detecting plain messages that don't require parsing).
+1. **RSC 优先**：深度整合 React 服务端组件，将工作转移至构建步骤或高性能服务器，从而减少客户端运行时负担。
+2. **消息拆分**：按语言划分消息，且可按服务器、客户端及组件拆分，减少传给客户端的消息体积。对支持多语言且消息量大的应用尤为关键。
+3. **缓存**：消息解析以及 [`Intl`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl) 构造器实例化均在应用中缓存，降低计算量。
+4. **捷径**：比缓存重复工作结果更好的是避免重复计算（例如，检测不需解析的纯文本消息）。
 
-→ [Planned enhancements](https://github.com/amannn/next-intl/labels/area%3A%20performance)
+→ [计划中的改进](https://github.com/amannn/next-intl/labels/area%3A%20performance)
 
-## Next.js-first
+## 专为 Next.js 设计
 
-Next.js comes with a lot of bells and whistles, but at the same time there are a number of aspects that need to be handled carefully to enable a reliable internationalization integration. `next-intl`, as the name implies, is primarly designed to work well with Next.js. Rather than trying to be a one-size-fits-all solution, `next-intl` integrates with Next.js as deeply as necessary and makes it a priority to stay on top of the latest developments in the Next.js ecosystem.
+Next.js 提供了许多功能，但同时也带来许多必须谨慎处理的细节，以实现可靠的国际化集成。顾名思义，`next-intl` 主要设计与 Next.js 深度协同。它不追求一刀切，而是根据需要深度集成 Next.js，持续关注 Next.js 生态的最新发展。
 
-That being said, `next-intl` has a Next.js-agnostic core that can be used in any React app, or even in plain JavaScript: [`use-intl`](/docs/environments/core-library). This core library contains most features of `next-intl`, but lacks Next.js-specific integrations like routing APIs. The goal of this library is to make it possible to use familiar APIs in other parts of your stack (e.g. React Native) and, in case you ever feel like Next.js is not the right fit for your project anymore, to provide a straightforward [migration path](#migration-friendly).
+尽管如此，`next-intl` 核心库为 Next.js 无关，适用于任意 React 应用，甚至纯 JavaScript 环境：[use-intl](/docs/environments/core-library)。该核心库包含 `next-intl` 大多数特性，但缺乏 Next.js 专属的集成如路由 API。其目标是在生态其他部分（如 React Native）复用熟悉 API，且若将来你觉得 Next.js 不再适合项目，也提供简明的[迁移路径](#migration-friendly)。
 
-## Migration-friendly
+## 便于迁移
 
-We've all been there, technology moves on, and sometimes you need to move on as well. `next-intl` is designed to be a good citizen in your codebase, and to make it possible to migrate away from certain parts of your stack in case this becomes necessary.
+我们都经历过技术演进，有时也需要跟进变化。`next-intl` 设计为你的代码库友好公民，方便在必要时迁移替换某些堆栈部分。
 
-If you ever feel like Next.js or `next-intl` is not the right fit for your project anymore, you have multiple options here:
+若你觉得 Next.js 或 `next-intl` 不再适合你的项目，你有以下多个选项：
 
-1. **Moving away from Next.js**: If you decide to migrate away from Next.js, you can continue to use the core library [`use-intl`](/docs/environments/core-library) in any React app, e.g. allowing you to reuse existing components in a React Router app.
-2. **Moving away from `next-intl`**: If you find that `next-intl` doesn't fit your needs anymore, you'll have to adapt app code that references the library, but you can still reuse your [standards-based](#standards-based) ICU messages and replace formatting APIs e.g. with direct calls to the [ECMAScript Internationalization API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl).
+1. **放弃 Next.js**：若决定迁移离开 Next.js，可继续在任何 React 应用中使用核心库 [`use-intl`](/docs/environments/core-library)，例如让你能复用已有组件于 React Router 应用中。
+2. **放弃 `next-intl`**：若觉得 `next-intl` 不符合需求，需修改引用库的应用代码，但仍能复用你的[基于标准的](#基于标准) ICU 消息，并可用直接调用[ECMAScript 国际化 API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl) 替代格式化 API。
 
-We won't hold you back, but if you like, we can stay friends.
+我们不会阻止你，但乐意继续做朋友。
 
-That being said, we're doing our best to make `next-intl` a great fit for your project. If you ever feel like something is not working as expected or if you have ideas for improvements, please let us know on the [issue tracker](https://github.com/amannn/next-intl/issues) and we'll do our best to help you out.
+当然，我们会尽全力让 `next-intl` 成为你项目的好帮手。如果你觉得哪里不尽如人意或有改进建议，请随时在[问题追踪区](https://github.com/amannn/next-intl/issues)反馈，我们将尽力帮你解决。
 
 ---
 
-Woah, this was a long read. Did you really read all of this? `next-intl` was created out of a lot of curiosity and passion for internationalization, seems like we share that! We're always curious to hear how `next-intl` is working out for you. If you have any feedback or questions, please don't hesitate to [reach out](https://github.com/amannn/next-intl/discussions)!
+哇，这篇文章真长。你真的全读完了吗？`next-intl` 诞生于对国际化的浓厚兴趣与热情，看来我们志同道合！我们总想知道 `next-intl` 给你的体验如何，如有反馈或疑问，欢迎随时[联系我们](https://github.com/amannn/next-intl/discussions)！

@@ -1,13 +1,13 @@
 import Callout from '@/components/Callout';
 import Image from 'next/image';
 
-# Storybook integration for `next-intl`
+# `next-intl` 的 Storybook 集成
 
-[Storybook](https://storybook.js.org/) is a tool for developing UI components in isolation and can be used in combination with `next-intl` to handle components that rely on internationalization.
+[Storybook](https://storybook.js.org/) 是一个用于在隔离环境中开发 UI 组件的工具，可以与 `next-intl` 结合使用，处理依赖国际化的组件。
 
-## Manual setup
+## 手动设置
 
-To set up Storybook for `next-intl`, you can configure a [global decorator](https://storybook.js.org/docs/writing-stories/decorators#global-decorators) that renders [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider) to wrap your stories accordingly:
+要为 `next-intl` 设置 Storybook，你可以配置一个[全局装饰器](https://storybook.js.org/docs/writing-stories/decorators#global-decorators)，渲染 [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider)，以相应地包裹你的故事：
 
 ```tsx filename=".storybook/preview.tsx"
 import {Preview} from '@storybook/react';
@@ -19,7 +19,7 @@ const preview: Preview = {
       <NextIntlClientProvider
         locale="en"
         messages={defaultMessages}
-        // ... potentially other config
+        // ... 可能还有其它配置
       >
         <Story />
       </NextIntlClientProvider>
@@ -30,29 +30,29 @@ const preview: Preview = {
 export default preview;
 ```
 
-With this setup in place, you're able to render components that use hook-based APIs like `useTranslations`.
+配置完成后，你可以渲染使用基于 hook API 如 `useTranslations` 的组件。
 
-Note that support for async Server Components is currently [experimental](https://storybook.js.org/docs/get-started/frameworks/nextjs#react-server-components-rsc) in Storybook and might require additional configuration.
+请注意，Storybook 对异步服务端组件的支持目前为[实验性](https://storybook.js.org/docs/get-started/frameworks/nextjs#react-server-components-rsc)，可能需要额外配置。
 
 <Callout>
 
-**Tip:** If you declare components that render as Server Components in your app via [non-async components](/docs/environments/server-client-components#shared-components), these components can render as Client Components in Storybook and will consume configuration from `NextIntlClientProvider`.
+**提示：** 如果你在应用中通过[非异步组件](/docs/environments/server-client-components#shared-components)声明了以服务端组件方式渲染的组件，这些组件在 Storybook 中可以作为客户端组件渲染，并会消费来自 `NextIntlClientProvider` 的配置。
 
 </Callout>
 
 ## `storybook-next-intl`
 
-Alternatively to setting up the global decorator yourself, you can use [`storybook-next-intl`](https://github.com/stevensacks/storybook-next-intl), a community-maintained addon that configures Storybook accordingly for you.
+除了自己设置全局装饰器，你还可以使用 [`storybook-next-intl`](https://github.com/stevensacks/storybook-next-intl)，这是一个社区维护的插件，帮你自动为 Storybook 配置相关内容。
 
-**Features**
+**功能**
 
-- Sets up [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider) globally for you
-- Provides a locale switcher so you can test components with different locales
+- 全局设置 [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider)
+- 提供语言切换器，可测试不同语言环境下的组件
 
 <Image
   className="mt-6"
   src="/storybook-integration.png"
   width={1768}
   height={1128}
-  alt="Storybook integration for next-intl"
+  alt="next-intl 的 Storybook 集成"
 />

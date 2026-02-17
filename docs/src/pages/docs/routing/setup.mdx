@@ -4,50 +4,50 @@ import Steps from '@/components/Steps';
 import Details from '@/components/Details';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Setup locale-based routing
+# 设置基于语言环境的路由
 
-Prefer to watch a video?
+更喜欢看视频？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/06-routing/01-setup"
-  title="Routing setup"
+  title="路由设置"
 />
 
-In order to use unique pathnames for every language that your app supports, `next-intl` can be used to handle the following routing setups:
+为了为你的应用支持的每种语言使用唯一的路径名，`next-intl` 可用于处理以下路由设置：
 
-1. Prefix-based routing (e.g. `/en/about`)
-2. Domain-based routing (e.g. `en.example.com/about`)
+1. 基于前缀的路由（例如 `/en/about`）
+2. 基于域名的路由（例如 `en.example.com/about`）
 
-In either case, `next-intl` integrates with the App Router by using a top-level `[locale]` [dynamic segment](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes) that can be used to provide content in different languages.
+在任一情况下，`next-intl` 通过使用顶层的 `[locale]` [动态段](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes) 与 App Router 集成，可用于提供不同语言的内容。
 
-## Initial setup
+## 初始设置
 
-To get started with locale-based routing, we'll set up the following files:
+要开始使用基于语言环境的路由，我们将设置以下文件：
 
 <Steps>
 
 ### `src/i18n/routing.ts` [#i18n-routing]
 
-We'll use `routing.ts` as a central place to define our routing configuration:
+我们将使用 `routing.ts` 作为定义路由配置的集中位置：
 
 ```ts filename="src/i18n/routing.ts"
 import {defineRouting} from 'next-intl/routing';
 
 export const routing = defineRouting({
-  // A list of all locales that are supported
+  // 支持的所有语言环境列表
   locales: ['en', 'de'],
 
-  // Used when no locale matches
+  // 当没有匹配语言环境时使用
   defaultLocale: 'en'
 });
 ```
 
-Depending on your requirements, you may wish to customize your routing configuration later—but let's finish with the setup first.
+根据需求，您可能以后想自定义路由配置 —— 但先完成设置。
 
 ### `src/proxy.ts` [#proxy]
 
-Once we have our routing configuration in place, we can use it to set up a proxy:
+一旦路由配置就绪，我们可以用它来设置代理：
 
 ```tsx filename="src/proxy.ts"
 import createMiddleware from 'next-intl/middleware';
@@ -56,57 +56,56 @@ import {routing} from './i18n/routing';
 export default createMiddleware(routing);
 
 export const config = {
-  // Match all pathnames except for
-  // - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
-  // - … the ones containing a dot (e.g. `favicon.ico`)
+  // 匹配所有路径名，除了：
+  // - 以 `/api`、`/trpc`、`/_next` 或 `/_vercel` 开头的路径
+  // - 含点号的路径（例如 `favicon.ico`）
   matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
 };
 ```
 
-**Note:** `proxy.ts` was called `middleware.ts` up until Next.js 16.
+**注意：** 在 Next.js 16 之前，`proxy.ts` 被称为 `middleware.ts`。
 
 <Details id="proxy-matcher-dots">
-  <summary>How can I match pathnames that contain dots like `/users/jane.doe`?</summary>
+  <summary>如何匹配包含点号的路径名，例如 `/users/jane.doe`？</summary>
 
-If you have pathnames where dots are expected, you can match them with explicit entries:
+如果路径名中预期会有点号，可以通过显式条目进行匹配：
 
 ```tsx filename="src/proxy.ts" {10,11}
 // ...
 
 export const config = {
   matcher: [
-    // Match all pathnames except for
-    // - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
-    // - … the ones containing a dot (e.g. `favicon.ico`)
+    // 匹配所有路径名，除了：
+    // - 以 `/api`、`/trpc`、`/_next` 或 `/_vercel` 开头的路径
+    // - 含点号的路径（例如 `favicon.ico`）
     '/((?!api|trpc|_next|_vercel|.*\\..*).*)',
 
-    // Match all pathnames within `{/:locale}/users`
+    // 匹配所有位于 `{/:locale}/users` 下的路径名
     '/([\\w-]+)?/users/(.+)'
   ]
 };
 ```
 
-This will match e.g. `/users/jane.doe`, also optionally with a locale prefix.
+这将匹配例如 `/users/jane.doe`，也可选搭配语言环境前缀。
 
 </Details>
 
 ### `src/i18n/navigation.ts` [#i18n-navigation]
 
-Additionally, we can use our routing configuration to set up the navigation APIs:
+此外，我们可以利用路由配置来设置导航 API：
 
 ```ts filename="src/i18n/navigation.ts"
 import {createNavigation} from 'next-intl/navigation';
 import {routing} from './routing';
 
-// Lightweight wrappers around Next.js' navigation
-// APIs that consider the routing configuration
+// Next.js 导航 API 的轻量封装，考虑了路由配置
 export const {Link, redirect, usePathname, useRouter, getPathname} =
   createNavigation(routing);
 ```
 
 ### `src/i18n/request.ts` [#i18n-request]
 
-Now, we can read the matched locale in our request configuration:
+现在，我们可以在请求配置中读取匹配到的语言环境：
 
 ```tsx filename="src/i18n/request.ts"
 import {getRequestConfig} from 'next-intl/server';
@@ -114,7 +113,7 @@ import {hasLocale} from 'next-intl';
 import {routing} from './routing';
 
 export default getRequestConfig(async ({requestLocale}) => {
-  // Typically corresponds to the `[locale]` segment
+  // 通常对应 `[locale]` 段
   const requested = await requestLocale;
   const locale = hasLocale(routing.locales, requested)
     ? requested
@@ -129,7 +128,7 @@ export default getRequestConfig(async ({requestLocale}) => {
 
 ### `src/app/[locale]/layout.tsx` [#layout]
 
-To complete our setup, we'll move all of our existing layouts and pages into the `[locale]` segment:
+完成设置，我们将所有现有布局和页面移动到 `[locale]` 段：
 
 ```
 src
@@ -140,7 +139,7 @@ src
         └── ...
 ```
 
-The `locale` that was matched is now available via the `[locale]` param:
+匹配到的 `locale` 现在可通过 `[locale]` 参数访问：
 
 ```tsx filename="app/[locale]/layout.tsx"
 import {NextIntlClientProvider, hasLocale} from 'next-intl';
@@ -153,7 +152,7 @@ type Props = {
 };
 
 export default async function LocaleLayout({children, params}: Props) {
-  // Ensure that the incoming `locale` is valid
+  // 确保传入的 `locale` 有效
   const {locale} = await params;
   if (!hasLocale(routing.locales, locale)) {
     notFound();
@@ -165,26 +164,26 @@ export default async function LocaleLayout({children, params}: Props) {
 
 </Steps>
 
-That's all it takes! From here, you can [configure your routing](/docs/routing/configuration) to cater to your specific needs.
+就是这么简单！从这里开始，你可以根据具体需求[配置路由](/docs/routing/configuration)。
 
-In case you ran into an issue, have a look at the [App Router example](/examples#app-router) to explore a working app.
+如果遇到问题，可以查看[App Router 示例](/examples#app-router)，了解一个可运行的示例应用。
 
-## Static rendering
+## 静态渲染
 
-When using locale-based routing, `next-intl` will currently opt into dynamic rendering when APIs like `useTranslations` are used in Server Components. This is a limitation that we aim to remove in the future, but as a stopgap solution, `next-intl` provides a temporary API that can be used to enable static rendering.
+使用基于语言环境的路由时，当在服务器组件中使用像 `useTranslations` 这类 API，`next-intl` 目前会选择动态渲染。我们计划未来移除这一限制，但作为临时方案，`next-intl` 提供了一个临时 API 来启用静态渲染。
 
 <Steps>
 
-### Add `generateStaticParams`
+### 添加 `generateStaticParams`
 
-Since we are using a dynamic route segment for the `[locale]` param, we need to use [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) so that the routes can be rendered at build time.
+由于我们使用动态路由段 `[locale]`，需要使用 [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params)，以便在构建时渲染路由。
 
-Depending on your needs, you can add `generateStaticParams` either to a layout or pages:
+根据需求，你可以在布局或页面中添加 `generateStaticParams`：
 
-1. **Layout**: Enables static rendering for all pages within this layout (e.g. `app/[locale]/layout.tsx`)
-2. **Individual pages**: Enables static rendering for a specific page (e.g. `app/[locale]/page.tsx`)
+1. **布局**：为该布局下所有页面开启静态渲染（例如 `app/[locale]/layout.tsx`）
+2. **单页**：为特定页面开启静态渲染（例如 `app/[locale]/page.tsx`）
 
-**Example:**
+**示例：**
 
 ```tsx
 import {routing} from '@/i18n/routing';
@@ -195,15 +194,15 @@ export function generateStaticParams() {
 ```
 
 <Details id="generatestaticparams-locales">
-<summary>Do I need to return all locales from `generateStaticParams`?</summary>
+<summary>我需要从 `generateStaticParams` 返回所有语言环境吗？</summary>
 
-If you prefer to only render certain locales at build time, or none at all, you can be selective about the ones you return from `generateStaticParams` (see [Static Rendering](https://nextjs.org/docs/app/api-reference/functions/generate-static-params#static-rendering) in the Next.js docs).
+如果你只希望构建时渲染部分语言环境，或不渲染任何语言环境，可以选择性地返回需要的（详见 Next.js 文档中的[静态渲染](https://nextjs.org/docs/app/api-reference/functions/generate-static-params#static-rendering)）。
 
 </Details>
 
-### Add `setRequestLocale` to all relevant layouts and pages
+### 在所有相关布局和页面中添加 `setRequestLocale`
 
-`next-intl` provides an API that can be used to distribute the locale that is received via `params` in layouts and pages for usage in all Server Components that are rendered as part of the request.
+`next-intl` 提供了一个 API，可用于将布局和页面通过 `params` 接收到的语言环境传递给该请求中渲染的所有服务器组件。
 
 ```tsx filename="app/[locale]/layout.tsx"
 import {setRequestLocale} from 'next-intl/server';
@@ -222,7 +221,7 @@ export default async function LocaleLayout({children, params}: Props) {
     notFound();
   }
 
-  // Enable static rendering
+  // 启用静态渲染
   setRequestLocale(locale);
 
   return (
@@ -239,11 +238,10 @@ import {useTranslations} from 'next-intl';
 export default function IndexPage({params}) {
   const {locale} = use(params);
 
-  // Enable static rendering
+  // 启用静态渲染
   setRequestLocale(locale);
 
-  // Once the request locale is set, you
-  // can call hooks from `next-intl`
+  // 一旦设置请求语言环境后，你可以调用 `next-intl` 的钩子
   const t = useTranslations('IndexPage');
 
   return (
@@ -252,39 +250,39 @@ export default function IndexPage({params}) {
 }
 ```
 
-**Keep in mind that:**
+**请注意：**
 
-1. The locale that you pass to `setRequestLocale` should be validated (e.g. in your [root layout](#layout)).
-2. You need to call this function in every page and every layout that you intend to enable static rendering for since Next.js can render layouts and pages independently.
-3. `setRequestLocale` needs to be called before you invoke any functions from `next-intl` like `useTranslations` or `getMessages`.
+1. 传递给 `setRequestLocale` 的语言环境应经过验证（例如，在你的[根布局](#layout)中）。
+2. 你需要在希望启用静态渲染的每个页面和布局中调用此函数，因为 Next.js 可能独立渲染布局和页面。
+3. 需要在调用 `useTranslations` 或 `getMessages` 等 `next-intl` 函数之前调用 `setRequestLocale`。
 
 <Details id="setrequestlocale-implementation">
-<summary>How does setRequestLocale work?</summary>
+<summary>setRequestLocale 是如何工作的？</summary>
 
-`next-intl` uses [`cache()`](https://react.dev/reference/react/cache) to create a mutable store that holds the current locale. By calling `setRequestLocale`, the current locale will be written to the store, making it available to all APIs that require the locale.
+`next-intl` 使用 [`cache()`](https://react.dev/reference/react/cache) 创建了一个可变存储，用于保存当前语言环境。调用 `setRequestLocale` 时，当前语言环境会写入该存储，从而让所有需要语言环境的 API 访问它。
 
-Note that the store is scoped to a request and therefore doesn't affect other requests that might be handled in parallel while a given request resolves asynchronously.
+请注意，该存储是请求作用域的，因此不会影响在异步处理期间可能并行处理的其他请求。
 
 </Details>
 
 <Details id="setrequestlocale-background">
-<summary>Why is this API necessary?</summary>
+<summary>为何需要此 API？</summary>
 
-Next.js currently doesn't provide an API to read route params like `locale` at arbitrary places in Server Components (see [`vercel/next.js`#58862](https://github.com/vercel/next.js/discussions/58862)). The `locale` is fundamental to all APIs provided by `next-intl`, therefore passing this as a prop throughout the tree doesn't stand out as particularly ergonomic.
+Next.js 目前没有提供 API 让服务器组件中任意位置读取路由参数如 `locale`（详见 [`vercel/next.js`#58862](https://github.com/vercel/next.js/discussions/58862)）。而 `locale` 是 `next-intl` 所有 API 的基础，通过整个组件树传递该参数显得不够方便。
 
-Due to this, `next-intl` uses its middleware to attach an `x-next-intl-locale` header to the incoming request, holding the negotiated locale as a value. This technique allows the locale to be read at arbitrary places via `headers().get('x-next-intl-locale')`.
+因此，`next-intl` 使用其中间件，在传入请求中添加 `x-next-intl-locale` 头，存储协商出的语言环境。此方式可以通过 `headers().get('x-next-intl-locale')` 在任意位置读取语言环境。
 
-However, the usage of `headers` opts the route into dynamic rendering.
+但调用 `headers` 会使路由进入动态渲染。
 
-By using `setRequestLocale`, you can provide the locale that is received in layouts and pages via `params` to `next-intl`. All APIs from `next-intl` can now read from this value instead of the header, enabling static rendering.
+通过使用 `setRequestLocale`，可以将布局和页面中通过 `params` 获得的语言环境传递给 `next-intl`。所有 `next-intl` API 均会从该值读取语言环境，启用静态渲染。
 
 </Details>
 
-### Use the `locale` param in metadata
+### 在元数据中使用 `locale` 参数
 
-In addition to the rendering of your pages, also page metadata needs to qualify for static rendering.
+除了页面的渲染外，页面元数据也需要满足静态渲染条件。
 
-To achieve this, you can forward the `locale` that you receive from Next.js via `params` to the [awaitable functions from `next-intl`](/docs/environments/server-client-components#async-components).
+为此，可以将 Next.js 通过 `params` 传递的 `locale` 转发给 [next-intl 的可等待函数](/docs/environments/server-client-components#async-components)。
 
 ```tsx filename="page.tsx"
 import {getTranslations} from 'next-intl/server';

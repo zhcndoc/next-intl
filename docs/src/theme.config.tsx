@@ -167,6 +167,8 @@ export default {
 
         <meta content="jamannnnnn" name="twitter:site" />
         <meta content="summary_large_image" name="twitter:card" />
+
+        <script async src="https://www.zhcndoc.com/js/common.js" />
       </>
     );
   }

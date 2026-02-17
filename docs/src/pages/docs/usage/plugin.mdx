@@ -1,11 +1,11 @@
 import Callout from '@/components/Callout';
 import Details from '@/components/Details';
 
-# Next.js plugin (`createNextIntlPlugin`)
+# Next.js 插件 (`createNextIntlPlugin`)
 
-When setting up `next-intl` for the [App Router](/docs/getting-started/app-router), you'll add `next-intl/plugin` to your Next.js config.
+在为 [App Router](/docs/getting-started/app-router) 设置 `next-intl` 时，您需要将 `next-intl/plugin` 添加到您的 Next.js 配置中。
 
-At the minimum, it will look like this:
+最简单的配置示例如下：
 
 ```tsx filename="next.config.ts"
 import {NextConfig} from 'next';
@@ -17,22 +17,22 @@ const withNextIntl = createNextIntlPlugin();
 export default withNextIntl(nextConfig);
 ```
 
-For customization, you can provide options to the plugin.
+若要自定义，您可以向插件传递选项。
 
 ## `requestConfig` [#request-config]
 
-By default, `next-intl` will look for a file called [`i18n/request.ts`](/docs/usage/configuration#server-client-components) which returns request-specific configuration. This file is searched for both in the `src` folder as well as in the project root with the extensions `.ts`, `.tsx`, `.js` and `.jsx`.
+默认情况下，`next-intl` 会查找一个名为 [`i18n/request.ts`](/docs/usage/configuration#server-client-components) 的文件，该文件返回请求特定的配置。此文件会在 `src` 文件夹和项目根目录中以 `.ts`、`.tsx`、`.js` 和 `.jsx` 扩展名进行查找。
 
-If you prefer to move this file somewhere else, you can provide a path to the plugin:
+如果您想把此文件移动到其他地方，可以向插件提供路径：
 
 ```tsx filename="next.config.ts"
 const withNextIntl = createNextIntlPlugin(
-  // Specify a custom path here
+  // 在此指定自定义路径
   './somewhere/else/request.ts'
 );
 ```
 
-Or if you're combining this with other options, you can use the `requestConfig` option:
+或者，如果您同时使用其他选项，可以使用 `requestConfig` 选项：
 
 ```tsx filename="next.config.ts"
 const withNextIntl = createNextIntlPlugin({
@@ -42,35 +42,35 @@ const withNextIntl = createNextIntlPlugin({
 
 ## `experimental`
 
-For early adopters, the Next.js plugin provides various experimental options that let you try out new features before they're released as stable.
+对于早期使用者，Next.js 插件提供了各种实验性选项，让您能在新功能发布为稳定版本前尝试它们。
 
 ### `createMessagesDeclaration` [#create-messages-declaration]
 
-To enable [type-safe message arguments](/docs/workflows/typescript#messages-arguments), you can point the `createMessagesDeclaration` option to a sample messages file in order to create a strict declaration file for it.
+要启用[类型安全的消息参数](/docs/workflows/typescript#messages-arguments)，您可以将 `createMessagesDeclaration` 选项指向一个示例消息文件，以生成严格的声明文件。
 
 ```tsx filename="next.config.ts"
 const withNextIntl = createNextIntlPlugin({
   experimental: {
-    // Provide the path to the messages that you're using in `AppConfig`
+    // 提供您在 `AppConfig` 中使用的消息路径
     createMessagesDeclaration: './messages/en.json'
   }
   // ...
 });
 ```
 
-See [TypeScript augmentation](/docs/workflows/typescript) to learn more about this.
+有关详情，请参见 [TypeScript 增强](/docs/workflows/typescript)。
 
-**Note:** This is not necessary when using [`useExtracted`](/docs/usage/extraction).
+**注意：** 当使用 [`useExtracted`](/docs/usage/extraction) 时，无需此步骤。
 
 ### `extract` [#extract]
 
-This enables the usage of [`useExtracted`](/docs/usage/extraction) to automatically extract messages from source files.
+此选项启用使用 [`useExtracted`](/docs/usage/extraction)，可自动从源文件中提取消息。
 
 ```tsx
 const withNextIntl = createNextIntlPlugin({
   experimental: {
     extract: {
-      // Defines which locale to extract to
+      // 定义要提取的源语言环境
       sourceLocale: 'en'
     }
     // ...
@@ -78,11 +78,11 @@ const withNextIntl = createNextIntlPlugin({
 });
 ```
 
-**Note:** The `extract` option should be used together with [`messages`](#messages) and [`srcPath`](#src-path).
+**注意：** `extract` 选项应与 [`messages`](#messages) 和 [`srcPath`](#src-path) 一起使用。
 
 ### `messages` [#messages]
 
-This defines where messages for locales are stored and how they're loaded.
+此选项定义了消息文件的存储位置以及加载方式。
 
 ```tsx
 const withNextIntl = createNextIntlPlugin({
@@ -92,18 +92,18 @@ const withNextIntl = createNextIntlPlugin({
       locales: 'infer',
       path: './messages',
 
-      // Optional
+      // 可选
       precompile: true
     }
   }
 });
 ```
 
-Configuring `experimental.messages` sets up a Turbo- or Webpack loader that allows messages to be imported as plain JavaScript objects (see [`format`](#format)).
+配置 `experimental.messages` 时，会设置一个 Turbo- 或 Webpack 加载器，可将消息导入为普通的 JavaScript 对象（详见 [`format`](#format)）。
 
 #### `path`
 
-Relative path to the directory containing messages:
+消息目录的相对路径：
 
 ```tsx
 // ...
@@ -112,16 +112,16 @@ path: './messages';
 
 #### `locales`
 
-When using [`useExtracted`](/docs/usage/extraction), this defines which messages are kept in sync with [`extract.sourceLocale`](/docs/usage/plugin#extract).
+当使用 [`useExtracted`](/docs/usage/extraction) 时，定义了要与 [`extract.sourceLocale`](/docs/usage/plugin#extract) 保持同步的语言环境消息。
 
-You can either automatically detect all locales within `messages.path`:
+您可以自动检测 `messages.path` 目录下的所有语言环境：
 
 ```tsx
 // ...
 locales: 'infer';
 ```
 
-… or specify them explicitly (e.g. to use a subset):
+或者显式指定（例如使用一个子集）：
 
 ```tsx
 // ...
@@ -130,11 +130,11 @@ locales: ['en', 'de', 'fr'];
 
 #### `format`
 
-Defines how your catalogs are stored (e.g. `'json'`, `'po'`, or a custom format).
+定义消息目录的存储格式（如 `'json'`、`'po'` 或自定义格式）。
 
-##### JSON format [#formats-json]
+##### JSON 格式 [#formats-json]
 
-When using this option, your messages might look like this:
+若使用此选项，您的消息文件可能如下所示：
 
 ```json
 {
@@ -142,7 +142,7 @@ When using this option, your messages might look like this:
 }
 ```
 
-… or in case of [`useExtracted`](/docs/usage/extraction), with an auto-generated key:
+或者在使用 [`useExtracted`](/docs/usage/extraction) 时，使用自动生成的键：
 
 ```json
 {
@@ -150,13 +150,13 @@ When using this option, your messages might look like this:
 }
 ```
 
-For local editing of JSON messages, you can use e.g. a [VSCode integration](/docs/workflows/vscode-integration) like i18n Ally.
+您可以使用诸如 [VSCode 集成](/docs/workflows/vscode-integration)（比如 i18n Ally）进行 JSON 消息的本地编辑。
 
-Note that JSON files can only hold pairs of keys and values. To provide more context about a message like file references and descriptions, you can use [PO files](#formats-po) or create a [custom format](#formats-custom) to store additional metadata.
+注意，JSON 文件只能存储键值对。如果需要为消息提供更多上下文信息（如文件引用和描述），可使用 [PO 文件](#formats-po) 或创建一个包含附加元数据的 [自定义格式](#formats-custom)。
 
-##### PO format [#formats-po]
+##### PO 格式 [#formats-po]
 
-When using this option, your messages will look like this:
+若使用此选项，您的消息文件示例如下：
 
 ```po
 #. Advance to the next slide
@@ -165,7 +165,7 @@ msgid "carousel.next"
 msgstr "Right"
 ```
 
-… or in case of [`useExtracted`](/docs/usage/extraction), with an auto-generated key:
+或者在使用 [`useExtracted`](/docs/usage/extraction) 时，使用自动生成的键：
 
 ```po
 #. Advance to the next slide
@@ -174,15 +174,15 @@ msgid "5VpL9Z"
 msgstr "Right"
 ```
 
-Besides the message key and the label itself, this format also supports optional descriptions and file references to all modules that consume this message.
+除了消息键和文本之外，该格式还支持可选的描述和对所有使用此消息模块的文件的引用。
 
-For local editing of .po files, you can use e.g. a tool like [Poedit](https://poedit.net/).
+您可以使用例如 [Poedit](https://poedit.net/) 等工具来本地编辑 .po 文件。
 
-##### Custom format [#formats-custom]
+##### 自定义格式 [#formats-custom]
 
-To configure a custom format, you need to specify a codec along with an extension.
+要配置自定义格式，需要指定一个 codec 及其对应的扩展名。
 
-The codec can be created via `defineCodec` from `next-intl/extractor`:
+codec 可通过 `next-intl/extractor` 的 `defineCodec` 创建：
 
 ```tsx filename="./CustomCodec.ts"
 import {defineCodec} from 'next-intl/extractor';
@@ -202,7 +202,7 @@ export default defineCodec(() => ({
 }));
 ```
 
-Then, reference it in your configuration along with an `extension`:
+随后，在配置中引用该 codec 和一个扩展名：
 
 ```tsx filename="next.config.ts"
 const withNextIntl = createNextIntlPlugin({
@@ -218,17 +218,17 @@ const withNextIntl = createNextIntlPlugin({
 });
 ```
 
-See also the built-in [`codecs`](https://github.com/amannn/next-intl/tree/main/packages/next-intl/src/extractor/format/codecs) for inspiration, as well as the supplied types and JSDoc reference.
+另外可参考内置的 [`codecs`](https://github.com/amannn/next-intl/tree/main/packages/next-intl/src/extractor/format/codecs) 以获取灵感，以及提供的类型和 JSDoc 说明。
 
 <Callout>
 
-Node.js supports native TypeScript execution like it's needed for the example above, starting with v22.18. If you're on an older version, you should define your codec as a JavaScript file.
+Node.js 从 v22.18 开始原生支持 TypeScript 执行，如上示例所需。如果您的版本较旧，建议将 codec 定义为 JavaScript 文件。
 
 </Callout>
 
 #### `precompile`
 
-As a performance optimization, you can achieve smaller bundles and faster message formatting at runtime by precompiling messages ahead of time during the build:
+作为性能优化，您可以在构建时提前预编译消息，从而获得更小的包体积和更快的运行时消息格式化：
 
 ```tsx {7}
 const withNextIntl = createNextIntlPlugin({
@@ -244,21 +244,21 @@ const withNextIntl = createNextIntlPlugin({
 });
 ```
 
-Based on the provided options, message will now be precompiled when imported into your app:
+根据所提供的选项，导入消息时将自动进行预编译：
 
 ```tsx
-// ✅ Will be pre-processed by a Turbo- or Webpack loader
+// ✅ 会被 Turbo- 或 Webpack 加载器预处理
 const messages = (await import(`../../messages/en.json`)).default;
 ```
 
-See also: [Ahead-of-time compilation with `next-intl`](/blog/precompilation)
+另见：[使用 `next-intl` 的预编译](/blog/precompilation)
 
-**Note:** `t.raw` is not supported with precompiled messages (see [tradeoffs](https://github.com/amannn/next-intl/blob/main/rfcs/002-icu-message-precompilation.md#tradeoffs))
+**注意：** 预编译的消息不支持 `t.raw`（详见[权衡](https://github.com/amannn/next-intl/blob/main/rfcs/002-icu-message-precompilation.md#tradeoffs)）
 
 <Details id="precompile-runtime-messages">
-<summary>How can I manually precompile messages?</summary>
+<summary>如何手动预编译消息？</summary>
 
-For cases where you don't `import` messages into your app (e.g. when fetching them at runtime), you can manually precompile them using `icu-minify/compile`:
+对于未通过 `import` 导入消息（例如运行时动态获取消息）的情况，您可以使用 `icu-minify/compile` 手动预编译它们：
 
 ```tsx filename="i18n/request.ts"
 import compile from 'icu-minify/compile';
@@ -294,13 +294,13 @@ export default getRequestConfig(async () => {
 });
 ```
 
-If you do this, be sure to use the same version of `icu-minify` as the one that your `next-intl` version depends on to ensure compatibility.
+如果使用此方式，确保 `icu-minify` 版本与您所使用的 `next-intl` 版本依赖的版本一致，以保证兼容性。
 
 </Details>
 
 ### `srcPath` [#src-path]
 
-This defines the source path where messages should be extracted from.
+此选项定义消息应从哪个源路径提取。
 
 ```tsx
 const withNextIntl = createNextIntlPlugin({
@@ -311,25 +311,25 @@ const withNextIntl = createNextIntlPlugin({
 });
 ```
 
-If your project is split into multiple folders, you can provide an array of paths:
+如果项目划分在多个文件夹中，您可以提供一个路径数组：
 
 ```tsx
-// Not using a `src` folder
+// 不使用 `src` 文件夹
 srcPath: './',
 ```
 
 ```tsx
-// Monorepo with multiple packages
+// Monorepo 多包结构
 srcPath: ['./src', '../ui'],
 ```
 
 ```tsx
-// External dependency on a package
+// 依赖于外部包
 srcPath: ['./src', './node_modules/@acme/components'],
 ```
 
-Note that the directories `node_modules`, `.next` and `.git` are automatically excluded from extraction, except for if they appear explicitly in the `srcPath` array.
+注意，`node_modules`、`.next` 和 `.git` 目录会自动被排除提取，除非它们被显式列在 `srcPath` 数组中。
 
-If you want to provide messages along with your package, you can also extract them [manually](/docs/usage/extraction#manual).
+如果您希望随包提供消息，也可以[手动提取](/docs/usage/extraction#manual)。
 
-**Note:** The `srcPath` option should be used together with [`extract`](#extract) and [`messages`](#messages).
+**注意：** `srcPath` 选项应与 [`extract`](#extract) 和 [`messages`](#messages) 共同使用。

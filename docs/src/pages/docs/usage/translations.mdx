@@ -3,34 +3,34 @@ import PartnerContentLink from '@/components/PartnerContentLink';
 import Details from '@/components/Details';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Rendering translations
+# 渲染翻译内容
 
-Prefer to watch a video?
+想看视频吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/03-translations/01-setup"
-  title="First translations"
+  title="首次翻译示例"
 />
 
-## Terminology
+## 术语
 
-- **Locale**: We use this term to describe an identifier that contains the language and formatting preferences of users. Apart from the language, a locale can include optional regional information (e.g. `en-US`).
-- **Messages**: These are collections of key/translation pairs that are grouped by locale (e.g. `en-US.json`).
+- **Locale （语言区域）**：我们用该术语描述包含用户语言和格式偏好的标识符。除了语言之外，locale 还可以包含可选的区域信息（例如 `en-US`）。
+- **Messages（消息）**：这些是以 locale 为单位分组的键/翻译对集合（例如 `en-US.json`）。
 
-## Structuring messages
+## 消息结构
 
-Messages are typically defined in JSON files:
+消息通常定义在 JSON 文件中：
 
 ```json filename="en.json"
 {
   "About": {
-    "title": "About us"
+    "title": "关于我们"
   }
 }
 ```
 
-You can render messages from within a React component with the `useTranslations` hook:
+你可以在 React 组件内部使用 `useTranslations` 钩子渲染消息：
 
 ```tsx filename="About.tsx"
 import {useTranslations} from 'next-intl';
@@ -41,7 +41,7 @@ function About() {
 }
 ```
 
-To retrieve all available messages in a component, you can omit the namespace path:
+要在组件中获取所有可用消息，可以省略命名空间路径：
 
 ```js
 const t = useTranslations();
@@ -49,45 +49,45 @@ const t = useTranslations();
 t('About.title');
 ```
 
-**Learn more:**
+**了解更多：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/03-translations/03-keys"
-  title="Organizing keys"
+  title="组织键"
 />
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/03-translations/04-message-reuse"
-  title="Reusing messages"
+  title="消息复用"
 />
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/03-translations/05-tooling"
-  title="Editor tools"
+  title="编辑器工具"
 />
 
 <Callout>
 
-Translators can collaborate on messages by using a localization management solution like <PartnerContentLink name="messages-collaborate" href="https://crowdin.com/teams/engineering">Crowdin</PartnerContentLink>.
+翻译人员可以使用本地化管理解决方案如 <PartnerContentLink name="messages-collaborate" href="https://crowdin.com/teams/engineering">Crowdin</PartnerContentLink> 来协作完成消息翻译。
 
 </Callout>
 
 <Details id="messages-nested-structure">
-<summary>How can I provide more structure for messages?</summary>
+<summary>如何为消息提供更多结构化？</summary>
 
-Optionally, you can structure your messages as nested objects.
+你可以选择将消息结构定义为嵌套对象。
 
 ```json filename="en.json"
 {
   "auth": {
     "SignUp": {
-      "title": "Sign up",
+      "title": "注册",
       "form": {
-        "placeholder": "Please enter your name",
-        "submit": "Submit"
+        "placeholder": "请输入你的名字",
+        "submit": "提交"
       }
     }
   }
@@ -98,8 +98,7 @@ Optionally, you can structure your messages as nested objects.
 import {useTranslations} from 'next-intl';
 
 function SignUp() {
-  // Provide the lowest common denominator that contains
-  // all messages this component needs to consume.
+  // 提供包含该组件所有消息的最低公共祖先路径
   const t = useTranslations('auth.SignUp');
 
   return (
@@ -107,8 +106,7 @@ function SignUp() {
       <h1>{t('title')}</h1>
       <form>
         <input
-          // The remaining hierarchy can be resolved by
-          // using `.` to access nested messages.
+          // 其余层级使用 '.' 访问嵌套消息字段
           placeholder={t('form.placeholder')}
         />
         <button type="submit">{t('form.submit')}</button>
@@ -121,22 +119,22 @@ function SignUp() {
 </Details>
 
 <Details id="messages-outside-components">
-<summary>How can I use translations outside of components?</summary>
+<summary>如何在组件外使用翻译？</summary>
 
-`next-intl` is heavily based on the `useTranslations` API which is intended to consume translations from within React components. This may seem like a limitation, but this is intentional and aims to encourage the use of proven patterns that avoid potential issues that are easy to overlook.
+`next-intl` 主要基于 `useTranslations` API，用于在 React 组件内消费翻译。虽然这看似限制，但这是刻意为之，旨在推动使用成熟的模式，避免容易忽视的问题。
 
-There's one exception however: [Using `next-intl` with Server Actions, Metadata and Route Handlers](/docs/environments/actions-metadata-route-handlers).
+不过有一个例外：[在服务器动作、元数据和路由处理函数中使用 `next-intl`](/docs/environments/actions-metadata-route-handlers)。
 
-If you're interested to dive deeper into this topic, there's a blog post that discusses the background of this design decision: [How (not) to use translations outside of React components](/blog/translations-outside-of-react-components).
+如果你想深入了解该设计决策的背景，推荐阅读这篇博客文章：[如何（不）在 React 组件外使用翻译](/blog/translations-outside-of-react-components)。
 
 </Details>
 
 <Details id="messages-other-styles">
-<summary>Can I use a different style for structuring my messages?</summary>
+<summary>我可以用其他方式组织消息吗？</summary>
 
-Namespace keys can not contain the character "." as this is used to express nesting—all other characters are fine to use.
+命名空间键不能包含字符“.”，因为它用于表示嵌套——其它字符正常使用。
 
-If you're migrating from a flat structure that uses "." in message keys, you can convert your messages to a nested structure as follows:
+如果你之前使用扁平结构且在消息键中包含“.”，可以按下面代码转换为嵌套结构：
 
 ```tsx
 import {set} from 'lodash';
@@ -153,7 +151,7 @@ const output = Object.entries(input).reduce(
 );
 ```
 
-**Output:**
+**输出结果：**
 
 ```tsx
 {
@@ -169,25 +167,25 @@ const output = Object.entries(input).reduce(
 }
 ```
 
-This keeps the hierarchy while removing the redundancy of repeated parent keys. You can either execute this is in a one-off script or before passing your messages to `next-intl`.
+这样保持了层级结构，同时去掉了重复的父级键名。你可以在单次脚本中执行此转换，也可以在将消息传给 `next-intl` 前先进行转换。
 
-If you've previously used human readable sentences for keys, you can theoretically map the `.` character to a different one (e.g. `_`) before passing the messages to `next-intl`, but it's generally recommended to use IDs as keys. You can still view human readable labels from your messages in your editor by using a [VSCode integration](/docs/workflows/vscode-integration) in case that's your primary motivation for using human readable keys.
+如果你之前使用可读文本作为键，也可以在传给 `next-intl` 前将 `.` 替换成别的符号（如 `_`），但一般推荐使用 ID 作为键。若主要目的是在编辑器中查看可读标签，可使用 [VSCode 集成](/docs/workflows/vscode-integration) 来展示消息中的人类可读标签。
 
 </Details>
 
-## ICU messages
+## ICU 消息
 
-`next-intl` uses [ICU message syntax](https://unicode-org.github.io/icu/userguide/format_parse/messages/) that allows you to express language nuances and separates state handling within messages from your app code.
+`next-intl` 使用 [ICU 消息语法](https://unicode-org.github.io/icu/userguide/format_parse/messages/)，允许表达语言细节，并将消息中的状态处理与应用代码分离。
 
 <CourseVideoBanner
   className="mt-4"
   href="https://learn.next-intl.dev/chapters/03-translations/06-icu-messages"
-  title="ICU messages"
+  title="ICU 消息"
 />
 
-### Static messages
+### 静态消息
 
-Static messages will be used as-is:
+静态消息将按原样使用：
 
 ```json filename="en.json"
 "message": "Hello world!"
@@ -197,9 +195,9 @@ Static messages will be used as-is:
 t('message'); // "Hello world!"
 ```
 
-### Interpolation of arguments [#arguments]
+### 参数插入 [#arguments]
 
-Dynamic values can be inserted into messages by using curly braces:
+动态值可以通过花括号插入到消息中：
 
 ```json filename="en.json"
 "message": "Hello {name}!"
@@ -210,15 +208,15 @@ t('message', {name: 'Jane'}); // "Hello Jane!"
 ```
 
 <Details id="interpolation-supported-characters">
-<summary>Which characters are supported for value names?</summary>
+<summary>参数名支持哪些字符？</summary>
 
-Value names are required to be alphanumeric and can contain underscores. All other characters, including dashes, are not supported.
+参数名必须是字母数字，可以包含下划线。其它字符（包括连字符）不支持。
 
 </Details>
 
-### Cardinal pluralization
+### 基数复数（Cardinal Pluralization）
 
-To express the pluralization of a given number of items, the `plural` argument can be used:
+用 `plural` 参数表达物品数量的复数：
 
 ```json filename="en.json"
 "message": "You have {count, plural, =0 {no followers yet} =1 {one follower} other {# followers}}."
@@ -228,65 +226,65 @@ To express the pluralization of a given number of items, the `plural` argument c
 t('message', {count: 3580}); // "You have 3,580 followers."
 ```
 
-Note that by using the `#` marker, the value will be [formatted as a number](/docs/usage/numbers).
+注意，使用 `#` 将对值进行[数字格式化](/docs/usage/numbers)。
 
 <Details id="cardinal-plural-forms">
-<summary>Which plural forms are supported?</summary>
+<summary>支持哪些复数形式？</summary>
 
-Languages have different rules for pluralization and your messages should reflect these rules.
+不同语言有不同的复数规则，消息应依据这些规则设计。
 
-For example, English has two forms: One for the singular (e.g. "1 _follower_") and one for everything else (e.g. "0 _followers_" and "2 _followers_"). In contrast, Chinese only has one form, while Arabic has six.
+例如，英文有两种形式：单数（如 "1 _follower_"）和其他（如 "0 _followers_"，"2 _followers_"）。中文只有一种形式，阿拉伯语则有六种。
 
-The other aspect to consider is that from a usability perspective, it can be helpful to consider additional cases on top—most commonly the special case for zero (e.g. "No followers yet" instead of "0 followers").
+另一方面，从可用性考虑，常会考虑增加特殊零的情况（如 "No followers yet" 替代 "0 followers"）。
 
-While you can always use the `=value` syntax to match a specific number (e.g. `=0`), you can choose from the following tags depending on what grammar rules apply to a given language:
+你可以用 `=value` 精确匹配数字（如 `=0`），也可用以下标签指定语言语法规则：
 
-- `zero`: For languages with zero-item grammar (e.g., Latvian, Welsh).
-- `one`: For languages with singular-item grammar (e.g., English, German).
-- `two`: For languages with dual-item grammar (e.g., Arabic, Welsh).
-- `few`: For languages with grammar specific to a small number of items (e.g., Arabic, Croatian).
-- `many`: For languages with grammar specific to a larger number of items (e.g., Arabic, Croatian).
-- `other`: Used when the value doesn't match other plural categories.
+- `zero`：适用于有零物品语法的语言（如拉脱维亚语、威尔士语）。
+- `one`：适用于单数语法的语言（如英语、德语）。
+- `two`：适用于双数语法（如阿拉伯语、威尔士语）。
+- `few`：适用于少数项目语法（如阿拉伯语、克罗地亚语）。
+- `many`：适用于大量项目语法（如阿拉伯语、克罗地亚语）。
+- `other`：用于不匹配其它类别的情况。
 
-`next-intl` uses [`Intl.PluralRules`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules) to detect the correct tag that should be used for a given number. The exact range that `few` and `many` applies to varies depending on the locale (see the [language plural rules](https://www.unicode.org/cldr/charts/43/supplemental/language_plural_rules.html) table in the Unicode CLDR).
+`next-intl` 利用 [`Intl.PluralRules`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules) 来判断一个数字对应哪个复数标签。`few` 和 `many` 的具体范围因 locale 而异（详见 Unicode CLDR 中[语言复数规则](https://www.unicode.org/cldr/charts/43/supplemental/language_plural_rules.html)表格）。
 
 </Details>
 
-### Ordinal pluralization
+### 序数复数（Ordinal Pluralization）
 
-To apply pluralization based on an order of items, the `selectordinal` argument can be used:
+用 `selectordinal` 参数基于顺序数字实行复数：
 
 ```tsx filename="en.json"
 "message": "It's your {year, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} birthday!"
 ```
 
 <Details id="ordinal-plural-forms">
-<summary>Which plural forms are supported?</summary>
+<summary>支持哪些序数复数形式？</summary>
 
-Depending on the language, different forms of ordinal pluralization are supported.
+不同语言支持不同序数复数形式。
 
-For example, English has four forms: "th", "st", "nd" and "rd" (e.g. 1st, 2nd, 3rd, 4th … 11th, 12th, 13th … 21st, 22nd, 23rd, 24th, etc.). In contrast, both Chinese and Arabic use only one form for ordinal numbers.
+例如英语有四种：th、st、nd、rd（如 1st, 2nd, 3rd, 4th... 11th, 12th, 13th... 21st, 22nd, 23rd, 24th 等）。中文和阿拉伯语仅用一种形式。
 
-`next-intl` uses [`Intl.PluralRules`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules) to detect the correct _tag_ that should be used for a given number.
+`next-intl` 使用 [`Intl.PluralRules`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules) 判定给定数值应使用哪个 _标签_。
 
-**These tags are supported:**
+**支持以下标签：**
 
-- `zero`: For languages with zero-item grammar (e.g., Latvian, Welsh).
-- `one`: For languages with singular-item grammar (e.g., English, German).
-- `two`: For languages with dual-item grammar (e.g., Arabic, Welsh).
-- `few`: For languages with grammar specific to a small number of items (e.g., Arabic, Polish, Croatian).
-- `many`: For languages with grammar specific to a larger number of items (e.g., Arabic, Polish, Croatian).
-- `other`: Used when the value doesn't match other plural categories.
+- `zero`：零的语法（如拉脱维亚语、威尔士语）
+- `one`：单数语法（如英语、德语）
+- `two`：双数语法（如阿拉伯语、威尔士语）
+- `few`：少量项目语法（如阿拉伯语、波兰语、克罗地亚语）
+- `many`：大量项目语法（如阿拉伯语、波兰语、克罗地亚语）
+- `other`：不匹配其他类别时使用。
 
-The exact range that `few` and `many` applies to varies depending on the locale (see the [language plural rules](https://www.unicode.org/cldr/charts/43/supplemental/language_plural_rules.html) table in the Unicode CLDR).
+`few` 和 `many` 所涵盖范围因 locale 不同而异（详见 Unicode CLDR 的[语言复数规则](https://www.unicode.org/cldr/charts/43/supplemental/language_plural_rules.html)表格）。
 
-To match a specific number, `next-intl` additionally supports the special `=value` syntax (e.g. `=3`) that always takes precedence.
+除此之外，`next-intl` 支持 `=value` 语法（如 `=3`），优先匹配特定数字。
 
 </Details>
 
-### Selecting enum-based values
+### 枚举值选择
 
-To map identifiers to human readable labels, you can use the `select` argument that works similar to the `switch` statement in JavaScript:
+用 `select` 参数映射标识符至可读标签，类似 JS 的 `switch` 语句：
 
 ```tsx filename="en.json"
 "message": "{gender, select, female {She is} male {He is} other {They are}} online."
@@ -296,17 +294,17 @@ To map identifiers to human readable labels, you can use the `select` argument t
 t('message', {gender: 'female'}); // "She is online."
 ```
 
-**Note**: The `other` case is required and will be used when none of the specific values match.
+**注意**：`other` 项必填，且在无具体匹配时使用。
 
 <Details id="select-values-supported-characters">
-<summary>Which characters are supported for select values?</summary>
+<summary>选择值支持哪些字符？</summary>
 
-Values are required to be alphanumeric and can contain underscores. All other characters, including dashes, are not supported.
+值必须是字母数字，可包含下划线。其它字符（包括破折号）不支持。
 
-Therefore, e.g. when you're mapping a locale to a human readable string, you should map the dash to an underscore first:
+因此，比如你映射 locale 至可读字符串时，应先将破折号映射为下划线：
 
 ```tsx filename="en.json"
-"label": "{locale, select, en_GB {British English} en_US {American English} other {Unknown}}"
+"label": "{locale, select, en_GB {英国英语} en_US {美式英语} other {未知}}"
 ```
 
 ```tsx
@@ -316,43 +314,43 @@ t('message', {locale: locale.replaceAll('-', '_')});
 
 </Details>
 
-### Escaping
+### 转义
 
-Since curly braces are used for [interpolating arguments](/docs/usage/translations#arguments), you can wrap them in single quotes (`'`) to use the actual symbol in messages:
+因为花括号用于[插入参数](/docs/usage/translations#arguments)，要在消息中使用实际符号，可以用单引号 `'` 包裹：
 
 ```json filename="en.json"
-"message": "Escape curly braces with single quotes (e.g. '{name}')"
+"message": "使用单引号转义花括号（如 '{name}'）"
 ```
 
 ```js
-t('message'); // "Escape curly braces with single quotes (e.g. {name})"
+t('message'); // "使用单引号转义花括号（如 {name}）"
 ```
 
-## Rich text
+## 富文本
 
-You can format rich text with custom tags and map them to React components via `t.rich`:
+你可以用自定义标签格式化富文本，使用 `t.rich` 映射至 React 组件：
 
 ```json filename="en.json"
 {
-  "message": "Please refer to <guidelines>the guidelines</guidelines>."
+  "message": "请参考 <guidelines>指南</guidelines>。"
 }
 ```
 
 ```js
-// Returns `<>Please refer to <a href="/guidelines">the guidelines</a>.</>`
+// 返回 `<>请参考 <a href="/guidelines">指南</a>。</>`
 t.rich('message', {
   guidelines: (chunks) => <a href="/guidelines">{chunks}</a>
 });
 ```
 
-Tags can be arbitrarily nested (e.g. `This is <important><very>very</very> important</important>`).
+标签可以任意嵌套（如 `这是 <important><very>非常</very>重要</important>`）。
 
 <Details id="rich-text-reuse-tags">
-<summary>How can I reuse tags across my app?</summary>
+<summary>如何在应用中复用标签？</summary>
 
-Common tags for rich text that you want to share across your app can be defined in a shared module and imported where relevant for usage with `t.rich`.
+常用通用富文本标签可以定义在共享模块中，并在需要处导入，配合 `t.rich` 使用。
 
-A convenient pattern is to use a component that provides common tags via a render prop:
+一个便捷模式是使用一个组件，通过 render prop 提供通用标签：
 
 ```js
 import {useTranslations} from 'next-intl';
@@ -364,12 +362,12 @@ function AboutPage() {
 }
 ```
 
-In this case, the `RichText` component can provide styled tags and also a general layout for the text:
+这样 `RichText` 组件就可以提供样式化标签和文本整体布局：
 
 ```js filename="components/RichText.tsx"
 import {ReactNode} from 'react';
 
-// These tags are available
+// 可用标签
 type Tag = 'p' | 'b' | 'i';
 
 type Props = {
@@ -389,7 +387,7 @@ export default function RichText({children}: Props) {
 }
 ```
 
-If you need to combine shared tags with values from your component, you can merge them accordingly by using the spread operator:
+如果需要把共享标签与组件内的值结合，可以用扩展操作符合并：
 
 ```js
 function UserPage({username}) {
@@ -403,9 +401,9 @@ function UserPage({username}) {
 </Details>
 
 <Details id="rich-text-self-closing">
-<summary>How can I use "self-closing" tags without any chunks?</summary>
+<summary>如何使用无子内容的“自闭合”标签？</summary>
 
-Messages can use tags without any chunks as children, but syntax-wise, a closing tag is required by the ICU parser:
+消息可使用无子内容的标签，但语法上 ICU 解析器要求闭合标签：
 
 ```json filename="en.json"
 {
@@ -422,13 +420,13 @@ t.rich('message', {
 </Details>
 
 <Details id="rich-text-attributes">
-<summary>How can I pass attributes to tags?</summary>
+<summary>如何向标签传递属性？</summary>
 
-Attributes can only be set on the call site, not within messages:
+属性只能在调用处设置，不能在消息里：
 
 ```json filename="en.json"
 {
-  "message": "Go to <profile>my profile</profile>"
+  "message": "去 <profile>我的个人资料</profile>"
 }
 ```
 
@@ -438,11 +436,11 @@ t.rich('message', {
 });
 ```
 
-In case you have attribute values that are required to be configured as part of your messages, you can retrieve them from a separate message and pass them to another one as an attribute:
+如果你有必须配置在消息里的属性值，可以从单独的消息中读取后作为属性传递：
 
 ```json filename="en.json"
 {
-  "message": "See this <partner>partner website</partner>.",
+  "message": "访问这个 <partner>合作伙伴网站</partner>。",
   "partnerHref": "https://partner.example.com"
 }
 ```
@@ -453,36 +451,36 @@ t.rich('message', {
 });
 ```
 
-For the use case of localizing pathnames, consider using [`pathnames`](/docs/routing/configuration#pathnames).
+如果想本地化路径名，可以考虑使用 [`pathnames`](/docs/routing/configuration#pathnames)。
 
 </Details>
 
-## HTML markup
+## HTML 标记
 
-To render rich text, you typically want to use [rich text formatting](#rich-text). However, if you have a use case where you need to emit raw HTML markup, you can use the `t.markup` function:
+渲染富文本通常用[富文本格式化](#rich-text)，但若需要输出原生 HTML 标记，可用 `t.markup` 函数：
 
 ```json filename="en.json"
 {
-  "markup": "This is <important>important</important>"
+  "markup": "这是 <important>重要的</important> 内容"
 }
 ```
 
 ```js
-// Returns 'This is <b>important</b>'
+// 返回 '这是 <b>重要的</b> 内容'
 t.markup('markup', {
   important: (chunks) => `<b>${chunks}</b>`
 });
 ```
 
-Note that unlike `t.rich`, the provided markup functions accept `chunks` as a `string` and also return a `string` where the `chunks` are wrapped accordingly.
+注意，`t.markup` 中的函数接收和返回的都是字符串，`chunks` 也为字符串，标签函数应返回字符串格式。
 
-## Raw messages
+## 原始消息
 
-Messages are always parsed and therefore e.g. for rich text formatting you need to supply the necessary tags. If you want to avoid the parsing, e.g. because you have raw HTML stored in a message, there's a separate API for this use case:
+消息总会被解析，例如富文本格式需要相应标签。如果想跳过解析（如消息里存有原始 HTML），有专用 API：
 
 ```json filename="en.json"
 {
-  "content": "<h1>Headline</h1><p>This is raw HTML</p>"
+  "content": "<h1>标题</h1><p>这是原始HTML</p>"
 }
 ```
 
@@ -491,16 +489,16 @@ Messages are always parsed and therefore e.g. for rich text formatting you need 
 ```
 
 <Callout type="warning">
-  **Important**: You should always sanitize the content that you pass to
+  **重要**：向
   [`dangerouslySetInnerHTML`](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
-  to avoid cross-site scripting attacks.
+  传入内容前，请务必清理和防范跨站脚本攻击（XSS）。
 </Callout>
 
-The value of a raw message can be any valid JSON value: strings, booleans, objects and arrays.
+原始消息的值可以是任意有效 JSON 类型：字符串、布尔值、对象和数组。
 
-## Optional messages [#t-has]
+## 可选消息 [#t-has]
 
-If you have messages that are only available for certain locales, you can use the `t.has` function to check whether a message is available for the current locale:
+如果某些消息只在个别 locale 支持，可以用 `t.has` 检测当前 locale 是否含该消息：
 
 ```js
 const t = useTranslations('About');
@@ -509,26 +507,26 @@ t.has('title'); // true
 t.has('unknown'); // false
 ```
 
-Note that separately from this, you can also provide [fallback messages](/docs/usage/configuration#messages), e.g. from the default locale, in case you have incomplete messages for certain locales.
+除了它，你还可以设置[回退消息](/docs/usage/configuration#messages)，例如来自默认语言的消息，以应对部分 locale 的不完整翻译。
 
-## Arrays of messages
+## 消息数组
 
-If you need to render a list of messages, the recommended approach is to map message keys to an array within your React component:
+若需渲染消息列表，推荐做法是在 React 组件里将翻译键映射为数组：
 
 ```json filename="en.json"
 {
   "CompanyStats": {
     "yearsOfService": {
-      "title": "Years of service",
+      "title": "服务年限",
       "value": "34"
     },
     "happyClients": {
-      "title": "Happy clients",
-      "value": "1.000+"
+      "title": "满意客户",
+      "value": "1,000+"
     },
     "partners": {
-      "title": "Products",
-      "value": "5.000+"
+      "title": "产品",
+      "value": "5,000+"
     }
   }
 }
@@ -567,12 +565,12 @@ function CompanyStats() {
 }
 ```
 
-This approach ensures that you can use ICU features while also enabling static [validation of messages](/docs/workflows/messages).
+该方法既能使用 ICU 功能，也可以享用消息的静态[校验](/docs/workflows/messages)。
 
 <Details id="arrays-varying-amount">
-<summary>What if the amount of items varies depending on the locale?</summary>
+<summary>如果不同 locale 的项目数不一样怎么办？</summary>
 
-To dynamically iterate over all keys of a namespace, you can use the [`useMessages`](/docs/usage/configuration#messages) hook to retrieve all messages of a given namespace and extract the keys from there:
+要动态遍历某个命名空间下所有键，可以使用 [`useMessages`](/docs/usage/configuration#messages) 钩子获取所有消息，再提取键：
 
 ```tsx filename="CompanyStats.tsx"
 import {useTranslations, useMessages} from 'next-intl';
@@ -598,11 +596,11 @@ function CompanyStats() {
 
 </Details>
 
-## Right-to-left languages
+## 从右向左的语言
 
-Languages such as Arabic, Hebrew and Persian use [right-to-left script](https://en.wikipedia.org/wiki/Right-to-left_script) (often abbreviated as RTL). For these languages, writing begins on the right side of the page and continues to the left.
+阿拉伯语、希伯来语和波斯语等使用[从右向左书写](https://zh.wikipedia.org/wiki/%E4%BB%8E%E5%8F%B3%E5%90%91%E5%B7%A6%E4%BC%9A%E5%86%99)（简称 RTL）。此类语言从页面右侧开始书写，向左延伸。
 
-**Example:**
+**示例：**
 
 <div dir="rtl" className="text-right mt-6">
 
@@ -612,16 +610,16 @@ Languages such as Arabic, Hebrew and Persian use [right-to-left script](https://
 
 </div>
 
-In addition to providing translated messages, proper RTL localization requires:
+除了提供翻译消息外，正确 RTL 本地化还需：
 
-1. Providing the [`dir` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/dir) where relevant
-2. Layout mirroring, e.g. by using [CSS logical properties](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_logical_properties_and_values)
-3. Element mirroring, e.g. by customizing icons
+1. 在相关处设置 [`dir` 属性](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Global_attributes/dir)
+2. 布局镜像，如用[CSS 逻辑属性](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_logical_properties_and_values)
+3. 元素镜像，如自定义图标方向
 
-**Learn more:**
+**了解更多：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/09-design-localization/02-right-to-left"
-  title="Right-to-left layouts"
+  title="从右向左的布局"
 />

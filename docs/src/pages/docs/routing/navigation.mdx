@@ -2,19 +2,19 @@ import Callout from '@/components/Callout';
 import Details from '@/components/Details';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Navigation APIs
+# 导航 APIs
 
-Prefer to watch a video?
+想看视频教程吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/06-routing/04-navigation-apis"
-  title="Navigation APIs"
+  title="导航 APIs"
 />
 
-`next-intl` provides lightweight wrappers around Next.js' navigation APIs like [`<Link />`](https://nextjs.org/docs/app/api-reference/components/link) and [`useRouter`](https://nextjs.org/docs/app/api-reference/functions/use-router) that automatically handle the user locale and pathnames behind the scenes.
+`next-intl` 提供了对 Next.js 导航 APIs（如 [`<Link />`](https://nextjs.org/docs/app/api-reference/components/link) 和 [`useRouter`](https://nextjs.org/docs/app/api-reference/functions/use-router)）的轻量包装，能够在后台自动处理用户的语言和路径。
 
-To create these APIs, you can call the `createNavigation` function with your `routing` configuration:
+要创建这些 API，可以通过传入你的 `routing` 配置来调用 `createNavigation` 函数：
 
 ```tsx filename="navigation.ts"
 import {createNavigation} from 'next-intl/navigation';
@@ -24,70 +24,69 @@ export const {Link, redirect, usePathname, useRouter, getPathname} =
   createNavigation(routing);
 ```
 
-This function is typically called in a central module like [`src/i18n/navigation.ts`](/docs/routing/setup#i18n-navigation) in order to provide easy access to navigation APIs in your components.
+该函数通常在像 [`src/i18n/navigation.ts`](/docs/routing/setup#i18n-navigation) 这样的集中模块中调用，以方便组件中访问导航 API。
 
 <Details id="locales-unknown">
-<summary>What if the locales aren't known at build time?</summary>
+<summary>如果构建时不知道所有语言怎么办？</summary>
 
-In case you're building an app where locales can be added and removed at runtime, `createNavigation` can be called without the `locales` argument, therefore allowing any string that is encountered at runtime to be a valid locale. In this case, you'd not use the [`defineRouting`](/docs/routing/configuration#define-routing) function.
+如果你的应用在运行时允许添加或删除语言，可以调用 `createNavigation` 时不传 `locales` 参数，从而允许运行时遇到的任意字符串作为有效语言。在这种情况下，你将不会使用 [`defineRouting`](/docs/routing/configuration#define-routing) 函数。
 
 ```tsx filename="navigation.ts"
 import {createNavigation} from 'next-intl/navigation';
 
 export const {Link, redirect, usePathname, useRouter, getPathname} =
   createNavigation({
-    // ... potentially other routing
-    // config, but no `locales` ...
+    // ... 可能有其他路由配置，但不包含 `locales` ...
   });
 ```
 
-Note however that the `locales` argument for the middleware is still mandatory. If you need to fetch the available locales at runtime, you can provide the routing configuration for the middleware [dynamically per request](/docs/routing/middleware#composing-other-middlewares).
+不过请注意，middleware 中的 `locales` 参数仍是必需的。如果你需要在运行时获取可用语言，可以为 middleware [动态按请求提供路由配置](/docs/routing/middleware#composing-other-middlewares)。
 
 </Details>
 
 ## APIs
 
-The created navigation APIs are thin wrappers around the equivalents from Next.js and mostly adhere to the same function signatures. Your routing configuration and the user's locale are automatically incorporated.
+创建的导航 API 是对 Next.js 同名 API 的薄封装，并且大多数保持相同的函数签名。你的路由配置和用户语言会自动融合其中。
 
-If you're using the [`pathnames`](/docs/routing/configuration#pathnames) setting in your routing configuration, the internal pathnames that are accepted for `href` arguments will be strictly typed and localized to the given locale.
+如果你在路由配置中使用了 [`pathnames`](/docs/routing/configuration#pathnames) 设置，那么传递给 `href` 参数的内部路径名将是严格类型化的，并会针对指定语言进行本地化。
 
 ### `Link`
 
-This component wraps [`next/link`](https://nextjs.org/docs/app/api-reference/components/link) and localizes the pathname as necessary.
+该组件封装了 [`next/link`](https://nextjs.org/docs/app/api-reference/components/link) 并根据需要对路径名进行本地化。
 
 ```tsx
 import {Link} from '@/i18n/navigation';
 
-// When the user is on `/en`, the link will point to `/en/about`
-<Link href="/about">About</Link>
+// 当用户在 `/en` 时，链接会指向 `/en/about`
+<Link href="/about">关于</Link>
 
-// Search params can be added via `query`
-<Link href={{pathname: "/users", query: {sortBy: 'name'}}}>Users</Link>
+// 也可以通过 `query` 添加搜索参数
+<Link href={{pathname: "/users", query: {sortBy: 'name'}}}>用户</Link>
 
-// You can override the `locale` to switch to another language
-// (this will set the `hreflang` attribute on the anchor tag)
-<Link href="/" locale="de">Switch to German</Link>
+// 你可以通过 `locale` 覆盖语言切换到其他语言
+// （这会在 <a> 标签上设置 `hreflang` 属性）
+<Link href="/" locale="de">切换到德语</Link>
 ```
 
-Depending on if you're using the [`pathnames`](/docs/routing/configuration#pathnames) setting, dynamic params can either be passed as:
+根据是否使用了 [`pathnames`](/docs/routing/configuration#pathnames) 设置，动态参数可以按以下两种方式传递：
 
 ```tsx
-// 1. A final string (when not using `pathnames`)
-<Link href="/users/12">Susan</Link>
+// 1. 最终字符串（不使用 `pathnames` 时）
+<Link href="/users/12">苏珊</Link>
 
-// 2. An object (when using `pathnames`)
+// 2. 对象（使用 `pathnames` 时）
 <Link href={{
   pathname: '/users/[userId]',
   params: {userId: '5'}
 }}>
-  Susan
+  苏珊
 </Link>
 ```
 
 <Details id="link-active">
-<summary>How can I render a navigation link?</summary>
+<summary>如何渲染一个导航链接？</summary>
 
-The [`useSelectedLayoutSegment` hook](https://nextjs.org/docs/app/api-reference/functions/use-selected-layout-segment) from Next.js allows you to detect if a given child segment is active from within the parent layout. Since this returns an internal pathname, it can be matched against an `href` that you can pass to `Link`.
+Next.js 的 [`useSelectedLayoutSegment` hook](https://nextjs.org/docs/app/api-reference/functions/use-selected-layout-segment) 允许你在父布局中检测某个子段是否处于激活状态。因为它返回的是一个内部路径名，所以你可以把它与传递给 `Link` 的 `href` 进行匹配。
 
 ```tsx filename="NavigationLink.tsx"
 'use client';
@@ -123,14 +122,14 @@ export default function NavigationLink({
 </nav>
 ```
 
-See also the Next.js docs on [creating an active link component](https://nextjs.org/docs/app/api-reference/functions/use-selected-layout-segment#creating-an-active-link-component).
+另请参见 Next.js 关于[创建激活链接组件](https://nextjs.org/docs/app/api-reference/functions/use-selected-layout-segment#creating-an-active-link-component)的文档。
 
 </Details>
 
 <Details id="link-composition">
-<summary>How can I compose the link with its href prop?</summary>
+<summary>如何组合包装组件中的 `href` 属性？</summary>
 
-If you need to create a component that receives an `href` prop that is forwarded to `Link` internally, you can compose the props from `Link` with the `ComponentProps` type:
+如果你需要创建一个接收 `href` 属性并内部传给 `Link` 的组件，可以用 `ComponentProps` 类型组合 `Link` 的属性：
 
 ```tsx filename="StyledLink.tsx"
 import {ComponentProps} from 'react';
@@ -145,58 +144,58 @@ export default function StyledLink({color, href, ...rest}: Props) {
 }
 ```
 
-In case you're using the [`pathnames`](/docs/routing/configuration#pathnames) setting, the `href` prop of the wrapping component will now be strictly typed based on your routing configuration.
+如果你使用了 [`pathnames`](/docs/routing/configuration#pathnames) 选项，包装组件的 `href` 属性将变成基于路由配置的严格类型。
 
 </Details>
 
 <Details id="link-locale">
-<summary>Why does `<Link />` always set a locale prefix when using the `locale` prop?</summary>
+<summary>为什么使用 `locale` 属性时 `<Link />` 总是会添加语言前缀？</summary>
 
-If you're providing a `locale` prop, typically to change the locale of the target page, you might notice that the link's `href` will always include a locale prefix, even if you're using a [`localePrefix`](/docs/routing/configuration#locale-prefix) setting other than `always`.
+当你提供 `locale` 属性（通常是为了切换目标页面语言）时，会发现链接的 `href` 总是会包含语言前缀，即使你使用的是 [`localePrefix`](/docs/routing/configuration#locale-prefix) 中非 `always` 的设置。
 
-**Example:**
+**示例：**
 
-If you're using [`localePrefix: 'as-needed'`](/docs/routing/configuration#locale-prefix-as-needed) and `en` is your default locale, then the `href` for this link will still be `/en/about`:
+如果你使用 [`localePrefix: 'as-needed'`](/docs/routing/configuration#locale-prefix-as-needed) 且默认语言是 `en`，则以下链接的 href 仍然会是 `/en/about`：
 
 ```tsx
-// Links to `/en/about`
+// 链接到 `/en/about`
 <Link href="/about" locale="en">
-  About
+  关于
 </Link>
 ```
 
-The reason for this is that a potential [cookie](/docs/routing/configuration#locale-cookie) may need to be updated before the user can visit the unprefixed route at `/about`. The prefixed pathname will take care of this and will subsequently redirect to the unprefixed route. This behavior is necessary because links might be interacted with before your page is hydrated and client-side code would have a chance to update the cookie.
+原因是可能需要先更新[语言 cookie](/docs/routing/configuration#locale-cookie)，才能访问不带前缀的 `/about` 路由。带前缀的路径会帮助完成这一步，然后重定向到无前缀路由。此行为是必须的，因为链接可能在页面 hydration 之前被点击，客户端代码还未有机会更新 cookie。
 
-If you'd like to avoid this behavior, you can instead use [`useRouter`](#userouter) to switch the locale, which can rely on updating the cookie on the client side before navigating to the target page.
+如果你想避免此行为，可以使用 [`useRouter`](#userouter) 来切换语言，该方法在导航到目标页面前可在客户端更新 cookie。
 
 </Details>
 
 <Details id="link-unknown-routes">
-<summary>How can I link to unknown routes when using the `pathnames` setting?</summary>
+<summary>使用 `pathnames` 设置时，如何链接到未知路由？</summary>
 
-In this case, the navigation APIs are strictly typed and only allow routes specified in the `pathnames` config. If you need to link to unknown routes in certain places, you can disable the type checking on a case-by-case basis:
+此情况下导航 API 具有严格的类型检查，只允许 `pathnames` 配置中声明的路由。如果你需要在某些情况下链接到未知路由，可以逐一禁用类型检查：
 
 ```tsx
 // @ts-expect-error
 <Link href="/unknown">...</Link>
 ```
 
-Unknown routes will be passed through as-is, but will receive relevant locale prefixes in case of absolute pathnames.
+未知路由会原样传递，但在绝对路径时会附加相应语言前缀。
 
 </Details>
 
 <Details id="link-prefetching">
-<summary>How does prefetching of localized links work?</summary>
+<summary>本地化链接的预加载是如何工作的？</summary>
 
-`<Link />` from `next-intl` inherits the default prefetch behavior from `next/link`.
+`next-intl` 的 `<Link />` 继承了 `next/link` 的默认预加载行为。
 
-The one exception to this is when you've set the `locale` prop. In this case, the link will not be prefetched, because this would otherwise result in prematurely overwriting the [locale cookie](/docs/routing/configuration#locale-cookie) as part of the prefetch request.
+唯一的例外是当你设置了 `locale` 属性时。此时链接不会被预加载，因为预加载请求会过早覆盖[语言 cookie](/docs/routing/configuration#locale-cookie)。
 
 </Details>
 
 ### `useRouter`
 
-If you need to navigate programmatically, e.g. in an event handler, `next-intl` provides a convience API that wraps [`useRouter` from Next.js](https://nextjs.org/docs/app/api-reference/functions/use-router) and localizes the pathname accordingly.
+如果你需要在事件处理函数中程序化导航，`next-intl` 提供了包装了 Next.js [`useRouter`](https://nextjs.org/docs/app/api-reference/functions/use-router) 的便利 API，会相应地本地化路径名。
 
 ```tsx
 'use client';
@@ -205,26 +204,26 @@ import {useRouter} from '@/i18n/navigation';
 
 const router = useRouter();
 
-// When the user is on `/en`, the router will navigate to `/en/about`
+// 当用户在 `/en` 时，router 会跳转到 `/en/about`
 router.push('/about');
 
-// Search params can be added via `query`
+// 也可以通过 `query` 添加搜索参数
 router.push({
   pathname: '/users',
   query: {sortBy: 'name'}
 });
 
-// You can override the `locale` to switch to another language
+// 你可以通过 `locale` 覆盖语言切换到其他语言
 router.replace('/about', {locale: 'de'});
 ```
 
-Depending on if you're using the [`pathnames`](/docs/routing/configuration#pathnames) setting, dynamic params can either be passed as:
+根据是否使用了 [`pathnames`](/docs/routing/configuration#pathnames) 设置，动态参数可以这样传递：
 
 ```tsx
-// 1. A final string (when not using `pathnames`)
+// 1. 最终字符串（不使用 `pathnames` 时）
 router.push('/users/12');
 
-// 2. An object (when using `pathnames`)
+// 2. 对象（使用 `pathnames` 时）
 router.push({
   pathname: '/users/[userId]',
   params: {userId: '5'}
@@ -232,11 +231,11 @@ router.push({
 ```
 
 <Details id="userouter-change-locale">
-<summary>How can I change the locale for the current page?</summary>
+<summary>如何更改当前页面的语言？</summary>
 
-By combining [`usePathname`](#usepathname) with [`useRouter`](#userouter), you can change the locale for the current page programmatically by navigating to the same pathname, while overriding the `locale`.
+结合 [`usePathname`](#usepathname) 和 [`useRouter`](#userouter)，你可以通过保持相同路径并覆盖 `locale` 来编程更改当前页面语言。
 
-Depending on if you're using the [`pathnames`](/docs/routing/configuration#pathnames) setting, you optionally have to forward `params` to potentially resolve an internal pathname.
+根据是否使用 [`pathnames`](/docs/routing/configuration#pathnames) 设置，你可能还需要传递 `params` 以解析内部路径名。
 
 ```tsx
 'use client';
@@ -247,77 +246,74 @@ import {useParams} from 'next/navigation';
 const pathname = usePathname();
 const router = useRouter();
 
-// Without `pathnames`: Pass the current `pathname`
+// 不使用 `pathnames`: 直接传递当前 pathname
 router.replace(pathname, {locale: 'de'});
 
-// With `pathnames`: Pass `params` as well
+// 使用 `pathnames`: 额外传递 params
 const params = useParams();
 router.replace(
-  // @ts-expect-error -- TypeScript will validate that only known `params`
-  // are used in combination with a given `pathname`. Since the two will
-  // always match for the current route, we can skip runtime checks.
+  // @ts-expect-error -- TypeScript 会验证仅允许给定 `pathname` 的已知 `params`，由于两者总是对应当前路由，可以跳过运行时检查
   {pathname, params},
   {locale: 'de'}
 );
 ```
 
-**Learn more:**
+**了解更多：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/06-routing/05-locale-switcher"
-  title="Locale switcher"
+  title="语言切换器"
 />
 
 </Details>
 
 ### `usePathname`
 
-To retrieve the current pathname without a potential locale prefix, you can call `usePathname`.
+获取当前路径名（不含语言前缀）可以调用 `usePathname`。
 
 ```tsx
 'use client';
 
 import {usePathname} from '@/i18n/navigation';
 
-// When the user is on `/en`, this will be `/`
+// 当用户在 `/en` 时，这里返回的是 `/`
 const pathname = usePathname();
 ```
 
-Note that if you're using the [`pathnames`](/docs/routing/configuration#pathnames) setting, the returned pathname will correspond to an internal pathname template (dynamic params will not be replaced by their values).
+如果你启用了 [`pathnames`](/docs/routing/configuration#pathnames) 设置，返回的路径名将对应一个内部路径模板（动态参数不会被替换成具体值）。
 
 ```tsx
-// When the user is on `/de/über-uns`, this will be `/about`
+// 当用户在 `/de/über-uns` 时，返回 `/about`
 const pathname = usePathname();
 
-// When the user is on `/de/neuigkeiten/produktneuheit`,
-// this will be `/news/[articleSlug]`
+// 当用户在 `/de/neuigkeiten/produktneuheit` 时，返回 `/news/[articleSlug]`
 const pathname = usePathname();
 ```
 
 ### `redirect`
 
-If you want to interrupt the render and redirect to another page, you can invoke the `redirect` function. This wraps [`redirect` from Next.js](https://nextjs.org/docs/app/api-reference/functions/redirect) and localizes the pathname as necessary.
+如果你想中断渲染并重定向到其他页面，可以调用 `redirect` 函数。该函数封装了 Next.js 的 [`redirect`](https://nextjs.org/docs/app/api-reference/functions/redirect)，并按需本地化路径名。
 
-Note that a `locale` prop is always required, even if you're just passing the [current locale](/docs/usage/configuration#use-locale).
+注意：即使只是传递当前语言，也必须提供 `locale` 属性。
 
 ```tsx
 import {redirect} from '@/i18n/navigation';
 
-// Redirects to `/en/login`
+// 重定向到 `/en/login`
 redirect({href: '/login', locale: 'en'});
 
-// Search params can be added via `query`
+// 也可通过 `query` 添加搜索参数
 redirect({href: '/users', query: {sortBy: 'name'}, locale: 'en'});
 ```
 
-Depending on if you're using the [`pathnames`](/docs/routing/configuration#pathnames) setting, dynamic params can either be passed as:
+根据是否使用了 [`pathnames`](/docs/routing/configuration#pathnames) 设置，动态参数可以这么传递：
 
 ```tsx
-// 1. A final string (when not using `pathnames`)
+// 1. 最终字符串（不使用 `pathnames`）
 redirect({href: '/users/12', locale: 'en'});
 
-// 2. An object (when using `pathnames`)
+// 2. 对象（使用 `pathnames`）
 redirect({
   href: {
     pathname: '/users/[userId]',
@@ -327,23 +323,22 @@ redirect({
 });
 ```
 
-When using a [`localePrefix`](/docs/routing/configuration#localeprefix) setting other than `always`, you can enforce a locale prefix by setting the `forcePrefix` option to `true`. This is useful when changing the user's locale and you need to update the [locale cookie](/docs/routing/configuration#locale-cookie) first:
+如果你使用的是非 `always` 的 [`localePrefix`](/docs/routing/configuration#localeprefix) 设置，可以通过将 `forcePrefix` 设为 `true` 强制添加语言前缀。这在切换用户语言并需要先更新[语言 cookie](/docs/routing/configuration#locale-cookie)时非常有用：
 
 ```tsx
-// Will initially redirect to `/en/about` to update the locale
-// cookie, regardless of your `localePrefix` setting
+// 无视你的 `localePrefix` 设置，首次会跳转到 `/en/about` 以更新语言 cookie
 redirect({href: '/about', locale: 'en', forcePrefix: true});
 ```
 
 <Callout>
   [`permanentRedirect`](https://nextjs.org/docs/app/api-reference/functions/permanentRedirect)
-  is supported too.
+  也同样支持。
 </Callout>
 
 <Details id="redirect-typescript-narrowing">
-<summary>Why does TypeScript not narrow types correctly after calling `redirect`?</summary>
+<summary>为什么调用 `redirect` 后，TypeScript 不会正确缩小类型？</summary>
 
-TypeScript currently has a [limitation](https://github.com/amannn/next-intl/issues/823#issuecomment-2421891151) with control flow analysis, which results in not being able to narrow types correctly after calling `redirect` as well as detecting unreachable code:
+TypeScript 目前存在一个[限制](https://github.com/amannn/next-intl/issues/823#issuecomment-2421891151)，导致在调用 `redirect` 后，类型缩小以及不可达代码检测无法正确生效：
 
 ```tsx
 import {redirect} from '@/i18n/navigation';
@@ -353,37 +348,36 @@ function UserProfile({userId}: {userId?: string}) {
     redirect({href: '/login', locale: 'en'});
   }
 
-  // `userId` should be narrowed to `string` here,
-  // but TypeScript doesn't analyze this correctly
+  // 这里 userId 本应被收窄为 string，但 TypeScript 不能正确分析
 }
 ```
 
-To work around this limitation, you can return the call to the `redirect` function:
+解决此限制的方式是将调用 `redirect` 函数作为 return：
 
 ```tsx
 if (!userId) {
   return redirect({href: '/login', locale: 'en'});
 }
 
-// ✅ `userId` is narrowed to `string` here
+// ✅ 这里的 userId 已被收窄为 string
 ```
 
 </Details>
 
 ### `getPathname`
 
-If you need to construct a particular pathname based on a locale, you can call the `getPathname` function.
+当你需要基于某个语言构建特定路径名时，可以调用 `getPathname` 函数。
 
 ```tsx
 import {getPathname} from '@/i18n/navigation';
 
-// Will return `/en/about`
+// 返回 `/en/about`
 const pathname = getPathname({
   locale: 'en',
   href: '/about'
 });
 
-// Search params can be added via `query`
+// 也可以通过 `query` 添加搜索参数
 const pathname = getPathname({
   locale: 'en',
   href: {
@@ -393,16 +387,16 @@ const pathname = getPathname({
 });
 ```
 
-Depending on if you're using the [`pathnames`](/docs/routing/configuration#pathnames) setting, dynamic params can either be passed as:
+根据是否使用了 [`pathnames`](/docs/routing/configuration#pathnames) 设置，动态参数可以这样传递：
 
 ```tsx
-// 1. A final string (when not using `pathnames`)
+// 1. 最终字符串（不使用 `pathnames`）
 const pathname = getPathname({
   locale: 'en',
   href: '/users/12'
 });
 
-// 2. An object (when using `pathnames`)
+// 2. 对象（使用 `pathnames`）
 const pathname = getPathname({
   locale: 'en',
   href: {
@@ -412,16 +406,16 @@ const pathname = getPathname({
 });
 ```
 
-**Use cases:**
+**使用场景示例：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/08-seo/04-sitemap"
-  title="Sitemaps"
+  title="网站地图"
 />
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/08-seo/03-alternate-links"
-  title="hreflang & canonicals"
+  title="hreflang 与规范链接"
 />

@@ -2,17 +2,17 @@ import Callout from '@/components/Callout';
 import Details from '@/components/Details';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Proxy / middleware
+# 代理 / 中间件
 
-The `next-intl` middleware can be created via `createMiddleware`.
+`next-intl` 中间件可以通过 `createMiddleware` 创建。
 
-It receives a [`routing`](/docs/routing/configuration#define-routing) configuration and takes care of:
+它接收一个 [`routing`](/docs/routing/configuration#define-routing) 配置，并负责：
 
-1. Locale negotiation
-2. Applying relevant redirects & rewrites
-3. Providing [alternate links](/docs/routing/configuration#alternate-links) for search engines
+1. 语言环境协商
+2. 应用相关的重定向和重写
+3. 为搜索引擎提供[备用链接](/docs/routing/configuration#alternate-links)
 
-**Example:**
+**示例：**
 
 ```tsx filename="proxy.ts"
 import createMiddleware from 'next-intl/middleware';
@@ -21,161 +21,161 @@ import {routing} from './i18n/routing';
 export default createMiddleware(routing);
 
 export const config = {
-  // Match all pathnames except for
-  // - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
-  // - … the ones containing a dot (e.g. `favicon.ico`)
+  // 匹配所有路径名，除了
+  // - 以 `/api`、`/trpc`、`/_next` 或 `/_vercel` 开头的路径
+  // - 包含点（例如 `favicon.ico`）的路径
   matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
 };
 ```
 
-**Note:** `proxy.ts` was called `middleware.ts` up until Next.js 16.
+**注意：** 在 Next.js 16 之前，`proxy.ts` 被称为 `middleware.ts`。
 
-## Locale detection [#locale-detection]
+## 语言环境检测 [#locale-detection]
 
-The locale is negotiated based on your routing configuration, taking into account your settings for [`localePrefix`](/docs/routing/configuration#locale-prefix), [`domains`](/docs/routing/configuration#domains), [`localeDetection`](/docs/routing/configuration#locale-detection), and [`localeCookie`](/docs/routing/configuration#locale-cookie).
+语言环境的协商基于您的路由配置，考虑了您对 [`localePrefix`](/docs/routing/configuration#locale-prefix)、[`domains`](/docs/routing/configuration#domains)、[`localeDetection`](/docs/routing/configuration#locale-detection) 以及 [`localeCookie`](/docs/routing/configuration#locale-cookie) 的设置。
 
-### Prefix-based routing (default) [#location-detection-prefix]
+### 基于前缀的路由（默认） [#location-detection-prefix]
 
-Prefer to watch a video?
+想看视频讲解吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/06-routing/07-prefix-based"
-  title="Prefix-based routing"
+  title="基于前缀的路由"
 />
 
-By default, [prefix-based routing](/docs/routing/configuration#locale-prefix) is used to determine the locale of a request.
+默认情况下，使用[基于前缀的路由](/docs/routing/configuration#locale-prefix) 来确定请求的语言环境。
 
-In this case, the locale is detected based on these priorities:
+在此情况下，语言环境检测的优先级如下：
 
-1. A locale prefix is present in the pathname (e.g. `/en/about`)
-2. A cookie is present that contains a previously detected locale
-3. A locale can be matched based on the [`accept-language` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language)
-4. As a last resort, the `defaultLocale` is used
+1. 路径名中包含语言环境前缀（例如 `/en/about`）
+2. 存在包含先前检测到语言环境的 cookie
+3. 根据 [`accept-language` 请求头](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language) 可以匹配的语言环境
+4. 最后使用 `defaultLocale`
 
-To change the locale, users can visit a prefixed route. This will take precedence over a previously matched locale that is saved in a cookie or the `accept-language` header and will update a previous cookie value.
+用户可以通过访问带前缀的路由来更改语言环境。这将优先于保存在 cookie 中的先前匹配语言环境或 `accept-language` 请求头，并且会更新之前的 cookie 值。
 
-**Example workflow:**
+**示例流程：**
 
-1. A user requests `/` and based on the `accept-language` header, the `en` locale is matched.
-2. The user is redirected to `/en`.
-3. The app renders `<Link locale="de" href="/">Switch to German</Link>` to allow the user to change the locale to `de`.
-4. When the user clicks on the link, a request to `/de` is initiated.
-5. The middleware will add a cookie to remember the preference for the `de` locale.
-6. The user later requests `/` again and the middleware will redirect to `/de` based on the cookie.
+1. 用户请求 `/`，基于 `accept-language` 请求头匹配到 `en` 语言环境。
+2. 用户被重定向到 `/en`。
+3. 应用渲染 `<Link locale="de" href="/">切换到德语</Link>`，允许用户切换语言到 `de`。
+4. 用户点击该链接，发起对 `/de` 的请求。
+5. 中间件会添加一个 cookie 来记住用户偏好的 `de` 语言环境。
+6. 用户后来再次请求 `/`，中间件会基于 cookie 重定向到 `/de`。
 
 <Details id="accept-language-matching">
-<summary>Which algorithm is used to match the accept-language header against the available locales?</summary>
+<summary>哪种算法用于将 accept-language 请求头与可用语言环境匹配？</summary>
 
-To determine the best-matching locale based on the available options from your app, the middleware uses the "best fit" algorithm of [`@formatjs/intl-localematcher`](https://www.npmjs.com/package/@formatjs/intl-localematcher). This algorithm is expected to provide better results than the more conservative "lookup" algorithm that is specified in [RFC 4647](https://www.rfc-editor.org/rfc/rfc4647.html#section-3.4).
+为了基于应用中的可用选项确定最佳匹配语言环境，中间件使用了 [`@formatjs/intl-localematcher`](https://www.npmjs.com/package/@formatjs/intl-localematcher) 的“最佳适配”（best fit）算法。预计此算法比 RFC 4647 中指定的更为保守的“查找”（lookup）算法能提供更好的结果。
 
-To illustrate this with an example, let's consider your app supports these locales:
+举个例子，假设您的应用支持以下语言环境：
 
 1. `en-US`
 2. `de-DE`
 
-The "lookup" algorithm works by progressively removing subtags from the user's `accept-language` header until a match is found. This means that if the user's browser sends the `accept-language` header `en-GB`, the "lookup" algorithm will not find a match, resulting in the default locale being used.
+“查找”算法通过逐步从用户的 `accept-language` 请求头中移除子标签，直到找到匹配项为止。这意味着，如果用户浏览器发送了 `en-GB` 作为 `accept-language`，该算法将找不到匹配，导致使用默认语言环境。
 
-In contrast, the "best fit" algorithm compares a _distance_ between the user's `accept-language` header and the available locales, while taking into consideration regional information. Due to this, the "best fit" algorithm is able to match `en-US` as the best-matching locale in this case.
+相比之下，“最佳适配”算法会计算用户 `accept-language` 请求头和可用语言环境之间的“距离”，同时考虑区域信息。因此，该算法能将 `en-US` 识别为最佳匹配。
 
 </Details>
 
-### Domain-based routing [#location-detection-domain]
+### 基于域名的路由 [#location-detection-domain]
 
-Prefer to watch a video?
+想看视频讲解吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/06-routing/06-domain-based"
-  title="Domain-based routing"
+  title="基于域名的路由"
 />
 
-If you're using the [`domains`](/docs/routing/configuration#domains) setting, the middleware will match the request against the available domains to determine the best-matching locale. To retrieve the domain, the host is read from the `x-forwarded-host` header, with a fallback to `host` (hosting platforms typically provide these headers out of the box).
+如果您使用了 [`domains`](/docs/routing/configuration#domains) 设置，中间件将会将请求与可用域名匹配，以确定最佳匹配的语言环境。域名从 `x-forwarded-host` 请求头读取，若无则退回到 `host`（托管平台通常默认提供这些请求头）。
 
-The locale is detected based on these priorities:
+语言环境检测的优先级如下：
 
-1. A locale prefix is present in the pathname (e.g. `ca.example.com/fr`)
-2. A locale is stored in a cookie and is supported on the domain
-3. A locale that the domain supports is matched based on the [`accept-language` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language)
-4. As a fallback, the `defaultLocale` of the domain is used
+1. 路径名包含语言环境前缀（例如 `ca.example.com/fr`）
+2. cookie 中存储了语言环境，且该语言环境在当前域名上受支持
+3. 基于 [`accept-language` 请求头](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language) 匹配该域名支持的语言环境
+4. 作为保底，使用该域名的 `defaultLocale`
 
-Since the middleware is aware of all your domains, if a domain receives a request for a locale that is not supported (e.g. `en.example.com/fr`), it will redirect to an alternative domain that does support the locale.
+因为中间件知道所有域名，如果某个域名收到一个不被支持的语言环境请求（例如 `en.example.com/fr`），它会重定向到支持该语言环境的其他域名。
 
-**Example workflow:**
+**示例流程：**
 
-1. The user requests `us.example.com` and based on the `defaultLocale` of this domain, the `en` locale is matched.
-2. The app renders `<Link locale="fr" href="/">Switch to French</Link>` to allow the user to change the locale to `fr`.
-3. When the link is clicked, a request to `us.example.com/fr` is initiated.
-4. The middleware recognizes that the user wants to switch to another domain and responds with a redirect to `ca.example.com/fr`.
+1. 用户请求 `us.example.com`，基于该域的 `defaultLocale` 匹配到 `en` 语言环境。
+2. 应用渲染 `<Link locale="fr" href="/">切换到法语</Link>`，允许用户切换语言到 `fr`。
+3. 点击链接后，请求 `us.example.com/fr` 被发起。
+4. 中间件识别用户想切换至另一个域名，响应重定向到 `ca.example.com/fr`。
 
-## Matcher config
+## 匹配规则配置
 
-The middleware is intended to only run on pages, not on arbitrary files that you serve independently of the user locale (e.g. `/favicon.ico`).
+中间件旨在仅在页面上运行，而非独立于用户语言环境而提供的任意文件（例如 `/favicon.ico`）。
 
-A popular strategy is to match all routes that don't start with certain segments (e.g. `/_next`) and also none that include a dot (`.`) since these typically indicate static files. However, if you have some routes where a dot is expected (e.g. `/users/jane.doe`), you should explicitly provide a matcher for these.
+一种常用策略是匹配所有不以特定前缀（如 `/_next`）开头且不包含点（`.`）的路由，因为通常点表示静态文件。但如果您有某些路径中允许有点（例如 `/users/jane.doe`），则应显式为这些路径配置匹配规则。
 
 ```tsx filename="proxy.ts"
 export const config = {
-  // Matcher entries are linked with a logical "or", therefore
-  // if one of them matches, the middleware will be invoked.
+  // 匹配条目通过逻辑“或”连接，因此
+  // 只要匹配其中一条，中间件就会被调用。
   matcher: [
-    // Match all pathnames except for
-    // - … if they start with `/api`, `/_next` or `/_vercel`
-    // - … the ones containing a dot (e.g. `favicon.ico`)
+    // 匹配所有路径名，除了
+    // - 以 `/api`、`/_next` 或 `/_vercel` 开头的路径
+    // - 包含点（例如 `favicon.ico`）的路径
     '/((?!api|_next|_vercel|.*\\..*).*)',
 
-    // However, match all pathnames within `/users`, optionally with a locale prefix
+    // 但是，匹配所有 `/users` 下的路径，且可选带语言前缀
     '/([\\w-]+)?/users/(.+)'
   ]
 };
 ```
 
-{/* Keep this in sync with `packages/next-intl/test/middleware/middleware.test.tsx` */}
+{/* 请与 `packages/next-intl/test/middleware/middleware.test.tsx` 保持同步 */}
 
-Note that some third-party providers like [Vercel Analytics](https://vercel.com/analytics) typically use internal endpoints that are then rewritten to an external URL (e.g. `/_vercel/insights/view`). Make sure to exclude such requests from your middleware matcher so they aren't rewritten by accident.
+注意，一些第三方提供商比如 [Vercel Analytics](https://vercel.com/analytics) 通常使用内部端点，这些端点会重写为外部 URL（例如 `/_vercel/insights/view`）。请确保将这些请求排除在您的中间件匹配规则外，避免它们被错误重写。
 
-## Composing other middlewares
+## 组合其他中间件
 
-By calling `createMiddleware`, you'll receive a function of the following type:
+调用 `createMiddleware` 会返回下面类型的函数：
 
 ```tsx
 function middleware(request: NextRequest): NextResponse;
 ```
 
-If you need to incorporate additional behavior, you can either modify the request before the `next-intl` middleware receives it, modify the response or even create the middleware based on dynamic configuration.
+如果您需要添加额外逻辑，可以在 `next-intl` 中间件接收请求之前修改请求，或修改响应，甚至基于动态配置创建中间件。
 
 ```tsx filename="proxy.ts"
 import createMiddleware from 'next-intl/middleware';
 import {NextRequest} from 'next/server';
 
 export default async function proxy(request: NextRequest) {
-  // Step 1: Use the incoming request (example)
+  // 第一步：使用传入请求（示例）
   const defaultLocale = request.headers.get('x-your-custom-locale') || 'en';
 
-  // Step 2: Create and call the next-intl middleware (example)
+  // 第二步：创建并调用 next-intl 中间件（示例）
   const handleI18nRouting = createMiddleware({
     locales: ['en', 'de'],
     defaultLocale
   });
   const response = handleI18nRouting(request);
 
-  // Step 3: Alter the response (example)
+  // 第三步：修改响应（示例）
   response.headers.set('x-your-custom-locale', defaultLocale);
 
   return response;
 }
 
 export const config = {
-  // Match only internationalized pathnames
+  // 仅匹配国际化路径名
   matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
 };
 ```
 
-### Example: Additional rewrites
+### 示例：附加重写规则
 
-If you need to handle rewrites apart from the ones provided by `next-intl`, you can call [`NextResponse.rewrite()`](https://nextjs.org/docs/app/api-reference/functions/next-response#rewrite) conditionally after the `next-intl` middleware has run.
+如果您需要处理除了 `next-intl` 提供的重写之外的其它重写，可以在 `next-intl` 中间件执行后有条件地调用 [`NextResponse.rewrite()`](https://nextjs.org/docs/app/api-reference/functions/next-response#rewrite)。
 
-This example rewrites requests for `/[locale]/profile` to `/[locale]/profile/new` if a special cookie is set.
+此示例当设置了特定 cookie 时，会将请求 `/[locale]/profile` 重写为 `/[locale]/profile/new`。
 
 ```tsx filename="proxy.ts"
 import createMiddleware from 'next-intl/middleware';
@@ -187,9 +187,9 @@ const handleI18nRouting = createMiddleware(routing);
 export default async function proxy(request: NextRequest) {
   let response = handleI18nRouting(request);
 
-  // Additional rewrite when NEW_PROFILE cookie is set
+  // 当设置了 NEW_PROFILE cookie 时进行额外重写
   if (response.ok) {
-    // (not for errors or redirects)
+    // （不针对错误或重定向）
     const [, locale, ...rest] = new URL(
       response.headers.get('x-middleware-rewrite') || request.url
     ).pathname.split('/');
@@ -210,50 +210,50 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Match only internationalized pathnames
+  // 仅匹配国际化路径名
   matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
 };
 ```
 
-You may wish to customize this based on your routing configuration and use case.
+您可以基于路由配置和实际需求进行自定义。
 
-### Starter templates (auth, saas, tenants)
+### 入门模板（认证、SaaS、多租户）
 
-🌐 [learn.next-intl.dev](https://learn.next-intl.dev) provides additional starter templates with middleware composition.
+🌐 [learn.next-intl.dev](https://learn.next-intl.dev) 提供额外的中间件组合入门模板。
 
-**Including:**
+**包含：**
 
-- **`app-router-auth` with Better Auth**: Auth-protected app with locale from user settings.
-- **`app-router-saas` with Better Auth**: Locale prefixes on public routes with a login to a protected app.
-- **`app-router-tenants`**: An advanced composition pattern that routes between multiple tenants and a landing page while supporting multiple locales.
+- **`app-router-auth` 搭配 Better Auth**：带有用户设置中语言环境的受保护认证应用。
+- **`app-router-saas` 搭配 Better Auth**：公共路由上带语言环境前缀，提供登录后访问受保护应用。
+- **`app-router-tenants`**：高级组合模式，支持多租户和主页路由，同时支持多语言环境。
 
-[Source code](https://learn.next-intl.dev/#project-code)
+[源码链接](https://learn.next-intl.dev/#project-code)
 
-## Usage without proxy / middleware (static export)
+## 无代理 / 无中间件使用（静态导出）
 
-If you're using the [static export](https://nextjs.org/docs/app/building-your-application/deploying/static-exports) feature from Next.js (`output: 'export'`), a proxy / middleware will not run. You can use [prefix-based routing](/docs/routing/configuration#locale-prefix) nontheless to internationalize your app, but a few tradeoffs apply.
+若您使用 Next.js 的[静态导出](https://nextjs.org/docs/app/building-your-application/deploying/static-exports) 功能（`output: 'export'`），则代理 / 中间件不会运行。尽管如此，您仍可使用[基于前缀的路由](/docs/routing/configuration#locale-prefix) 来实现国际化，但存在若干限制。
 
-**Static export limitations:**
+**静态导出限制：**
 
-1. Using a locale prefix is required (same as [`localePrefix: 'always'`](/docs/routing/configuration#locale-prefix-always))
-2. The locale can't be negotiated on the server (same as [`localeDetection: false`](/docs/routing/configuration#locale-detection))
-3. You can't use [`pathnames`](/docs/routing/configuration#pathnames), as these require server-side rewrites
-4. [Static rendering](/docs/routing/setup#static-rendering) is required
+1. 必须使用语言环境前缀（与 [`localePrefix: 'always'`](/docs/routing/configuration#locale-prefix-always) 相同）
+2. 服务器端无法协商语言环境（与 [`localeDetection: false`](/docs/routing/configuration#locale-detection) 功能对应）
+3. 无法使用 [`pathnames`](/docs/routing/configuration#pathnames)，因为这些需要服务器端重写
+4. 需要采用[静态渲染](/docs/routing/setup#static-rendering)
 
-Additionally, other [limitations as documented by Next.js](https://nextjs.org/docs/app/building-your-application/deploying/static-exports#unsupported-features) will apply too.
+此外，还会受到 Next.js 记录的其它[限制](https://nextjs.org/docs/app/building-your-application/deploying/static-exports#unsupported-features)影响。
 
-If you choose this approach, you might want to enable a redirect at the root of your app:
+若选择此方案，您可能希望在应用根目录添加一个重定向：
 
 ```tsx filename="app/page.tsx"
 import {redirect} from 'next/navigation';
 
-// Redirect the user to the default locale when `/` is requested
+// 当请求 `/` 时，重定向用户到默认语言环境
 export default function RootPage() {
   redirect('/en');
 }
 ```
 
-If you add such a root page at `app/page.tsx`, you need to add a root layout at `app/layout.tsx` as well, even if it's just passing `children` through:
+若您添加了如上根页面（`app/page.tsx`），还需添加根布局（`app/layout.tsx`），即使只是简单传递 `children`：
 
 ```tsx filename="app/layout.tsx"
 export default function RootLayout({children}) {
@@ -261,25 +261,25 @@ export default function RootLayout({children}) {
 }
 ```
 
-## Troubleshooting
+## 故障排查
 
-### "The proxy / middleware doesn't run for a particular page." [#middleware-not-running]
+### “某个页面的代理 / 中间件未运行。” [#middleware-not-running]
 
-To resolve this, make sure that:
+要解决此问题，请确认：
 
-1. The [proxy / middleware](/docs/routing/setup#proxy) is set up in the correct file (e.g. `src/proxy.ts`).
-2. Your [`matcher`](#matcher-config) correctly matches all routes of your application, including dynamic segments with potentially unexpected characters like dots (e.g. `/users/jane.doe`).
-3. In case you're [composing other middlewares](#composing-other-middlewares), ensure that the middleware is called correctly.
-4. In case you require static rendering, make sure to follow the [static rendering guide](/docs/routing/setup#static-rendering) instead of relying on hacks like [`force-static`](https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic).
+1. 已正确设置[代理 / 中间件](/docs/routing/setup#proxy)，例如在 `src/proxy.ts` 文件中。
+2. 您的 [`matcher`](#matcher-config) 能正确匹配应用中的所有路由，包括带有点（`.`）的动态路由（例如 `/users/jane.doe`）。
+3. 如果您在[组合其他中间件](#composing-other-middlewares)，确认中间件函数已正确调用。
+4. 如果需要静态渲染，请确保遵循[静态渲染指南](/docs/routing/setup#static-rendering)，而非依赖诸如 [`force-static`](https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic) 等 hack 手段。
 
-### "My page content isn't localized despite the pathname containing a locale prefix." [#content-not-localized]
+### “尽管路径中包含语言环境前缀，页面内容仍未本地化。” [#content-not-localized]
 
-This is very likely the result of your [proxy / middleware not running](#middleware-not-running) on the request. As a result, a potential fallback from [`i18n/request.ts`](/docs/usage/configuration#i18n-request) might be applied.
+这很可能是因为您的[代理 / 中间件没有在该请求中运行](#middleware-not-running)，导致可能启动了 [`i18n/request.ts`](/docs/usage/configuration#i18n-request) 中的回退逻辑。
 
-### "Unable to find `next-intl` locale because the proxy / middleware didn't run on this request and no `locale` was returned in `getRequestConfig`." [#unable-to-find-locale]
+### “无法找到 `next-intl` 语言环境，因为代理 / 中间件未在此请求运行，且 `getRequestConfig` 没有返回 `locale`。” [#unable-to-find-locale]
 
-If the middleware _is not_ expected to run on this request (e.g. because you're using a setup without locale-based routing, you should explicitly return a `locale` from [`getRequestConfig`](/docs/usage/configuration#i18n-request) to recover from this error.
+如果此请求不应运行中间件（例如未启用基于语言环境的路由），则应从 [`getRequestConfig`](/docs/usage/configuration#i18n-request) 显式返回 `locale` 来避免此错误。
 
-If the middleware _is_ expected to run, verify that your [middleware is set up correctly](#middleware-not-running).
+如果此请求应运行中间件，请确认您的[中间件配置正确](#middleware-not-running)。
 
-Note that `next-intl` will invoke the `notFound()` function to abort the render if no locale is available after `getRequestConfig` has run. You should consider adding a [`not-found` page](/docs/environments/error-files#not-foundjs) due to this.
+请注意，若在运行完 `getRequestConfig` 后仍无可用语言环境，`next-intl` 会调用 `notFound()` 函数以中止页面渲染。建议因此添加[`not-found` 页面](/docs/environments/error-files#not-foundjs)。

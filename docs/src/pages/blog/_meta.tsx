@@ -1,6 +1,6 @@
 export default {
   index: {
-    title: 'Overview'
+    title: '概述'
   },
   'use-extracted': {
     title: 'useExtracted: The Tailwind of i18n?',
@@ -15,7 +15,7 @@ export default {
     display: 'hidden'
   },
   'date-formatting-nextjs': {
-    title: 'Reliable date formatting in Next.js',
+    title: '在 Next.js 中可靠地格式化日期',
     display: 'hidden'
   },
   'next-intl-3-0': {
@@ -23,7 +23,7 @@ export default {
     display: 'hidden'
   },
   'translations-outside-of-react-components': {
-    title: 'How (not) to use translations outside of React components',
+    title: '如何（不）在 React 组件外部使用翻译',
     display: 'hidden'
   }
 };

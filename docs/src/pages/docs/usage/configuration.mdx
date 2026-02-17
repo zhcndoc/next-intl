@@ -3,17 +3,17 @@ import {Tabs} from 'nextra/components';
 import Details from '@/components/Details';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Request configuration
+# 请求配置
 
-Configuration properties that you use across your Next.js app can be set per request.
+您可以针对每个请求设置在整个 Next.js 应用中使用的配置属性。
 
-## Server & Client Components [#server-client-components]
+## 服务器与客户端组件 [#server-client-components]
 
-Depending on if you handle internationalization in [Server- or Client Components](/docs/environments/server-client-components), the configuration from `i18n/request.ts` or `NextIntlClientProvider` will be applied respectively.
+根据您是在[服务器组件还是客户端组件](/docs/environments/server-client-components)中处理国际化，将分别应用 `i18n/request.ts` 或 `NextIntlClientProvider` 的配置。
 
-### `i18n/request.ts` & `getRequestConfig` [#i18n-request]
+### `i18n/request.ts` 和 `getRequestConfig` [#i18n-request]
 
-`i18n/request.ts` can be used to provide configuration for **server-only** code, i.e. Server Components, Server Actions & friends. The configuration is provided via the `getRequestConfig` function and provides a `requestLocale` parameter in case you're using [locale-based routing](/docs/routing).
+`i18n/request.ts` 可用于为**仅服务器端**代码提供配置，即服务器组件、服务器操作及类似功能。配置通过 `getRequestConfig` 函数提供，并且如果您使用[基于 locale 的路由](/docs/routing)，将提供一个 `requestLocale` 参数。
 
 ```tsx filename="i18n/request.ts"
 import {getRequestConfig} from 'next-intl/server';
@@ -30,13 +30,13 @@ export default getRequestConfig(async ({requestLocale}) => {
 });
 ```
 
-The configuration object is created once for each request by internally using React's [`cache`](https://react.dev/reference/react/cache). The first component to use internationalization will call the function defined with `getRequestConfig`.
+配置对象会针对每个请求创建一次，内部使用 React 的 [`cache`](https://react.dev/reference/react/cache)。第一个使用国际化的组件会调用 `getRequestConfig` 定义的函数。
 
-Since this function is executed during the Server Components render pass, you can call functions like [`cookies()`](https://nextjs.org/docs/app/api-reference/functions/cookies) and [`headers()`](https://nextjs.org/docs/app/api-reference/functions/headers) to return configuration that is request-specific.
+由于该函数在服务器组件的渲染过程中执行，您可以调用像 [`cookies()`](https://nextjs.org/docs/app/api-reference/functions/cookies) 和 [`headers()`](https://nextjs.org/docs/app/api-reference/functions/headers) 这样的函数来返回特定请求的配置。
 
 ### `NextIntlClientProvider`
 
-`NextIntlClientProvider` can be used to provide configuration for **Client Components**.
+`NextIntlClientProvider` 可用于为**客户端组件**提供配置。
 
 ```tsx filename="layout.tsx" /NextIntlClientProvider/
 import {NextIntlClientProvider} from 'next-intl';
@@ -55,7 +55,7 @@ export default async function RootLayout(/* ... */) {
 }
 ```
 
-These props are inherited if you're rendering `NextIntlClientProvider` from a Server Component:
+如果您从服务器组件渲染 `NextIntlClientProvider`，这些属性会被继承：
 
 1. `locale`
 2. `messages`
@@ -63,11 +63,11 @@ These props are inherited if you're rendering `NextIntlClientProvider` from a Se
 4. `timeZone`
 5. `formats`
 
-If you don't want to inherit some of these props, e.g. because you're selective about how you use internationalization in [Server & Client Components](/docs/environments/server-client-components), you can opt-out:
+如果您不想继承其中某些属性，例如因为您在[服务器和客户端组件](/docs/environments/server-client-components)中选择性使用国际化，您可以选择放弃继承：
 
 ```tsx filename="layout.tsx"
 <NextIntlClientProvider
-  // Don't pass any messages to the client
+  // 不向客户端传递 messages
   messages={null}
   // ...
 >
@@ -75,19 +75,19 @@ If you don't want to inherit some of these props, e.g. because you're selective 
 </NextIntlClientProvider>
 ```
 
-Additionally, nested instances of `NextIntlClientProvider` will inherit configuration from their respective ancestors. Note however that individual props are treated as atomic, therefore e.g. `messages` need to be merged manually—if necessary.
+此外，嵌套的 `NextIntlClientProvider` 实例会继承各自上级的配置。但请注意，单个属性是作为原子处理的，因此例如 `messages` 需要手动合并（如果需要）。
 
-In contrast, these props are not inherited:
+以下这些属性不会被继承：
 
 1. `onError`
 2. `getMessageFallback`
 
 <Details id="nextintlclientprovider-non-serializable-props">
-<summary>How can I provide non-serializable props like `onError` to `NextIntlClientProvider`?</summary>
+<summary>如何向 `NextIntlClientProvider` 提供不可序列化的属性（如 `onError`）？</summary>
 
-React limits the types of props that can be passed to Client Components to the ones that are [serializable](https://react.dev/reference/rsc/use-client#serializable-types). Since `onError` and `getMessageFallback` can receive functions, these configuration options can't be automatically inherited by the client side.
+React 限制传递给客户端组件的属性类型为[可序列化类型](https://react.dev/reference/rsc/use-client#serializable-types)。由于 `onError` 和 `getMessageFallback` 可以接收函数，这些配置选项无法由客户端自动继承。
 
-In order to define these values on the client side, you can add a provider that defines these props:
+为了在客户端定义这些属性，您可以添加一个定义这些属性的 provider：
 
 ```tsx filename="IntlErrorHandlingProvider.tsx"
 'use client';
@@ -106,7 +106,7 @@ export default function IntlErrorHandlingProvider({children}) {
 }
 ```
 
-Once you have defined your client-side provider component, you can use it in a Server Component:
+定义好客户端的 provider 组件后，您可以在服务器组件中使用它：
 
 ```tsx filename="layout.tsx"
 import {NextIntlClientProvider} from 'next-intl';
@@ -128,26 +128,26 @@ export default async function RootLayout({children}) {
 }
 ```
 
-By doing this, your provider component will already be part of the client-side bundle and can therefore define and pass functions as props.
+这样，您的 provider 组件将成为客户端包的一部分，因此可以定义并传递函数作为属性。
 
-Note that the inner `NextIntlClientProvider` inherits the configuration from the outer one, only the `onError` and `getMessageFallback` functions are added.
+请注意，内层的 `NextIntlClientProvider` 继承了外层的配置，只有 `onError` 和 `getMessageFallback` 函数被添加。
 
 </Details>
 
 ## Locale
 
-The `locale` represents an identifier that contains the language and formatting preferences of users, optionally including regional information (e.g. `en-US`). Locales are specified as [IETF BCP 47 language tags](https://en.wikipedia.org/wiki/IETF_language_tag).
+`locale` 是一个标识符，包含用户的语言和格式偏好，可选地包括区域信息（例如 `en-US`）。Locale 使用 [IETF BCP 47 语言标签](https://en.wikipedia.org/wiki/IETF_language_tag) 指定。
 
 <Tabs items={['i18n/request.ts', 'Provider']}>
 <Tabs.Tab>
 
-Depending on if you're using [locale-based routing](/docs/routing), you can read the locale from the `requestLocale` parameter or provide a value on your own:
+根据您是否使用[基于 locale 的路由](/docs/routing)，您可以从 `requestLocale` 参数读取 locale，或者自行提供一个值：
 
-**With locale-based routing:**
+**使用基于 locale 的路由：**
 
 ```tsx filename="i18n/request.ts"
 export default getRequestConfig(async ({requestLocale}) => {
-  // Typically corresponds to the `[locale]` segment
+  // 通常对应于 `[locale]` 路由段
   const requested = await requestLocale;
   const locale = hasLocale(routing.locales, requested)
     ? requested
@@ -160,12 +160,12 @@ export default getRequestConfig(async ({requestLocale}) => {
 });
 ```
 
-**Without locale-based routing:**
+**不使用基于 locale 的路由：**
 
 ```tsx filename="i18n/request.ts"
 export default getRequestConfig(async () => {
-  // Provide a static locale, fetch a user setting,
-  // read from `cookies()`, `headers()`, etc.
+  // 提供静态 locale，读取用户设置，
+  // 读取 `cookies()`、`headers()` 等
   const locale = 'en';
 
   return {
@@ -176,13 +176,13 @@ export default getRequestConfig(async () => {
 ```
 
 <Details id="server-request-locale">
-<summary>Which values can the `requestLocale` parameter hold?</summary>
+<summary>`requestLocale` 参数可以包含哪些值？</summary>
 
-While the `requestLocale` parameter typically corresponds to the `[locale]` segment that was matched by the middleware, there are three special cases to consider:
+虽然 `requestLocale` 参数通常对应于由中间件匹配到的 `[locale]` 路由段，但有三个特殊情况需要考虑：
 
-1. **Overrides**: When an explicit `locale` is passed to [awaitable functions](/docs/environments/actions-metadata-route-handlers) like `getTranslations({locale: 'en'})`, then this value will be used instead of the segment.
-1. **`undefined`**: The value can be `undefined` when a page outside of the `[locale]` segment renders (e.g. a language selection page at `app/page.tsx`).
-1. **Invalid values**: Since the `[locale]` segment effectively acts like a catch-all for unknown routes (e.g. `/unknown.txt`), invalid values should be replaced with a valid locale. In addition to this, you might want to call `notFound()` in the [root layout](/docs/routing/setup#layout) to abort the render in this case.
+1. **覆盖**：若显式向可等待函数（如 `getTranslations({locale: 'en'})`）传递了 `locale`，则使用此值替代路由段。
+2. **`undefined`**：当页面渲染不在 `[locale]` 路由段下（例如语言选择页面 `app/page.tsx`）时，此值可能为 `undefined`。
+3. **非法值**：由于 `[locale]` 路由段在某种程度上是对未知路由的 catch-all（例如 `/unknown.txt`），非法值应替换为有效 locale。此外，您可能希望在[根布局](/docs/routing/setup#layout)调用 `notFound()` 以中止渲染。
 
 </Details>
 
@@ -197,55 +197,55 @@ While the `requestLocale` parameter typically corresponds to the `[locale]` segm
 </Tabs>
 
 <Details id="locale-change">
-<summary>How can I change the locale?</summary>
+<summary>如何更改 locale？</summary>
 
-Depending on if you're using [locale-based routing](/docs/routing), the locale can be changed as follows:
+根据您是否使用[基于 locale 的路由](/docs/routing)，您可以按以下方式更改 locale：
 
-1. **With locale-based routing**: The locale is managed by the router and can be changed by using navigation APIs from `next-intl` like [`Link`](/docs/routing/navigation#link) or [`useRouter`](/docs/routing/navigation#userouter).
-2. **Without locale-based routing**: You can change the locale by updating the value where the locale is read from (e.g. a cookie, a user setting, etc.).
+1. **使用基于 locale 的路由**：locale 由路由管理，可通过使用 `next-intl` 的导航 API（例如 [`Link`](/docs/routing/navigation#link) 或 [`useRouter`](/docs/routing/navigation#userouter)）进行切换。
+2. **不使用基于 locale 的路由**：可以通过更新读取 locale 的地方的值（例如 cookie、用户设置等）来更改 locale。
 
-Learn more:
+了解更多：
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/04-adding-locales/02-locale-switcher"
-  title="Locale switcher"
+  title="语言切换器"
 />
 
 </Details>
 
-### `useLocale` & `getLocale` [#use-locale]
+### `useLocale` 和 `getLocale` [#use-locale]
 
-The current locale of your app is automatically incorporated into hooks like `useTranslations` & `useFormatter` and will affect the rendered output.
+应用的当前 locale 会自动融入类似 `useTranslations` 和 `useFormatter` 的 hook 中，影响渲染结果。
 
-In case you need to use this value in other places of your app, e.g. to implement a locale switcher or to pass it to API calls, you can read it via `useLocale` or `getLocale`:
+如果您需要在其它地方使用此值，例如实现语言切换器或传递给 API 调用，可以通过 `useLocale` 或 `getLocale` 读取：
 
 ```tsx
-// Regular components
+// 普通组件
 import {useLocale} from 'next-intl';
 const locale = useLocale();
 
-// Async Server Components
+// 异步服务器组件
 import {getLocale} from 'next-intl/server';
 const locale = await getLocale();
 ```
 
 <Details id="locale-return-value">
-<summary>Which value is returned from `useLocale`?</summary>
+<summary>`useLocale` 返回的值是什么？</summary>
 
-Depending on how a component renders, the returned locale corresponds to:
+根据组件的渲染方式，返回的 locale 对应：
 
-1. **Server Components**: The locale represents the value returned in [`i18n/request.ts`](#i18n-request).
-2. **Client Components**: The locale is received from [`NextIntlClientProvider`](#nextintlclientprovider).
+1. **服务器组件**：locale 为 [`i18n/request.ts`](#i18n-request) 中返回的值。
+2. **客户端组件**：locale 来自 [`NextIntlClientProvider`](#nextintlclientprovider)。
 
-Note that `NextIntlClientProvider` automatically inherits the locale if it is rendered by a Server Component, therefore you rarely need to pass a locale to `NextIntlClientProvider` yourself.
+请注意，如果 `NextIntlClientProvider` 是由服务器组件渲染，它会自动继承 locale，因此您很少需要自己向 `NextIntlClientProvider` 传递 locale。
 
 </Details>
 
 <Details id="locale-pages-router">
-<summary>I'm using the Pages Router, how can I access the locale?</summary>
+<summary>我在使用 Pages Router，如何访问 locale？</summary>
 
-If you use [internationalized routing with the Pages Router](https://nextjs.org/docs/pages/building-your-application/routing/internationalization), you can receive the locale from the router in order to pass it to `NextIntlClientProvider`:
+如果您使用[带国际化的 Pages 路由](https://nextjs.org/docs/pages/building-your-application/routing/internationalization)，可以从路由器读取 locale 并传递给 `NextIntlClientProvider`：
 
 ```tsx filename="_app.tsx"
 import {useRouter} from 'next/router';
@@ -263,9 +263,9 @@ return (
 
 </Details>
 
-### `Locale` type [#locale-type]
+### `Locale` 类型 [#locale-type]
 
-When passing a `locale` to another function, you can use the `Locale` type for the receiving parameter:
+传递 `locale` 给其它函数时，可以使用 `Locale` 类型作为参数：
 
 ```tsx
 import {Locale} from 'next-intl';
@@ -275,23 +275,23 @@ async function getPosts(locale: Locale) {
 }
 ```
 
-This can be helpful when integrating with backend services or a CMS:
+这在集成后端服务或 CMS 时可能有用：
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/07-content/01-overview"
-  title="Backend content"
+  title="后端内容"
 />
 
 <Callout>
-  By default, `Locale` is typed as `string`. However, you can optionally provide
-  a strict union based on your supported locales for this type by [augmenting
-  the `Locale` type](/docs/workflows/typescript#locale).
+  默认情况下，`Locale` 类型为 `string`。但您可以通过[扩展
+  `Locale` 类型](/docs/workflows/typescript#locale)，
+  使用基于支持的 locales 的严格联合类型。
 </Callout>
 
-## Messages
+## 消息
 
-The most crucial aspect of internationalization is providing labels based on the user's language. The recommended workflow is to store your messages in your repository along with the code.
+国际化最关键的方面是基于用户语言提供标签。推荐的工作流是将消息与代码一同存储在版本库中。
 
 ```
 ├── messages
@@ -301,17 +301,17 @@ The most crucial aspect of internationalization is providing labels based on the
 ...
 ```
 
-Colocating your messages with app code is beneficial because it allows developers to make changes quickly and additionally, you can use the shape of your local messages for [type checking](/docs/workflows/typescript#messages).
+将消息与应用代码放在一起的优点是方便开发者快速修改，同时您可以利用本地消息的形状进行[类型检查](/docs/workflows/typescript#messages)。
 
-If your team ships frequently, you can consider automating the translation process:
+如果团队频繁发布，也可以考虑自动化翻译流程：
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/10-continuous-localization/01-local-workflow"
-  title="AI translations with Crowdin"
+  title="使用 Crowdin 进行 AI 翻译"
 />
 
-That being said, `next-intl` is agnostic to how you store messages and allows you to freely define an async function that fetches them while your app renders:
+不过，`next-intl` 并不限制如何存储消息，允许您自由定义异步函数来在渲染时获取消息：
 
 <Tabs items={['i18n/request.ts', 'Provider']}>
 <Tabs.Tab>
@@ -327,26 +327,26 @@ export default getRequestConfig(async () => {
 });
 ```
 
-After messages are configured, they can be used via [`useTranslations`](/docs/usage/translations#rendering-messages-with-usetranslations).
+消息配置后，可以通过 [`useTranslations`](/docs/usage/translations#rendering-messages-with-usetranslations) 使用。
 
-Since `getRequestConfig` can execute arbitrary code, you can also:
+`getRequestConfig` 可以执行任意代码，您还可以：
 
-- Share messages across multiple locales
-- Merge messages from another locale as fallbacks
-- Load messages from a remote source
+- 多 locale 共享消息
+- 将其他 locale 的消息合并为备用
+- 从远程源加载消息
 
-**Learn more:**
+**了解更多：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/04-adding-locales/01-messages"
-  title="Providing messages"
+  title="提供消息"
 />
 
 <Details id="messages-split-files">
-<summary>How can I split my messages into multiple files?</summary>
+<summary>如何将消息拆分为多个文件？</summary>
 
-Since messages can be freely defined and loaded, you can split them into multiple files and merge them later at runtime if you prefer:
+由于消息可以自由定义和加载，您可以将其拆分为多个文件，并在运行时合并：
 
 ```tsx
 const messages = {
@@ -355,20 +355,20 @@ const messages = {
 };
 ```
 
-Note that the [VSCode integration](/docs/workflows/vscode-integration) for `next-intl` can help you manage messages within a single, large file. If you're splitting messages purely for organizational reasons, you might want to consider using this instead.
+注意，`next-intl` 的 [VSCode 集成](/docs/workflows/vscode-integration) 能够帮助您在单个大型文件中管理消息。如果您仅是出于组织考虑拆分文件，建议使用 VSCode 插件而不是拆分。
 
 </Details>
 
-### `useMessages` & `getMessages` [#use-messages]
+### `useMessages` 和 `getMessages` [#use-messages]
 
-In case you require access to messages in a component, you can read them via `useMessages()` or `getMessages()` from your configuration:
+如果组件中需要访问消息，可以通过 `useMessages()` 或 `getMessages()` 从配置获取：
 
 ```tsx
-// Regular components
+// 普通组件
 import {useMessages} from 'next-intl';
 const messages = useMessages();
 
-// Async Server Components
+// 异步服务器组件
 import {getMessages} from 'next-intl/server';
 const messages = await getMessages();
 ```
@@ -382,7 +382,7 @@ import {getMessages} from 'next-intl/server';
 import pick from 'lodash/pick';
 
 async function Component({children}) {
-  // Read messages configured via `i18n/request.ts`
+  // 读取 `i18n/request.ts` 配置的消息
   const messages = await getMessages();
 
   return (
@@ -396,9 +396,9 @@ async function Component({children}) {
 </Tabs.Tab>
 </Tabs>
 
-## Time zone
+## 时区
 
-Specifying a time zone affects the rendering of dates and times. By default, the time zone of the server runtime will be used, but can be customized as necessary.
+指定时区会影响日期和时间的渲染。默认使用服务器运行时的时区，但可以根据需要自定义。
 
 <Tabs items={['i18n/request.ts', 'Provider']}>
 <Tabs.Tab>
@@ -408,9 +408,8 @@ import {getRequestConfig} from 'next-intl/server';
 
 export default getRequestConfig(async () => {
   return {
-    // The time zone can either be statically defined, read from the
-    // user profile if you store such a setting, or based on dynamic
-    // request information like the locale or a cookie.
+    // 时区可以静态定义，读取用户配置（如果存储了此设置），
+    // 或基于请求动态信息，如 locale 或 cookie。
     timeZone: 'Europe/Vienna'
 
     // ...
@@ -422,9 +421,8 @@ export default getRequestConfig(async () => {
 <Tabs.Tab>
 
 ```tsx
-// The time zone can either be statically defined, read from the
-// user profile if you store such a setting, or based on dynamic
-// request information like the locale or a cookie.
+// 时区可以静态定义，读取用户配置（如果存储了此设置），
+// 或基于请求动态信息，如 locale 或 cookie。
 const timeZone = 'Europe/Vienna';
 
 <NextIntlClientProvider timeZone={timeZone}>...<NextIntlClientProvider>
@@ -433,35 +431,35 @@ const timeZone = 'Europe/Vienna';
 </Tabs.Tab>
 </Tabs>
 
-The available time zone names can be looked up in the [tz database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+可用时区名称可在[tz 数据库](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)中查询。
 
-The time zone in Client Components is automatically inherited from the server side if you wrap the relevant components in a `NextIntlClientProvider` that is rendered by a Server Component. For all other cases, you can specify the value explicitly on a wrapping `NextIntlClientProvider`.
+如果您使用由服务器组件渲染的 `NextIntlClientProvider` 将相关客户端组件包裹起来，客户端组件会自动继承服务器端的时区。其他情况，您可以在包裹的 `NextIntlClientProvider` 上显式指定该值。
 
-**Learn more:**
+**了解更多：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/05-formatting/02-dates-timezones"
-  title="Dates & time zones"
+  title="日期与时区"
 />
 
-### `useTimeZone` & `getTimeZone` [#use-time-zone]
+### `useTimeZone` 和 `getTimeZone` [#use-time-zone]
 
-The configured time zone can be read via `useTimeZone` or `getTimeZone` in components:
+可以在组件中通过 `useTimeZone` 或 `getTimeZone` 读取配置的时区：
 
 ```tsx
-// Regular components
+// 普通组件
 import {useTimeZone} from 'next-intl';
 const timeZone = useTimeZone();
 
-// Async Server Components
+// 异步服务器组件
 import {getTimeZone} from 'next-intl/server';
 const timeZone = await getTimeZone();
 ```
 
-## Now value [#now]
+## 当前时间值 [#now]
 
-When formatting [relative dates and times](/docs/usage/dates-times#relative-times), `next-intl` will format times in relation to a reference point in time that is referred to as "now". While it can be beneficial in terms of caching to [provide this value](/docs/usage/dates-times#relative-times-usenow) where necessary, you can provide a global value for `now`, e.g. to ensure consistency when running tests.
+在格式化[相对日期和时间](/docs/usage/dates-times#relative-times)时，`next-intl` 会以一个参考时间点「现在」为基准进行格式化。虽然[提供这个值](/docs/usage/dates-times#relative-times-usenow)有助于缓存，但您也可以提供全局的 `now` 值，例如确保测试时的一致性。
 
 <Tabs items={['i18n/request.ts', 'Provider']}>
 <Tabs.Tab>
@@ -490,35 +488,35 @@ const now = new Date('2024-11-14T10:36:01.516Z');
 </Tabs.Tab>
 </Tabs>
 
-If a `now` value is provided in `i18n/request.ts`, this will automatically be inherited by Client Components if you wrap them in a `NextIntlClientProvider` that is rendered by a Server Component.
+如果在 `i18n/request.ts` 中提供了 `now`，且您用服务器组件渲染了 `NextIntlClientProvider` 包裹客户端组件，则客户端组件也会自动继承。
 
-### `useNow` & `getNow` [#use-now]
+### `useNow` 和 `getNow` [#use-now]
 
-The configured `now` value can be read in components via `useNow` or `getNow`:
+配置的 `now` 值可以通过 `useNow` 或 `getNow` 在组件中获取：
 
 ```tsx
-// Regular components
+// 普通组件
 import {useNow} from 'next-intl';
 const now = useNow();
 
-// Async Server Components
+// 异步服务器组件
 import {getNow} from 'next-intl/server';
 const now = await getNow();
 ```
 
-Note that the returned value defaults to the current date and time, therefore making this hook useful when [providing `now`](/docs/usage/dates-times#relative-times-usenow) for `format.relativeTime` even when you haven't configured a global `now` value.
+注意，返回值默认是当前时间，因此即使您没有配置全局 `now`，使用此 hook 在为 `format.relativeTime`[提供 `now`](/docs/usage/dates-times#relative-times-usenow) 时也很有用。
 
-## Formats
+## 格式
 
-Prefer to watch a video?
+喜欢看视频吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/05-formatting/04-global-formats"
-  title="Global formats"
+  title="全局格式"
 />
 
-To achieve consistent date, time, number and list formatting, you can define a set of global formats.
+为了实现日期、时间、数字和列表格式的一致性，您可以定义一套全局格式。
 
 <Tabs items={['i18n/request.ts', 'Provider']}>
 <Tabs.Tab>
@@ -587,7 +585,7 @@ export default getRequestConfig(async () => {
 </Tabs.Tab>
 </Tabs>
 
-Once you have `formats` set up, you can use them in your components via `useFormatter`:
+配置好 `formats` 后，可以通过 `useFormatter` 在组件中使用：
 
 ```tsx
 import {useFormatter} from 'next-intl';
@@ -602,12 +600,12 @@ function Component() {
 ```
 
 <Callout>
-  By default, format names are loosely typed as `string`. However, you can
-  optionally use strict types by [augmenting the `Formats`
-  type](/docs/workflows/typescript#formats).
+  默认情况下，格式名称的类型为松散的 `string`。但您可以通过[扩展
+  `Formats`
+  类型](/docs/workflows/typescript#formats)来使用严格类型。
 </Callout>
 
-Global formats for numbers, dates and times can be referenced in messages too:
+数字、日期和时间的全局格式也可以在消息中引用：
 
 ```json filename="en.json"
 {
@@ -627,13 +625,13 @@ function Component() {
 }
 ```
 
-Formats are automatically inherited from the server side if you wrap the relevant components in a `NextIntlClientProvider` that is rendered by a Server Component.
+如果您用服务器组件渲染的 `NextIntlClientProvider` 包裹相关组件，则格式会自动从服务器继承。
 
-## Error handling (`onError` & `getMessageFallback`) [#error-handling]
+## 错误处理 (`onError` 和 `getMessageFallback`) [#error-handling]
 
-By default, when a message fails to resolve or when the formatting failed, an error will be printed on the console. In this case `${namespace}.${key}` will be rendered instead to keep your app running.
+默认情况下，当消息解析失败或格式化失败时，会在控制台打印错误，并渲染 `${namespace}.${key}` 以保证应用继续运行。
 
-This behavior can be customized with the `onError` and `getMessageFallback` configuration option.
+您可以通过配置 `onError` 和 `getMessageFallback` 自定义此行为。
 
 <Tabs items={['i18n/request.ts', 'Provider']}>
 <Tabs.Tab>
@@ -646,10 +644,10 @@ export default getRequestConfig(async () => {
   return {
     onError(error) {
       if (error.code === IntlErrorCode.MISSING_MESSAGE) {
-        // Missing translations are expected and should only log an error
+        // 缺少翻译属于预期，只打印错误日志
         console.error(error);
       } else {
-        // Other errors indicate a bug in the app and should be reported
+        // 其它错误表示应用有缺陷，应报告
         reportToErrorTracking(error);
       }
     },
@@ -658,9 +656,9 @@ export default getRequestConfig(async () => {
       const path = [namespace, key].filter((part) => part != null).join('.');
 
       if (error.code === IntlErrorCode.MISSING_MESSAGE) {
-        return path + ' is not yet translated';
+        return path + ' 尚未翻译';
       } else {
-        return 'Dear developer, please fix this message: ' + path;
+        return '尊敬的开发者，请修复此消息：' + path;
       }
     }
 
@@ -669,21 +667,21 @@ export default getRequestConfig(async () => {
 });
 ```
 
-Note that `onError` and `getMessageFallback` are not automatically inherited by Client Components. If you want to make this functionality available in Client Components too, you can however create a [client-side provider](#nextintlclientprovider-non-serializable-props) that defines these props.
+注意，`onError` 和 `getMessageFallback` 不会被客户端组件自动继承。如果您想让客户端组件也可用该功能，可以创建一个[客户端 provider](#nextintlclientprovider-non-serializable-props) 并定义这些属性。
 
 <Details id="error-handling-fallback">
-<summary>How can I use messages from another locale as a fallback?</summary>
+<summary>如何使用其他 locale 的消息作为回退？</summary>
 
-The `getMessageFallback` setting is intended to customize the error case for apps which want to treat missing messages as errors.
+`getMessageFallback` 用于定制缺失消息的错误处理逻辑。
 
-If you expect missing messages for certain locales, you can consider merging messages e.g. from the default locale with the ones for the current locale when providing [messages](/docs/usage/configuration#messages).
+如果某些 locale 预期会缺失消息，可以考虑在提供[消息](/docs/usage/configuration#messages)时合并默认 locale 的消息作为回退。
 
-**Learn more:**
+**了解更多：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/04-adding-locales/01-messages"
-  title="Providing messages"
+  title="提供消息"
 />
 
 </Details>
@@ -696,10 +694,10 @@ import {NextIntlClientProvider, IntlErrorCode} from 'next-intl';
 
 function onError(error) {
   if (error.code === IntlErrorCode.MISSING_MESSAGE) {
-    // Missing translations are expected and should only log an error
+    // 缺少翻译属于预期，只打印错误日志
     console.error(error);
   } else {
-    // Other errors indicate a bug in the app and should be reported
+    // 其它错误表示应用有缺陷，应报告
     reportToErrorTracking(error);
   }
 }
@@ -708,9 +706,9 @@ function getMessageFallback({namespace, key, error}) {
   const path = [namespace, key].filter((part) => part != null).join('.');
 
   if (error.code === IntlErrorCode.MISSING_MESSAGE) {
-    return path + ' is not yet translated';
+    return path + ' 尚未翻译';
   } else {
-    return 'Dear developer, please fix this message: ' + path;
+    return '尊敬的开发者，请修复此消息：' + path;
   }
 }
 

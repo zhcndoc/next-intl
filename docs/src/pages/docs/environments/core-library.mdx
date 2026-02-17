@@ -1,40 +1,39 @@
 import Details from '@/components/Details';
 
-# Core library
+# 核心库
 
-While `next-intl` is primarily intended to be used in Next.js apps, the core is agnostic and can be used independently—either in React apps or any other JavaScript environment.
+虽然 `next-intl` 主要用于 Next.js 应用，但其核心是无框架依赖的，可以独立使用——无论是在 React 应用还是任何其他 JavaScript 环境中。
 
-## React apps
+## React 应用
 
-`next-intl` internally uses a library called [`use-intl`](https://www.npmjs.com/package/use-intl). This core library contains most features you're familiar with from `next-intl`, but lacks the following Next.js-specific features:
+`next-intl` 内部使用了一个叫做 [`use-intl`](https://www.npmjs.com/package/use-intl) 的库。这个核心库包含了你在 `next-intl` 中熟悉的大部分功能，但缺少以下 Next.js 特有的功能：
 
-1. [Routing APIs](/docs/routing)
-2. [Awaitable APIs](/docs/environments/actions-metadata-route-handlers) for Server Actions, Metadata and Route Handlers
-3. [Server Components integration](/docs/environments/server-client-components) along with `i18n/request.ts`
+1. [路由 API](/docs/routing)
+2. 用于服务器动作、元数据和路由处理的可等待 API (/docs/environments/actions-metadata-route-handlers)
+3. 与 `i18n/request.ts` 配合的 [服务器组件集成](/docs/environments/server-client-components)
 
-In case Server Components establish themselves in React apps outside of Next.js, the support for Server Components might be moved to the core library in the future.
+如果服务器组件在 Next.js 之外的 React 应用中得到普及，未来服务器组件的支持可能会迁移到核心库中。
 
-In contrast, `use-intl` contains all APIs that are necessary for handling i18n in regular React apps:
+相比之下，`use-intl` 包含了处理普通 React 应用国际化所必需的所有 API：
 
-- [`useTranslations`](/docs/usage/translations) for translating messages
-- `useFormatter` for formatting [numbers](/docs/usage/numbers), [dates & times](/docs/usage/dates-times) and [lists](/docs/usage/lists)
-- [Configuration APIs](/docs/usage/configuration) (note however that `NextIntlProvider` is called `IntlProvider` in `use-intl`)
+- 用于翻译消息的 [`useTranslations`](/docs/usage/translations)
+- 用于格式化 [数字](/docs/usage/numbers)、[日期和时间](/docs/usage/dates-times) 与 [列表](/docs/usage/lists) 的 `useFormatter`
+- [配置 API](/docs/usage/configuration) （不过请注意，`use-intl` 中 `NextIntlProvider` 被称为 `IntlProvider`）
 
-This allows you to use the same APIs that you know from `next-intl` in other environments:
+这使得你可以在其他环境中使用与 `next-intl` 相同的 API：
 
-1. React Apps ([example](/examples#use-intl))
+1. React 应用 ([示例](/examples#use-intl))
 2. React Native
-3. Testing environments like Jest ([example](https://github.com/amannn/next-intl/blob/main/examples/example-app-router/src/components/Navigation.spec.tsx))
+3. 测试环境如 Jest ([示例](https://github.com/amannn/next-intl/blob/main/examples/example-app-router/src/components/Navigation.spec.tsx))
 4. [Storybook](/docs/workflows/storybook)
 
-**Basic usage:**
+**基本用法：**
 
 ```tsx
 import {IntlProvider, useTranslations} from 'use-intl';
 
-// You can get the messages from anywhere you like. You can also
-// fetch them from within a component and then render the provider
-// along with your app once you have the messages.
+// 你可以从任何地方获取消息，也可以在组件内部获取消息，
+// 然后在拿到消息后再渲染该 Provider 和你的应用。
 const messages = {
   App: {
     hello: 'Hello {username}!'
@@ -56,25 +55,24 @@ function App({user}) {
 ```
 
 <Details id="shared-components">
-<summary>Can I build shared components that work in both Next.js and plain React apps?</summary>
+<summary>我可以构建在 Next.js 和纯 React 应用中都能工作的共享组件吗？</summary>
 
-Yes, shared components that render in either environment are supported.
+可以，支持在这两种环境中渲染的共享组件。
 
-In this case, it can be beneficial to import from `next-intl` for the relevant components, to be able to benefit from the [Server
-Components integration](/docs/environments/server-client-components) in case you render them in Next.js. In other environments, imports to `next-intl` will work as well, but will require `IntlProvider` to be present.
+在这种情况下，建议对相关组件从 `next-intl` 中导入，这样如果你在 Next.js 中渲染它们，就可以利用 [服务器组件集成](/docs/environments/server-client-components)。在其他环境中，导入 `next-intl` 也能正常工作，但需要保证存在 `IntlProvider`。
 
 </Details>
 
-## Non-React apps
+## 非 React 应用
 
-Besides the React-specific APIs, `use-intl` also exports two low-level functions that can be used in any JavaScript environment:
+除了特定于 React 的 API，`use-intl` 还导出了两个低级函数，可以在任何 JavaScript 环境中使用：
 
-1. `createTranslator` for translating messages
-2. `createFormatter` for formatting numbers, dates & times and lists
+1. `createTranslator` 用于翻译消息
+2. `createFormatter` 用于格式化数字、日期和时间以及列表
 
-These APIs receive all relevant configuration directly and don't rely on global configuration.
+这些 API 直接接收所有相关配置，不依赖全局配置。
 
-You can use these APIs as follows:
+你可以这样使用这些 API：
 
 ```tsx
 import {createTranslator, createFormatter} from 'use-intl/core';
@@ -84,24 +82,23 @@ const messages = {
   rich: 'Hello <b>{name}</b>!'
 };
 
-// This creates the same function that is returned by `useTranslations`.
-// Since there's no provider, you can pass all the properties you'd
-// usually pass to the provider directly here.
+// 创建与 `useTranslations` 返回的函数相同的函数。
+// 由于没有 provider，你可以直接传入通常传递给 provider 的所有属性。
 const t = createTranslator({locale: 'en', messages});
 
-// Result: "Hello world!"
+// 结果: "Hello world!"
 t('basic', {name: 'world'});
 
-// To generate HTML markup, you can consider using the `markup`
-// function which in contrast to `t.rich` returns a markup string.
+// 若要生成 HTML 标记，可以考虑使用 `markup` 函数，
+// 它与 `t.rich` 不同，返回的是标记字符串。
 t.markup('rich', {
   name: 'world',
   b: (chunks) => `<b>${chunks}</b>`
 });
 
-// Creates the same object that is returned by `useFormatter`.
+// 创建与 `useFormatter` 返回的对象相同的对象。
 const format = createFormatter({locale: 'en'});
 
-// Result: "Oct 17, 2022"
+// 结果: "Oct 17, 2022"
 format.dateTime(new Date(2022, 9, 17), {dateStyle: 'medium'});
 ```

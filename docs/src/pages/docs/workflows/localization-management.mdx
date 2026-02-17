@@ -4,23 +4,23 @@ import Screenshot from '@/components/Screenshot';
 import Image from 'next/image';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Localization management with Crowdin
+# 使用 Crowdin 进行本地化管理
 
-Prefer to use a fully AI-driven workflow?
+更喜欢使用全 AI 驱动的工作流程？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/10-continuous-localization/01-local-workflow"
-  title="AI translations with Crowdin"
+  title="使用 Crowdin 进行 AI 翻译"
 />
 
-Once you've set up your app with `next-intl`, you'll have multiple translation bundles that contain your messages (e.g. `en.json`). To streamline the workflow of managing these and to allow other team members to contribute translations, it's a good idea to use a localization management platform.
+一旦你使用 `next-intl` 搭建好了你的应用，你将拥有多个包含消息的翻译包（例如 `en.json`）。为了简化管理这些翻译包的工作流程，并允许其他团队成员贡献翻译，使用本地化管理平台是一个不错的选择。
 
-While `next-intl` works with all localization management platforms that support translating JSON files, `next-intl` recommends <PartnerContentLink name="localization-management-intro" href="https://crowdin.com">Crowdin</PartnerContentLink> for managing your translations.
+虽然 `next-intl` 支持所有能够翻译 JSON 文件的本地化管理平台，`next-intl` 推荐使用 <PartnerContentLink name="localization-management-intro" href="https://crowdin.com">Crowdin</PartnerContentLink> 来管理你的翻译。
 
-## Collaborate with translators
+## 与翻译人员协作
 
-The Crowdin Editor provides an easy-to-use environment for translating messages. Apart from guiding translators through your messages, the workflow is improved with advanced features like machine translation suggestions, glossaries and contextual screenshots.
+Crowdin 编辑器提供了一个易用的翻译消息环境。除了引导翻译人员完成你的消息外，工作流程还通过机器翻译建议、术语表和上下文截图等高级功能得到了提升。
 
 <figure>
   <div className="max-w-lg">
@@ -32,27 +32,26 @@ The Crowdin Editor provides an easy-to-use environment for translating messages.
         src="/crowdin-editor-schematic.png"
         width={899}
         height={732}
-        alt="Crowdin Editor"
+        alt="Crowdin 编辑器"
       />
     </PartnerContentLink>
   </div>
   <figcaption>
-    The Crowdin Editor enables translators to work with JSON files from
-    `next-intl` (illustration).
+    Crowdin 编辑器使翻译人员能够处理来自 `next-intl` 的 JSON 文件（示意图）。
   </figcaption>
 </figure>
 
-## Decouple localization from development
+## 将本地化与开发解耦
 
-As a developer-focused localization service, Crowdin helps you to decouple the localization process from development and integrates with your existing workflows.
+作为一个面向开发者的本地化服务，Crowdin 帮助你将本地化流程与开发解耦，并与现有工作流程无缝集成。
 
-**Integration options:**
+**集成选项：**
 
-1. Command-line integration with the <PartnerContentLink name="localization-management-developers-integrations" href="https://developer.crowdin.com/cli-tool/">Crowdin CLI</PartnerContentLink>
-2. Git integration e.g. via the <PartnerContentLink name="localization-management-developers-integrations" href="https://support.crowdin.com/github-integration/">GitHub app</PartnerContentLink>
-3. Automatic workflows triggered from <PartnerContentLink name="localization-management-developers-integrations" href="https://developer.crowdin.com/api/v2/#tag/Webhooks">webhooks</PartnerContentLink>
-4. Over-the-air delivery via the <PartnerContentLink name="localization-management-developers-integrations" href="https://developer.crowdin.com/sdk-ota-web/">JS SDK</PartnerContentLink>
-5. Manual up- and download of messages
+1. 使用 <PartnerContentLink name="localization-management-developers-integrations" href="https://developer.crowdin.com/cli-tool/">Crowdin 命令行工具（CLI）</PartnerContentLink> 进行命令行集成
+2. 通过 <PartnerContentLink name="localization-management-developers-integrations" href="https://support.crowdin.com/github-integration/">GitHub 应用</PartnerContentLink> 进行 Git 集成
+3. 通过 <PartnerContentLink name="localization-management-developers-integrations" href="https://developer.crowdin.com/api/v2/#tag/Webhooks">Webhook</PartnerContentLink> 触发自动工作流程
+4. 通过 <PartnerContentLink name="localization-management-developers-integrations" href="https://developer.crowdin.com/sdk-ota-web/">JS SDK</PartnerContentLink> 实现无线更新（OTA）交付
+5. 手动上传和下载消息
 
 <figure>
   <div className="max-w-2xl">
@@ -64,35 +63,35 @@ As a developer-focused localization service, Crowdin helps you to decouple the l
         src="/crowdin-workflow.png"
         width={858}
         height={332}
-        alt="Crowdin workflow"
+        alt="Crowdin 工作流程"
         className="dark:contrast-75 dark:invert"
       />
     </PartnerContentLink>
   </div>
   <figcaption>
     <p>
-      {'The '}
+      {' '}
       <PartnerContentLink
         name="localization-management-developers-image-caption"
         href="https://support.crowdin.com/github-integration/"
       >
-        {'Crowdin GitHub integration'}
+        {'Crowdin GitHub 集成'}
       </PartnerContentLink>
-      {' automatically creates pull requests when translations are updated.'}
+      {' 会在翻译更新时自动创建拉取请求。'}
     </p>
   </figcaption>
 </figure>
 
-## Example workflow with the GitHub integration
+## 使用 GitHub 集成的示例工作流程
 
-For this example, we're going to use an example that is publicly available on GitHub: [Street Photography Viewer](https://github.com/amannn/street-photography-viewer). It's a Next.js app that displays street photography pictures from Unsplash and uses `next-intl` for all internationalization needs.
+本示例使用一个在 GitHub 上公开的示例仓库：[Street Photography Viewer](https://github.com/amannn/street-photography-viewer)。这是一个 Next.js 应用，展示来自 Unsplash 的街头摄影照片，并使用 `next-intl` 进行所有国际化需求。
 
-Once you have a GitHub repository with your app, you can follow these steps:
+一旦你有了包含你应用的 GitHub 仓库，可以按照以下步骤操作：
 
-1. Install <PartnerContentLink name="localization-management-example" href="https://store.crowdin.com/github">the GitHub app from the Crowdin store</PartnerContentLink>
-2. Follow <PartnerContentLink name="localization-management-example" href="https://support.crowdin.com/github-integration/">the setup guide for the GitHub integration</PartnerContentLink>
+1. 安装 <PartnerContentLink name="localization-management-example" href="https://store.crowdin.com/github">Crowdin 商店中的 GitHub 应用</PartnerContentLink>
+2. 按照 <PartnerContentLink name="localization-management-example" href="https://support.crowdin.com/github-integration/">GitHub 集成的设置指南</PartnerContentLink> 进行配置
 
-After this procedure, Crowdin will commit a configuration file to your repository based on your settings.
+完成此流程后，Crowdin 将根据你的设置向你的仓库提交一个配置文件。
 
 ```yml filename="crowdin.yml"
 files:
@@ -100,7 +99,7 @@ files:
     translation: /messages/%locale%.json
 ```
 
-This file provides the local translations in your repository to Crowdin.
+该配置文件向 Crowdin 提供了仓库中的本地翻译文件。
 
 <figure>
   <div className="max-w-2xl">
@@ -108,16 +107,15 @@ This file provides the local translations in your repository to Crowdin.
       src="/crowdin-repo-mapping.png"
       width={753}
       height={393}
-      alt="Crowdin repository mapping"
+      alt="Crowdin 仓库映射"
     />
   </div>
   <figcaption>
-    With the configuration file in place, Crowdin knows about the translation
-    files in your repository.
+    有了这个配置文件，Crowdin 就能识别你仓库中的翻译文件。
   </figcaption>
 </figure>
 
-Now, as soon as a translation gets updated in Crowdin, the next sync will create a pull request in your repository with the updates.
+现在，一旦 Crowdin 中的翻译被更新，下次同步时将会在你的仓库创建包含更新内容的拉取请求。
 
 <figure>
   <div className="max-w-2xl">
@@ -125,13 +123,12 @@ Now, as soon as a translation gets updated in Crowdin, the next sync will create
       src="/crowdin-repo-sync.png"
       width={805}
       height={371}
-      alt="Crowdin repository sync"
+      alt="Crowdin 仓库同步"
     />
   </div>
   <figcaption>
-    Automatic translation sync from Crowdin ([example pull
-    request](https://github.com/amannn/street-photography-viewer/pull/3))
+    Crowdin 自动同步翻译（[示例拉取请求](https://github.com/amannn/street-photography-viewer/pull/3)）
   </figcaption>
 </figure>
 
-→ Head over to <PartnerContentLink name="localization-management-example" href="https://support.crowdin.com/introduction/">Crowdin</PartnerContentLink> to learn more.
+→ 前往 <PartnerContentLink name="localization-management-example" href="https://support.crowdin.com/introduction/">Crowdin</PartnerContentLink> 了解更多信息。

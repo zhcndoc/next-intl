@@ -7,39 +7,39 @@ import StayUpdated from '@/components/StayUpdated.mdx';
 
 # next-intl 3.0
 
-<small>Nov 14, 2023 · by Jan Amann</small>
+<small>2023年11月14日 · 作者 Jan Amann</small>
 
-More than a year ago, on Oct 25, 2022, [Next.js 13 was announced](https://nextjs.org/blog/next-13) with beta support for the App Router and Server Components. Ever since then, `next-intl` began an exploration on what it means to provide an ideal experience for implementing i18n with the newly added capabilities.
+一年多以前，在2022年10月25日，[Next.js 13 发布](https://nextjs.org/blog/next-13)，引入了对 App Router 和 Server Components 的测试支持。从那时起，`next-intl` 就开始探索利用这些新增功能来提供实现国际化（i18n）的理想体验。
 
-Today, [after more than 370 commits and the involvement of over 60 community members](https://github.com/amannn/next-intl/pull/149), I'm absolutely thrilled to announce **next-intl 3.0**, which is now App Router-first.
+今天，[经过370多个提交和60多位社区成员的参与](https://github.com/amannn/next-intl/pull/149)，我非常激动地宣布 **next-intl 3.0** 正式发布，它现已优先支持 App Router。
 
-If you're still happy with the Pages Router, rest assured that `next-intl` is dedicated to support this paradigm for as long as Next.js does. For those who have already migrated to the App Router, this means that you can take full advantage of the new capabilities with `next-intl`.
+如果你仍然对 Pages Router 感到满意，请放心，`next-intl` 将持续支持这种范式，只要 Next.js 还在支持。对于已经迁移到 App Router 的用户，这意味着你可以充分利用 `next-intl` 带来的新能力。
 
-## New features
+## 新特性
 
-1. **Support for React Server Components**: The APIs `useTranslations`, `useFormatter`, `useLocale`, `useNow` and `useTimeZone` can now be used in Server Components ([docs](/docs/environments/server-client-components)).
-2. **New async APIs**: To handle i18n in async components, the Metadata API and Route Handlers, the APIs `getTranslations`, `getFormatter`, `getNow`, and `getTimeZone` have been added ([docs](/docs/environments/actions-metadata-route-handlers)).
-3. **Middleware for internationalized routing**: While Next.js has built-in support for this with the Pages Router, the App Router doesn't include a built-in solution anymore. `next-intl` now provides a drop-in solution that has you covered ([docs](/docs/routing/middleware)).
-4. **Internationalized navigation APIs**: Similar to the middleware, this provides a drop-in solution that adds internationalization support for Next.js' navigation APIs: `Link`, `useRouter`, `usePathname` and `redirect`. These APIs allow you to handle locale prefixes behind the scenes and also provide support for localizing pathnames (e.g. `/en/about` vs. `/de/ueber-uns`, see the [docs](/docs/routing/navigation)).
+1. **支持 React 服务器组件（Server Components）**：`useTranslations`、`useFormatter`、`useLocale`、`useNow` 和 `useTimeZone` 这些 API 现在可以在服务器组件中使用（[文档](/docs/environments/server-client-components)）。
+2. **新增异步 API**：为了支持异步组件、Metadata API 和路由处理器，新增了 `getTranslations`、`getFormatter`、`getNow` 和 `getTimeZone` 这些异步 API（[文档](/docs/environments/actions-metadata-route-handlers)）。
+3. **国际化路由中间件**：虽然 Next.js 在 Pages Router 内置了对此的支持，但 App Router 不再包含内置解决方案。`next-intl` 现在提供了一个开箱即用的解决方案来覆盖这部分需求（[文档](/docs/routing/middleware)）。
+4. **国际化导航 API**：类似于中间件的功能，这提供了一个可直接使用的解决方案，为 Next.js 的导航 API 添加国际化支持：`Link`、`useRouter`、`usePathname` 和 `redirect`。这些 API 允许你在幕后处理语言前缀，还支持路径名称的本地化（例如 `/en/about` 与 `/de/ueber-uns`，详见[文档](/docs/routing/navigation)）。
 
-The latter two have already been added in minor versions, but 3.0 cleans up the API and includes many improvements and bug fixes.
+后面两个功能之前已在小版本中加入，但 3.0 版本整理了 API，并包含了许多改进和 bug 修复。
 
-## Breaking changes
+## 重大更改
 
-**Users of pre-releases:** If you've already tried out pre-release versions, first of all, thank you so much! Second: Some APIs saw iterations over the pre-release period, please carefully review the breaking changes below, even if you're already using some of the new APIs. Also note the change [from `getTranslator` to `getTranslations`](https://github.com/amannn/next-intl/pull/600) to provide better ergonomics for working with async Server Components.
+**预发布版本用户：** 如果你已经尝试过预发布版本，首先，非常感谢！其次：在预发布期间一些 API 经历了迭代，请仔细查看以下重大更改，即使你已经在使用部分新 API。并且请注意将 [`getTranslator` 改为 `getTranslations`](https://github.com/amannn/next-intl/pull/600) 以提供更好的人机工程学支持异步服务器组件的变化。
 
-### Updated setup
+### 更新的配置步骤
 
-`next-intl` now requires two additional setup steps when you're using the App Router:
+当你使用 App Router 时，`next-intl` 现在需要额外两个配置步骤：
 
-1.  [The `i18n.ts` module](/docs/getting-started/app-router#i18n-request) provides configuration for Server Components
-2.  [`next-intl/plugin`](/docs/getting-started/app-router#nextconfigjs) needs to be added to link your `i18n.ts` module to `next-intl`
+1.  [`i18n.ts` 模块](/docs/getting-started/app-router#i18n-request) 为服务器组件提供配置
+2.  需要在 `next.config.js` 中添加 [`next-intl/plugin`](/docs/getting-started/app-router#nextconfigjs)，用来链接你的 `i18n.ts` 模块到 `next-intl`
 
-### New navigation APIs for the App Router
+### App Router 的新导航 API
 
-With [v2.14](https://github.com/amannn/next-intl/blob/main/CHANGELOG.md#2140-2023-05-10), the navigation APIs `useRouter`, `usePathname` and `Link` were added to `next-intl` that enabled you to use the APIs you're used to from Next.js while automatically considering a `locale` behind the scenes.
+在 [v2.14](https://github.com/amannn/next-intl/blob/main/CHANGELOG.md#2140-2023-05-10) 中，`useRouter`、`usePathname` 和 `Link` 导航 API 被添加到 `next-intl`，使你能够使用惯用的 Next.js API，同时自动处理后台的 `locale`。
 
-With 3.0, we're cleaning up these APIs by moving them to a shared namespace as well as introducing type-safety for the `locale` prop that can be passed to these APIs.
+3.0 版本中，我们整理了这些 API，将它们移动到共享命名空间中，并且为可以传递给这些 API 的 `locale` 属性引入了类型安全支持。
 
 ```diff
 - import Link from 'next-intl/link';
@@ -52,9 +52,9 @@ With 3.0, we're cleaning up these APIs by moving them to a shared namespace as w
 + const {Link, useRouter, usePathname, redirect} = createSharedPathnamesNavigation({locales});
 ```
 
-Typically, you'll want to call this factory function in a central place in your app where you can easily import from (see the [navigation docs](/docs/routing/navigation)).
+通常，你会想在应用的一个中央位置调用此工厂函数，以方便导入（参见[导航文档](/docs/routing/navigation)）。
 
-These changes bring the existing APIs in line with the new [`createLocalizedPathnamesNavigation` API](/docs/routing/navigation) that allows you to localize pathnames:
+这些变化使现有 API 与新的 [`createLocalizedPathnamesNavigation` API](/docs/routing/navigation) 保持一致，该 API 允许你对路径名称进行本地化：
 
 ```tsx filename="navigation.ts"
 import {
@@ -64,16 +64,14 @@ import {
 
 export const locales = ['en', 'de'] as const;
 
-// The `pathnames` object holds pairs of internal
-// and external paths, separated by locale.
+// `pathnames` 对象保存了内部路径和外部路径的映射，按语言区分。
 export const pathnames = {
-  // If all locales use the same pathname, a
-  // single external path can be provided.
+  // 如果所有语言使用同一路径，则可提供单一外部路径。
   '/': '/',
   '/blog': '/blog',
 
-  // If locales use different paths, you can
-  // specify each external path per locale.
+  // 如果不同语言使用不同路径，可以
+  // 为每种语言指定外部路径。
   '/about': {
     en: '/about',
     de: '/ueber-uns'
@@ -84,55 +82,55 @@ export const {Link, redirect, usePathname, useRouter} =
   createLocalizedPathnamesNavigation({locales, pathnames});
 ```
 
-By using a similar API, you can upgrade from shared pathnames to localized pathnames by replacing the factory function.
+使用类似的 API，你可以通过替换工厂函数，将共享路径名升级为本地化路径名。
 
-### Switching the middleware default of `localePrefix` to `always`
+### 中间件 `localePrefix` 默认值切换为 `always`
 
-Previously, the [`localePrefix` of the middleware](/docs/routing/configuration#locale-prefix) defaulted to `as-needed`, meaning that a locale prefix was only added for non-default locales.
+之前，中间件的 [`localePrefix`](/docs/routing/configuration#locale-prefix) 默认值是 `as-needed`，意味着仅为非默认语言添加语言前缀。
 
-This default has now been changed to `always` since this has two advantages:
+现在，这一默认改为 `always`，原因有两个：
 
-1. We can recommend [a safer default `matcher`](/docs/routing/middleware#matcher-config) that needs no extra treatment for pathnames with dots (e.g. `/users/jane.doe`)
-2. It avoids an [edge case of `Link`](/docs/routing/configuration#locale-prefix-as-needed) where we include a prefix for the default locale on the server side but patch this on the client side by removing the prefix (certain SEO tools might report a hint that a link points to a redirect in this case).
+1. 我们可以推荐一个更安全的默认 [`matcher`](/docs/routing/middleware#matcher-config)，无需特别处理包含点号的路径名（如 `/users/jane.doe`）
+2. 避免了 [`Link` 的一个边界情况](/docs/routing/configuration#locale-prefix-as-needed)：服务器端会为默认语言包含前缀，但在客户端侧通过移除该前缀来修复（某些 SEO 工具可能报告链接指向重定向的提示）。
 
-If you want to stay on the `as-needed` strategy, you can [configure this option](/docs/routing/configuration#locale-prefix-as-needed) in the middleware.
+如果你想继续使用 `as-needed` 策略，可以在中间件里[配置该选项](/docs/routing/configuration#locale-prefix-as-needed)。
 
-### Static rendering of Server Components
+### 服务器组件的静态渲染
 
-With the newly introduced Server Components support comes a temporary workaround for static rendering.
+新增的服务器组件支持带来了对静态渲染的临时解决方案。
 
-If you call APIs from `next-intl` in Server Components, the page will by default opt into [dynamic rendering](https://nextjs.org/docs/app/building-your-application/rendering/server-components#dynamic-rendering). This is a limitation that we aim to remove in the future, but as a stopgap solution, we've added the [`unstable_setRequestLocale`](/docs/routing/setup#static-rendering) API so that you can keep your pages fully static.
+如果你在服务器组件中调用 `next-intl` 的 API，页面默认将选择[动态渲染](https://nextjs.org/docs/app/building-your-application/rendering/server-components#dynamic-rendering)。这是我们未来计划移除的限制，但作为权宜之计，我们添加了 [`unstable_setRequestLocale`](/docs/routing/setup#static-rendering) API，让你可以保持页面的完全静态渲染。
 
-Note that if you're using `next-intl` exclusively in Client Components, this doesn't apply to your app and static rendering will continue to work as it did before.
+请注意，如果你仅在客户端组件中使用 `next-intl`，则此限制不适用，静态渲染仍按原样工作。
 
-### Changes to [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider)
+### [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider) 的变更
 
-First, the import for this component has changed:
+首先引入此组件的方式变更：
 
 ```diff
 - import {NextIntlClientProvider} from 'next-intl/client';
 + import {NextIntlClientProvider} from 'next-intl';
 ```
 
-Depending on if you're using `NextIntlClientProvider` with or without the App Router, there's been another change to consider that was implemented in order to avoid hydration mismatches across the server and client.
+根据是否结合使用 App Router，使用该组件时还须考虑下述变更，这是为了避免服务端与客户端中的水合不匹配。
 
-**Using `NextIntlClientProvider` without the App Router**
+**在未使用 App Router 的情况下使用 `NextIntlClientProvider`**
 
-If you're using `NextIntlClientProvider` _without the App Router_ (e.g. with the Pages Router), you need to define the `locale` prop now explicitly (e.g. via `useRouter().locale`). Furthermore, a warning has been added if a `timeZone` hasn't been defined.
+如果你在 _未使用 App Router_ 的情况下（例如使用 Pages Router）使用 `NextIntlClientProvider`，现在需要显式定义 `locale` 属性（比如通过 `useRouter().locale`）。同时，如果未定义 `timeZone`，将会产生警告。
 
-**Using `NextIntlClientProvider` with the App Router**
+**在使用 App Router 的情况下使用 `NextIntlClientProvider`**
 
-If you're using `NextIntlClientProvider` _with the App Router_, there has been a slight change to the semantics. If you're rendering `NextIntlClientProvider` within a Server Component, the component will pass defaults for `locale`, `now` and `timeZone` to the client side.
+如果你在 _使用 App Router_ 时渲染 `NextIntlClientProvider` 于服务器组件中，组件将为客户端传递默认的 `locale`、`now` 和 `timeZone`。
 
-If you're already providing these options, then you're set.
+如果你已经提供了这些选项，就无需改变。
 
-If you're not, be aware that this will by default opt the corresponding page into dynamic rendering. If your app relies on static rendering, you can avoid this by passing all of the mentioned options:
+如果没有，请注意这会默认使对应页面进入动态渲染。如果你的应用依赖静态渲染，可以通过传入所有这些属性来避免：
 
 ```tsx
 <NextIntlClientProvider
   messages={messages}
-  // By providing these props explicitly,
-  // the provider can render statically.
+  // 通过显式提供这些属性，
+  // provider 可以静态渲染。
   timeZone="Europe/Vienna"
   now={new Date()}
   locale={locale}
@@ -141,55 +139,54 @@ If you're not, be aware that this will by default opt the corresponding page int
 </NextIntlClientProvider>
 ```
 
-Alternatively, you can explicitly enable static rendering—see the [previous section](#static-rendering-of-server-components).
+另外，你也可以显式启用静态渲染——请参见[前一节](#static-rendering-of-server-components)。
 
-### Other notable changes
+### 其他重要变化
 
-1. `next-intl` now uses [`exports` in `package.json`](https://nodejs.org/api/packages.html#subpath-exports) to clearly define which modules are exported. This should not affect you, unless you've previously imported undocumented internals.
-2. `NextIntlProvider` has been removed in favor of [`NextIntlClientProvider`](/docs/usage/configuration#client-server-components)
-3. [The middleware](/docs/routing/middleware) now needs to be imported from `next-intl/middleware` instead of `next-intl/server` (deprecated since v2.14).
-4. `next@^13.4` is now required for the RSC APIs. Next.js 10–12 is still supported for the Pages Router integration via `use-intl` (see also: [Support for legacy Next.js versions](/docs/getting-started/pages-router#support-for-legacy-nextjs-versions)).
-5. `useMessages` now has a non-nullable return type for easier consumption and will throw if no messages are configured.
-6. `createTranslator(…).rich` now returns a `ReactNode`. Previously, this was somewhat confusing, since `t.rich` accepted and returned either React elements or strings depending on if you retrieve the fuction via `useTranslations` or `createTranslator`. Now, an explicit [`t.markup`](/docs/usage/translations#html-markup) function has been added to generate markup strings like `'<b>Hello</b>'` outside of React components.
-7. `useIntl` has been replaced with [`useFormatter`](/docs/usage/dates-times) (deprecated since v2.11).
-8. `createIntl` has been replaced with [`createFormatter`](/docs/environments/core-library) (deprecated since v2.11).
-9. `useLocale` now requires `next@>=13.3.0`. If you're on an older version of Next.js and you're using the Pages Router, please use `useRouter().locale` instead.
+1. `next-intl` 现在使用 [`package.json` 的 `exports`](https://nodejs.org/api/packages.html#subpath-exports) 明确导出模块。除非你之前导入了未文档化的内部模块，否则不会受到影响。
+2. `NextIntlProvider` 被移除，推荐使用 [`NextIntlClientProvider`](/docs/usage/configuration#client-server-components)
+3. [中间件](/docs/routing/middleware) 现在需从 `next-intl/middleware` 导入，而非之前的 `next-intl/server`（自 v2.14 起已废弃）。
+4. 使用服务器组件相关 API 需要 `next@^13.4`。Pages Router 集成通过 `use-intl` 仍支持 Next.js 10–12（另见：[旧版本 Next.js 支持](/docs/getting-started/pages-router#support-for-legacy-nextjs-versions)）。
+5. `useMessages` 现在返回非空类型，便于使用，且如果未配置消息会抛出错误。
+6. `createTranslator(…).rich` 现在返回 `ReactNode`。之前存在一些混淆，因为 `t.rich` 根据是通过 `useTranslations` 还是 `createTranslator` 获得，接受并返回的是 React 元素或字符串。现在，添加了显式的 [`t.markup`](/docs/usage/translations#html-markup) 函数，用于在 React 组件外生成类似 `'<b>Hello</b>'` 的标记字符串。
+7. `useIntl` 已被 [`useFormatter`](/docs/usage/dates-times) 替代（自 v2.11 起废弃）。
+8. `createIntl` 已被 [`createFormatter`](/docs/environments/core-library) 替代（自 v2.11 起废弃）。
+9. `useLocale` 现在需要 `next@>=13.3.0`。如果你使用较旧版本的 Next.js 且用 Pages Router，请改用 `useRouter().locale`。
 
-## Upgrade now
+## 立刻升级
 
 ```
 npm install next-intl@latest
 ```
 
-## Thank you
+## 感谢
 
-This release was truly a team effort and couldn't be nearly where it is today without the involvement of the community.
+此次发布是团队的共同努力成果，离不开社区的积极参与。
 
-Thank you so much for:
+特别感谢大家：
 
-- All the encouraging words along the way
-- Testing out prereleases
-- Providing feedback
-- Contributing code
-- Questioning ideas
-- Helping each other
+- 一路上的鼓励与支持
+- 试用预发布版本
+- 提供反馈意见
+- 贡献代码
+- 质疑和讨论想法
+- 相互帮助
 
-I had the pleasure to get in touch with so many of you along the way and I'm incredibly grateful for the willingness to help and support each other in our community.
+很高兴在此过程中与大家交流，我非常感激我们社区里大家愿意互相帮助和支持。
 
 <figure>
 <img className="max-w-xl w-full" src="/rsc-pr-participants.png" />
 
 <figcaption>
-  Participants who joined the conversation in [pull request
-  #149](https://github.com/amannn/next-intl/pull/149).
+  参与[拉取请求 #149](https://github.com/amannn/next-intl/pull/149) 讨论的成员们。
 </figcaption>
 
 </figure>
 
-A special thank you goes to <PartnerContentLink href="https://crowdin.com/">Crowdin</PartnerContentLink>, being the primary sponsor for `next-intl` and enabling me to regularly dedicate time for this project.
+特别感谢 <PartnerContentLink href="https://crowdin.com/">Crowdin</PartnerContentLink>，作为 `next-intl` 的主要赞助商，使我得以定期腾出时间专注于此项目。
 
 —Jan
 
-(this post has been updated from an initial announcement for the 3.0 release candidate)
+（本文从初次发布的 3.0 候选版本公告更新而来）
 
 <StayUpdated />

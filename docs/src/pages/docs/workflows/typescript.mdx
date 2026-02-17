@@ -3,19 +3,19 @@ import {Tabs} from 'nextra/components';
 import Callout from '@/components/Callout';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# TypeScript augmentation
+# TypeScript 增强
 
-Prefer to watch a video?
+想看视频讲解吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/03-translations/05-tooling"
-  title="Editor tools"
+  title="编辑器工具"
 />
 
-`next-intl` integrates seamlessly with TypeScript right out of the box, requiring no additional setup.
+`next-intl` 开箱即用，与 TypeScript 无缝集成，无需额外设置。
 
-However, you can optionally provide supplemental definitions to augment the types that `next-intl` works with, enabling improved autocompletion and type safety across your app.
+不过，您也可以选择性地提供补充定义来增强 `next-intl` 使用的类型，从而提升整个应用的代码自动补全和类型安全。
 
 ```tsx filename="global.ts"
 import {routing} from '@/i18n/routing';
@@ -31,7 +31,7 @@ declare module 'next-intl' {
 }
 ```
 
-Type augmentation is available for:
+类型增强支持：
 
 - [`Locale`](#locale)
 - [`Messages`](#messages)
@@ -39,7 +39,7 @@ Type augmentation is available for:
 
 ## `Locale`
 
-Augmenting the `Locale` type will affect all APIs from `next-intl` that either return or receive a locale:
+增强 `Locale` 类型会影响所有从 `next-intl` 中获取或传入 locale 的 API：
 
 ```tsx
 import {useLocale} from 'next-intl';
@@ -51,15 +51,15 @@ const locale = useLocale();
 ```tsx
 import {Link} from '@/i18n/routing';
 
-// ✅ Passes the validation
+// ✅ 通过验证
 <Link href="/" locale="en" />;
 ```
 
-Additionally, `next-intl` provides a [`Locale`](/docs/usage/configuration#locale-type) type that can be used when passing the locale as an argument.
+此外，`next-intl` 提供了一个 [`Locale`](/docs/usage/configuration#locale-type) 类型，用于传递 locale 参数时使用。
 
-To enable this validation, you can adapt `AppConfig` as follows:
+要启用此验证，可按如下方式调整 `AppConfig`：
 
-<Tabs items={['With locale-based routing', 'Without locale-based routing']}>
+<Tabs items={['使用基于 locale 的路由', '无基于 locale 的路由']}>
 <Tabs.Tab>
 
 ```tsx filename="global.ts"
@@ -77,7 +77,7 @@ declare module 'next-intl' {
 <Tabs.Tab>
 
 ```tsx filename="global.ts"
-// Potentially imported from a shared config
+// 可能从共享配置导入
 const locales = ['en', 'de'] as const;
 
 declare module 'next-intl' {
@@ -93,7 +93,7 @@ declare module 'next-intl' {
 
 ## `Messages`
 
-Messages can be strictly typed to ensure you're using valid keys.
+消息内容可严格定义类型，确保使用有效的键。
 
 ```json filename="messages.json"
 {
@@ -105,18 +105,18 @@ Messages can be strictly typed to ensure you're using valid keys.
 
 ```tsx
 function About() {
-  // ✅ Valid namespace
+  // ✅ 有效的命名空间
   const t = useTranslations('About');
 
-  // ✖️ Unknown message key
+  // ✖️ 不存在的消息键
   t('description');
 
-  // ✅ Valid message key
+  // ✅ 有效的消息键
   t('title');
 }
 ```
 
-To enable this validation, you can adapt `AppConfig` as follows:
+要启用此验证，可按如下方式调整 `AppConfig`：
 
 ```ts filename="global.ts"
 import messages from './messages/en.json';
@@ -129,43 +129,43 @@ declare module 'next-intl' {
 }
 ```
 
-You can freely define the interface, but if you have your messages available locally, it can be helpful to automatically create the type based on the messages from your default locale.
+您可以自由定义接口，但如果本地有消息文件，自动根据默认 locale 的消息生成类型会很有帮助。
 
 <Details id="messages-performance-tsc">
-<summary>Does this affect the performance of type checking?</summary>
+<summary>这会影响类型检查的性能吗？</summary>
 
-While the size of your messages file can have an effect on the time it takes to run the TypeScript compiler on your project, the overhead of augmenting `Messages` should be reasonably fast.
+虽然消息文件的大小会影响 TypeScript 编译的时间，但增强 `Messages` 的开销通常是合理快速的。
 
-Here's a benchmark from a sample project with 340 messages:
+以下是一个包含 340 条消息的示例项目的性能基准：
 
-- No type augmentation for messages: ~2.20s
-- Type-safe keys: ~2.82s
-- Type-safe arguments: ~2.85s
+- 无消息类型增强: ~2.20秒
+- 类型安全的键: ~2.82秒
+- 类型安全的参数: ~2.85秒
 
-This was observed on a MacBook Pro 2019 (Intel).
+以上数据来源于 MacBook Pro 2019（Intel）。
 
 ---
 
-If you experience performance issues on larger projects, you can consider:
+若在较大项目中遇到性能问题，可考虑：
 
-1. Using type augmentation of messages only on your continuous integration pipeline as a safety net
-2. Splitting your project into multiple packages in a monorepo, allowing you to work with separate messages per package
+1. 只在持续集成管线中使用消息的类型增强作为安全措施
+2. 将项目拆分为 monorepo 中的多个包，以便分别处理每个包的消息
 
 </Details>
 
 <Details id="messages-performance-editor">
-<summary>Does this affect the performance of my editor?</summary>
+<summary>这会影响我的编辑器性能吗？</summary>
 
-Generally, type augmentation for `Messages` should be [reasonably fast](#messages-performance-tsc).
+通常，`Messages` 的类型增强应保持[合理快速](#messages-performance-tsc)。
 
-In case you notice your editor performance related to saving files to be impacted, it might be caused by running ESLint on save when using [type-aware](https://typescript-eslint.io/troubleshooting/typed-linting/performance/) rules from `@typescript-eslint`.
+如果您注意到保存文件时编辑器性能变慢，可能是因为在保存时运行了 ESLint，并开启了 `@typescript-eslint` 的[类型感知规则](https://typescript-eslint.io/troubleshooting/typed-linting/performance/)。
 
-To ensure your editor performance is optimal, you can consider running expensive, type-aware rules only on your continuous integration pipeline:
+为保证编辑器性能最佳，可考虑只在持续集成管线运行消耗资源的、类型感知的规则：
 
 ```tsx filename="eslint.config.js"
 // ...
 
-  // Run expensive, type-aware linting only on CI
+  // 仅在 CI 中运行消耗资源的类型检查规则
   '@typescript-eslint/no-misused-promises': process.env.CI
     ? 'error'
     : 'off'
@@ -173,9 +173,9 @@ To ensure your editor performance is optimal, you can consider running expensive
 
 </Details>
 
-### Type-safe arguments [#messages-arguments]
+### 类型安全的参数 [#messages-arguments]
 
-Apart from strictly typing message keys, you can also ensure type safety for message arguments:
+除了严格限定消息键外，还能确保消息参数的类型安全：
 
 ```json filename="messages/en.json"
 {
@@ -189,19 +189,19 @@ Apart from strictly typing message keys, you can also ensure type safety for mes
 function UserProfile({user}) {
   const t = useTranslations('UserProfile');
 
-  // ✖️ Missing argument
+  // ✖️ 缺少参数
   t('title');
 
-  // ✅ Argument is provided
+  // ✅ 参数存在
   t('title', {firstName: user.firstName});
 }
 ```
 
-TypeScript currently has a [limitation](https://github.com/microsoft/TypeScript/issues/32063) where it infers values of imported JSON modules as loose types like `string` instead of the actual value. To bridge this gap for the time being, `next-intl` can generate an accompanying `.d.json.ts` file for the messages that you're assigning to your `AppConfig`.
+TypeScript 目前存在一个[限制](https://github.com/microsoft/TypeScript/issues/32063)，它将导入的 JSON 模块的值推断为宽泛类型（如 `string`），而非实际值。为此，`next-intl` 可以为您赋值给 `AppConfig` 的消息生成配套的 `.d.json.ts` 声明文件作为临时解决方案。
 
-**Usage:**
+**用法：**
 
-1. Add support for JSON type declarations in your `tsconfig.json`:
+1. 在 `tsconfig.json` 中添加对 JSON 类型声明的支持：
 
 ```json filename="tsconfig.json"
 {
@@ -212,14 +212,14 @@ TypeScript currently has a [limitation](https://github.com/microsoft/TypeScript/
 }
 ```
 
-2. Configure the `createMessagesDeclaration` setting in your Next.js config:
+2. 在 Next.js 配置中设置 `createMessagesDeclaration`：
 
 ```tsx filename="next.config.mjs"
 import {createNextIntlPlugin} from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin({
   experimental: {
-    // Provide the path to the messages that you're using in `AppConfig`
+    // 提供赋值给 `AppConfig` 的消息文件路径
     createMessagesDeclaration: './messages/en.json'
   }
   // ...
@@ -228,46 +228,46 @@ const withNextIntl = createNextIntlPlugin({
 // ...
 ```
 
-With this setup in place, you'll see a new declaration file generated in your `messages` directory once you run `next dev`, `next build` or `next typegen`:
+完成上述配置后，运行 `next dev`、`next build` 或 `next typegen` 时，会在 `messages` 目录生成一个新的声明文件：
 
 ```diff
   messages/en.json
 + messages/en.d.json.ts
 ```
 
-This declaration file will provide the exact types for the JSON messages that you're importing and assigning to `AppConfig`, enabling type safety for message arguments.
+该声明文件为您导入并赋值给 `AppConfig` 的 JSON 消息提供精确类型，从而支持消息参数的类型安全。
 
-To keep your code base tidy, you can ignore this file in Git:
+为了保持代码仓库整洁，建议在 Git 中忽略此文件：
 
 ```text filename=".gitignore"
 messages/*.d.json.ts
 ```
 
-Please consider upvoting [`TypeScript#32063`](https://github.com/microsoft/TypeScript/issues/32063) to potentially remove this workaround in the future.
+欢迎为 [`TypeScript#32063`](https://github.com/microsoft/TypeScript/issues/32063) 点赞，期待未来能去除这一权宜之计。
 
 ## `Formats`
 
-If you're using [global formats](/docs/usage/configuration#formats), you can strictly type the format names that are referenced in calls to `format.dateTime`, `format.number` and `format.list`.
+如果使用[全局格式](/docs/usage/configuration#formats)，可以严格限定传递给 `format.dateTime`、`format.number` 和 `format.list` 的格式名称。
 
 ```tsx
 function Component() {
   const format = useFormatter();
 
-  // ✖️ Unknown format string
+  // ✖️ 未知格式字符串
   format.dateTime(new Date(), 'unknown');
 
-  // ✅ Valid format
+  // ✅ 有效格式
   format.dateTime(new Date(), 'short');
 
-  // ✅ Valid format
+  // ✅ 有效格式
   format.number(2, 'precise');
 
-  // ✅ Valid format
+  // ✅ 有效格式
   format.list(['HTML', 'CSS', 'JavaScript'], 'enumeration');
 }
 ```
 
-To enable this validation, export the formats that you're using e.g. from your request configuration:
+要启用此验证，可从请求配置中导出您使用的 formats：
 
 ```ts filename="i18n/request.ts"
 import {Formats} from 'next-intl';
@@ -296,7 +296,7 @@ export const formats = {
 // ...
 ```
 
-Now, you can include the `formats` in your `AppConfig`:
+然后，将 `formats` 包含到您的 `AppConfig` 中：
 
 ```ts filename="global.ts"
 import {formats} from '@/i18n/request';
@@ -309,10 +309,10 @@ declare module 'next-intl' {
 }
 ```
 
-## Troubleshooting
+## 排查问题
 
-If you're encountering problems, double check that:
+如果遇到问题，请检查：
 
-1. The interface uses the correct name `AppConfig`.
-2. Your type declaration file is included in `tsconfig.json`.
-3. Your editor has loaded the latest types. When in doubt, restart your editor.
+1. 接口名称是否正确为 `AppConfig`。
+2. 类型声明文件是否包含在 `tsconfig.json` 中。
+3. 编辑器是否已加载最新类型，必要时重启编辑器。

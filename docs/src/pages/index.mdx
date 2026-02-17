@@ -1,5 +1,5 @@
 ---
-title: next-intl
+title: Next.js 的国际化（i18n）
 ---
 
 import Callout from '@/components/Callout';
@@ -18,62 +18,62 @@ import GitHubStarsLinkButton from '@/components/GitHubStarsLinkButton';
 <div className="bg-slate-50 dark:bg-gray-900">
 
 <Hero
-  title="Internationalization for Next.js"
-  description="Support multiple languages, with your app code becoming simpler instead of complex."
-  getStarted="Get started"
-  viewExample="View an example"
+  title="Next.js 的国际化"
+  description="支持多种语言，让你的应用代码变得更简单，而非复杂。"
+  getStarted="开始使用"
+  viewExample="查看示例"
   announcement={{
     href: 'https://learn.next-intl.dev',
-    label: 'The next-intl course is out now!'
+    label: 'next-intl 课程现已发布！'
   }}
 />
-<PartnerBanner intro="Presented by" />
+<PartnerBanner intro="由以下机构呈现" />
 
 <Section
-  title="Batteries included, minimalistic API"
-  description="Internationalization (i18n) is an essential part of the user experience, therefore next‑intl gives you all the parts you need to get language nuances right."
+  title="自带功能，简洁的 API"
+  description="国际化（i18n）是用户体验中不可或缺的一环，因此 next-intl 为你提供所有必要组件，以精确处理语言细节。"
 >
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 xl:gap-20">
     <FeaturePanel
       code={<CodeSnippets.icu />}
-      title="ICU message syntax"
-      description="Localize your messages with interpolation, cardinal & ordinal plurals, enum-based label selection and rich text."
+      title="ICU 消息语法"
+      description="使用插值、基数和序数复数、基于枚举的标签选择以及富文本来本地化你的消息。"
     />
     <FeaturePanel
       code={<CodeSnippets.datesTimesNumbers />}
-      title="Dates, times, numbers & more"
-      description="Apply appropriate formatting without worrying about server/client differences like time zones."
+      title="日期、时间、数字及更多"
+      description="无需担心服务器/客户端如时区的差异，即可应用合适的格式化。"
     />
     <FeaturePanel
       code={<CodeSnippets.typeSafe />}
-      title="Type-safe"
-      description="Speed up development with autocompletion for message keys and catch typos early with compile-time checks."
+      title="类型安全"
+      description="通过消息键的自动补全加速开发，利用编译时检查提前捕获拼写错误。"
     />
     <FeaturePanel
       code={<CodeSnippets.hooks />}
-      title="Hooks-based API"
-      description="Learn a single API that can be used across your code base to turn translations into plain strings or rich text."
+      title="基于 Hooks 的 API"
+      description="学习一个统一的 API，可在代码库中使用，将翻译内容转换为纯字符串或富文本。"
     />
     <FeaturePanel
       code={<CodeSnippets.buildOutput />}
-      title="Next.js-native and performance-obsessed"
-      description="App Router, Server Components, static rendering—pick the right tool for the right job, next-intl works everywhere."
+      title="Next.js 原生与性能至上"
+      description="支持 App Router、服务器组件、静态渲染——针对不同需求选择合适工具，next-intl 全部兼容。"
     />
     <FeaturePanel
       code={<CodeSnippets.routing />}
-      title="Internationalized routing"
-      description="Provide unique pathnames per language and optionally localize pathnames for search engine optimization."
+      title="国际化路由"
+      description="为每种语言提供独特路径名，并可选择性地本地化路径名以提升搜索引擎优化。"
     />
   </div>
 </Section>
-<Section title="Trusted by the Next.js community" description="Powering localized web experiences from marketing sites to e-commerce portals and sophisticated apps, next-intl ensures your users will be as happy as the developers building them.">
+<Section title="得到 Next.js 社区信赖" description="从营销网站到电商门户，再到复杂应用，next-intl 驱动多语言网页体验，确保你的用户和开发者一样满意。">
   <UserCompanies />
   <div className="mt-10 lg:mt-24 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-20">
     <UserTestimonial
       featured
       userName="Claudio Wunder"
-      position="Cross Project Council at OpenJS Foundation"
-      quote="We love next-intl. We've adopted it on the Node.js website along with Next.js' App Router. From all the i18n solutions out there for React and Next.js, so far the API and the design of next-intl has definitely become my favorite."
+      position="OpenJS Foundation 跨项目委员会成员"
+      quote="我们非常喜欢 next-intl。我们已在 Node.js 网站采用了它与 Next.js 的 App Router 结合使用。在所有为 React 和 Next.js 提供的 i18n 方案中，next-intl 的 API 和设计无疑是我的最爱。"
       portraitUrl="/user-claudio-wunder.jpeg"
       href="https://nodejs.org"
       bgUrlBright="/testimonial-bg-nodejs-bright.png"
@@ -82,16 +82,16 @@ import GitHubStarsLinkButton from '@/components/GitHubStarsLinkButton';
     />
     <UserTestimonial
       userName="Cali Castle"
-      position="Founder & CEO of Zolplay"
-      quote="I think next-intl should become a Next.js first-class citizen at some point, it’s just brilliant and simple to use."
+      position="Zolplay 创始人兼 CEO"
+      quote="我认为 next-intl 应该有一天成为 Next.js 的一等公民，它的设计既出色又简洁易用。"
       portraitUrl="/user-cali-castle.png"
       href="https://zolplay.com"
       linkTitle="Zolplay"
     />
     <UserTestimonial
       userName="Colin Sidoti"
-      position="Co-founder & CEO of Clerk"
-      quote="Interop with next-intl was a design requirement."
+      position="Clerk 联合创始人兼 CEO"
+      quote="与 next-intl 的互操作是我们的设计要求之一。"
       portraitUrl="/user-colin-sidoti.jpg"
       href="https://clerk.com/"
       linkTitle="Clerk"
@@ -99,8 +99,8 @@ import GitHubStarsLinkButton from '@/components/GitHubStarsLinkButton';
     <UserTestimonial
       featured
       userName="Kieran McHugh"
-      position="Founder & CEO of Daybridge"
-      quote="We were initially worried that adding support for multiple languages to our app would add overwhelming complexity, but next-intl genuinely made the process so much smoother than we expected. We've been able to build a calendar that can feel like home for millions more people around the world."
+      position="Daybridge 创始人兼 CEO"
+      quote="起初我们担心为应用添加多语言支持会增添过多复杂性，但 next-intl 真的让整个过程顺畅许多。我们得以打造一个为全球数百万人提供亲切体验的日历。"
       portraitUrl="/user-kieran-mchugh.jpg"
       href="https://www.daybridge.com"
       bgUrlBright="/testimonial-bg-daybridge-bright.png"
@@ -110,9 +110,9 @@ import GitHubStarsLinkButton from '@/components/GitHubStarsLinkButton';
     />
     <UserTestimonial
       userName="Dawid Gaweł"
-      position="Frontend Engineer at Todoist"
+      position="Todoist 前端工程师"
       featured
-      quote="We deeply care about internationalization. Our websites, apps, and materials are translated to almost 20 languages. Thanks a ton for working on this project!"
+      quote="我们非常重视国际化。我们的网站、应用和资料已翻译成近 20 种语言。非常感谢你们对这个项目的付出！"
       portraitUrl="/user-dawid-gawel.jpeg"
       href="https://todoist.com"
       linkTitle="Todoist"
@@ -123,8 +123,8 @@ import GitHubStarsLinkButton from '@/components/GitHubStarsLinkButton';
     <UserTestimonial
       className="lg:-mt-16"
       userName="Alvar Lagerlöf"
-      position="Senior Frontend Developer at Motatos"
-      quote="It's a great tool. We're using it now for our App Router rollout."
+      position="Motatos 高级前端开发"
+      quote="这是一个很棒的工具。我们现在用于我们的 App Router 推广中。"
       portraitUrl="/user-alvar-lagerlof.jpeg"
       href="https://www.motatos.com/"
       linkTitle="Motatos"
@@ -132,17 +132,17 @@ import GitHubStarsLinkButton from '@/components/GitHubStarsLinkButton';
     <UserTestimonial
       className="lg:-mt-16"
       userName="Jökull Solberg"
-      position="CTO of Trip to Japan"
-      quote="Amazing work on this library, launching our site today."
+      position="Trip to Japan CTO"
+      quote="这个库的工作非常棒，我们今天正式上线了网站。"
       portraitUrl="/user-jokull-solberg.jpeg"
       href="https://www.triptojapan.com/"
       linkTitle="Trip to Japan"
     />
     <UserTestimonial
       userName="Lachlan Campbell"
-      position="Web designer-developer at Watershed"
+      position="Watershed 网页设计师兼开发者"
       featured
-      quote="We're using next-intl on watershed.com! It's running entirely on App Router, using the Client Components version."
+      quote="我们在 watershed.com 上使用 next-intl！它完全运行在 App Router 上，使用的是客户端组件版本。"
       portraitUrl="/user-lachlan-campbell.jpeg"
       href="https://watershed.com/"
       linkTitle="Watershed"
@@ -152,18 +152,18 @@ import GitHubStarsLinkButton from '@/components/GitHubStarsLinkButton';
     />
   </div>
   <div className="mt-10 lg:mt-24 text-sm lg:ml-6 text-slate-600 dark:text-slate-400">
-    Using next-intl too? <Link target="_blank" href="https://github.com/amannn/next-intl/issues/138">Let us know!</Link>
+    你也在使用 next-intl 吗？ <Link target="_blank" href="https://github.com/amannn/next-intl/issues/138">告诉我们！</Link>
   </div>
 </Section>
 <div className="pt-10 pb-20 lg:pb-60">
   <Wrapper>
     <div className="text-center">
       <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white lg:text-4xl">
-        Get started with <code className="nextra-code">next-intl</code>
+        开始使用 <code className="nextra-code">next-intl</code>
       </h2>
       <div className="mt-4 flex items-center justify-center gap-2 md:mt-8 md:gap-4">
         <LinkButton href="/docs/getting-started" size="lg">
-          Read the docs
+          阅读文档
         </LinkButton>
         <GitHubStarsLinkButton />
       </div>

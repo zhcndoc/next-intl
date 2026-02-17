@@ -1,24 +1,23 @@
 import Callout from '@/components/Callout';
 
-# Internationalization in Next.js error files
+# Next.js 错误文件中的国际化
 
-The Next.js App Router's file convention provides two files that can be used for error handling:
+Next.js App Router 的文件约定提供了两个可用于错误处理的文件：
 
 1. [`not-found.js`](https://nextjs.org/docs/app/api-reference/file-conventions/not-found)
 2. [`error.js`](https://nextjs.org/docs/app/api-reference/file-conventions/error)
 
-This page provides practical guides for these cases.
+本页提供了这些情况的实用指南。
 
-**Tip:** You can have a look at the [App Router example](/examples#app-router) to explore a working app with error handling.
+**提示：** 你可以查看 [App Router 示例](/examples#app-router) 来探索包含错误处理功能的示例应用。
 
 ## `not-found.js`
 
 <Callout>
-  This section is only relevant if you're using [locale-based
-  routing](/docs/routing).
+  本节仅在你使用[基于语言环境的路由](/docs/routing)时相关。
 </Callout>
 
-Next.js renders the closest `not-found` page when a route segment calls the [`notFound`](https://nextjs.org/docs/app/api-reference/functions/not-found) function. We can use this mechanism to provide a localized 404 page by adding a `not-found` file within the `[locale]` folder.
+当路由段调用 [`notFound`](https://nextjs.org/docs/app/api-reference/functions/not-found) 函数时，Next.js 会渲染最近的 `not-found` 页面。我们可以利用此机制，在 `[locale]` 文件夹内添加一个 `not-found` 文件来提供本地化的 404 页面。
 
 ```tsx filename="app/[locale]/not-found.tsx"
 import {useTranslations} from 'next-intl';
@@ -29,11 +28,11 @@ export default function NotFoundPage() {
 }
 ```
 
-Note however that Next.js will only render this page when the `notFound` function is called from within a route, not for all unknown routes in general.
+但需要注意的是，Next.js 仅当路由内部调用了 `notFound` 函数时才会渲染这个页面，而不是针对所有未知路由。
 
-### Catching unknown routes
+### 捕获未知路由
 
-To catch unknown routes too, you can define a catch-all route that explicitly calls the `notFound` function.
+若要捕获未知路由，你可以定义一个捕获所有的路由，并显式调用 `notFound` 函数。
 
 ```tsx filename="app/[locale]/[...rest]/page.tsx"
 import {notFound} from 'next/navigation';
@@ -43,13 +42,13 @@ export default function CatchAllPage() {
 }
 ```
 
-After this change, all requests that are matched within the `[locale]` segment will render the `not-found` page when an unknown route is encountered (e.g. `/en/unknown`).
+此更改后，所有 `[locale]` 段内匹配的请求在遇到未知路由时都会渲染 `not-found` 页面（例如 `/en/unknown`）。
 
-### Catching non-localized requests
+### 捕获非本地化请求
 
-When the user requests a route that is not matched by the `next-intl` [middleware](/docs/routing/middleware), there's no locale associated with the request (depending on your [`matcher` config](/docs/routing/middleware#matcher-config), e.g. `/unknown.txt` might not be matched).
+当用户请求的路由未被 `next-intl` [middleware](/docs/routing/middleware) 匹配时，请求没有关联的语言环境（取决于你的 [`matcher` 配置](/docs/routing/middleware#matcher-config)，例如 `/unknown.txt` 可能不会被匹配到）。
 
-You can add a root `not-found` page to handle these cases too.
+你可以添加一个根目录的 `not-found` 页面来处理这些情况。
 
 ```tsx filename="app/not-found.tsx"
 'use client';
@@ -67,17 +66,17 @@ export default function NotFound() {
 }
 ```
 
-Note that the presence of `app/not-found.tsx` requires that a root layout is available, even if it's just passing `children` through.
+注意，存在 `app/not-found.tsx` 文件时，根布局是必需的，即使它只是简单地透传 `children`。
 
 ```tsx filename="app/layout.tsx"
-// Since we have a root `not-found.tsx` page, a layout file
-// is required, even if it's just passing children through.
+// 由于我们有根目录的 `not-found.tsx` 页面，
+// 所以必须定义布局文件，即使只是简单地透传 children。
 export default function RootLayout({children}) {
   return children;
 }
 ```
 
-For the 404 page to render, we need to call the `notFound` function in the root layout when we detect an incoming `locale` param that isn't valid.
+为了使 404 页面渲染，我们需要在根布局中检测到传入的 `locale` 参数无效时调用 `notFound` 函数。
 
 ```tsx filename="app/[locale]/layout.tsx"
 import {hasLocale} from 'next-intl';
@@ -96,7 +95,7 @@ export default function LocaleLayout({children, params}) {
 
 ## `error.js`
 
-When an `error` file is defined, Next.js creates an [error boundary](https://nextjs.org/docs/app/building-your-application/routing/error-handling#how-errorjs-works) within your layout that wraps pages accordingly to catch runtime errors:
+当定义了 `error` 文件时，Next.js 会在你的布局内创建一个[错误边界](https://nextjs.org/docs/app/building-your-application/routing/error-handling#how-errorjs-works)，以相应地包裹页面捕获运行时错误：
 
 <figure>
 <div className="w-full lg:w-[500px]">
@@ -110,12 +109,12 @@ When an `error` file is defined, Next.js creates an [error boundary](https://nex
 </div>
 
 <figcaption>
-  Schematic component hierarchy that Next.js creates internally.
+  Next.js 内部创建的组件层级示意。
 </figcaption>
 
 </figure>
 
-Since the `error` file must be defined as a Client Component, you have to use [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider) to provide messages in case it renders:
+由于 `error` 文件必须定义为客户端组件，你需要使用 [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider) 来在渲染时提供翻译消息：
 
 ```tsx filename="layout.tsx"
 import pick from 'lodash/pick';
@@ -130,7 +129,7 @@ export default async function RootLayout(/* ... */) {
       <body>
         <NextIntlClientProvider
           locale={locale}
-          // Make sure to provide at least the messages for `Error`
+          // 确保至少提供 `Error` 的翻译消息
           messages={pick(messages, 'Error')}
         >
           {children}
@@ -141,7 +140,7 @@ export default async function RootLayout(/* ... */) {
 }
 ```
 
-Once `NextIntlClientProvider` is in place, you can use functionality from `next-intl` in the `error` file:
+一旦引入了 `NextIntlClientProvider`，你就可以在 `error` 文件中使用 `next-intl` 的功能：
 
 ```tsx filename="error.tsx"
 'use client';
@@ -160,13 +159,13 @@ export default function Error({error, reset}) {
 }
 ```
 
-Note that `error.tsx` is loaded right after your app has initialized. If your app is performance-sensitive and you want to avoid loading translation functionality from `next-intl` as part of this bundle, you can export a lazy reference from your `error` file:
+需注意，`error.tsx` 会在应用初始化后立即加载。如果你的应用对性能敏感，且想避免将 `next-intl` 的翻译功能包含进这个包中，可以从 `error` 文件导出一个延迟加载的引用：
 
 ```tsx filename="error.tsx"
 'use client';
 
 import {lazy} from 'react';
 
-// Move error content to a separate chunk and load it only when needed
+// 将错误内容拆分到单独的 chunk，仅在需要时加载
 export default lazy(() => import('./Error'));
 ```

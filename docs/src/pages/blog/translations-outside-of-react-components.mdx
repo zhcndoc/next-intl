@@ -1,16 +1,16 @@
 ---
-title: How (not) to use translations outside of React components
+title: 如何（不）在 React 组件外使用翻译
 ---
 
 import StayUpdated from '@/components/StayUpdated.mdx';
 
-# How (not) to use translations outside of React components
+# 如何（不）在 React 组件外使用翻译
 
-<small>Apr 21, 2023 · by Jan Amann</small>
+<small>2023年4月21日 · 作者 Jan Amann</small>
 
-Have you ever wondered why `next-intl` doesn’t provide an API to consume translations outside of React components?
+你是否曾经好奇，为什么 `next-intl` 不提供在 React 组件外消费翻译的 API？
 
-The traditional way to internationalize your app with `next-intl` is to use the `useTranslations` hook:
+使用 `next-intl` 为你的应用程序实现国际化的传统方式是使用 `useTranslations` 钩子：
 
 ```tsx
 import {useTranslations} from 'next-intl';
@@ -21,27 +21,26 @@ function About() {
 }
 ```
 
-Why is it not possible to format messages e.g. in utility functions? Is there something missing here?
+为什么不可能在比如说工具函数中格式化消息？这里是否缺少了什么？
 
-This may seem like an unnecessary limitation, but the absence of this feature is intentional and aims to encourage the use of proven patterns that avoid potential issues—especially if they are easy to overlook.
+这看起来像是不必要的限制，但缺乏此功能是刻意为之，目的是鼓励采用经过验证的模式以避免潜在问题——尤其是那些容易被忽视的问题。
 
-## Example: Formatting error messages
+## 示例：格式化错误消息
 
-Let's assume you have a `FeedbackForm` component that posts user feedback to a backend endpoint. Unfortunately, the server occasionally returns a 504 status code due to the high volume of feedback. To improve the user experience, you would like to implement automatic retries and provide appropriate feedback to the user.
+假设你有一个 `FeedbackForm` 组件，会将用户反馈发送到后端接口。不幸的是，由于反馈量很大，服务器偶尔会返回 504 状态码。为了提升用户体验，你想实现自动重试并向用户提供适当的反馈。
 
-Here’s a naive approach. Can you spot an issue with this implementation?
+以下是一个幼稚的实现。你能发现此实现有什么问题吗？
 
 ```tsx
 import {useTranslations, useNow} from 'next-intl';
 import {addMinutes} from 'date-fns';
 
 function sendFeedback() {
-  // ❌ Bad implementation: Returns formatted messages
+  // ❌ 不好的实现：返回格式化后的消息
   API.sendFeedback().catch((error) => {
-    // In case of a gateway timeout, notify the
-    // user that we'll try again in 5 minutes
+    // 如果是网关超时，通知用户我们将在5分钟后重试
     if (error.status === 504) {
-      // (let's assume `t` is defined here for the sake of the example)
+      // （这里为了示例假设 `t` 已定义）
       return t('timeout', {nextAttempt: addMinutes(new Date(), 5)});
     }
   });
@@ -66,16 +65,16 @@ function FeedbackForm({user}) {
 }
 ```
 
-Have you found an issue?
+你发现问题了吗？
 
-Let's have a look together:
+我们一起来看看：
 
-1. The `nextAttempt` value is interpolated into the message in a utility function that is called by an event handler. There's no way how we can keep the remaining time updated as we're nearing the retry timeout.
-2. If the user changes the language, the error message will remain in the previously selected language, leading to a jarring user experience.
+1. `nextAttempt` 的值是在一个由事件处理器调用的工具函数中插值到消息里的。随着临近重试超时时间，我们无法保持剩余时间的更新。
+2. 如果用户切换语言，错误消息仍会保持之前选择的语言，导致体验不连贯。
 
-## A better way: Formatting during render
+## 更好的方式：在渲染时格式化
 
-To avoid these issues, we can format messages during the rendering phase of React, turning data structures into human readable strings.
+为避免上述问题，我们可以在 React 的渲染阶段格式化消息，将数据结构变成人类可读的字符串。
 
 ```tsx
 import {useTranslations, useNow} from 'next-intl';
@@ -85,12 +84,12 @@ function FeedbackForm({user}) {
   const t = useTranslations('Form');
   const [retry, setRetry] = useState();
   const now = useNow({
-    // Update every minute
+    // 每分钟更新一次
     updateInterval: 1000 * 60
   });
 
   function onSubmit() {
-    // ✅ Good implementation: Store data structures in state
+    // ✅ 好的实现：将数据结构存储于状态中
     API.sendFeedback().catch((error) => {
       if (error.status === 504) {
         setRetry(addMinutes(now, 5));
@@ -100,42 +99,42 @@ function FeedbackForm({user}) {
 
   return (
     <form onSubmit={onSubmit}>
-      {retry != null && <p>{t('timeout', {nextAttempt: nextAttempt - now})}</p>}
+      {retry != null && <p>{t('timeout', {nextAttempt: retry - now})}</p>}
       ...
     </form>
   );
 }
 ```
 
-Now, we can offer a better user experience by interactively counting down the time to the next attempt.
+现在，我们可以通过交互式倒计时提供更好的用户体验，显示距离下一次尝试的时间。
 
-Additionally, this approach is more robust to possibly unexpected states, like the user changing the language while the timeout message is being displayed.
+此外，这种方式对可能出现的意外状态更健壮，例如用户在超时消息显示时切换语言。
 
-## The exception that proves the rule
+## 证明规则的例外
 
-If you’re working with Next.js, you might want to translate i18n messages in [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes), [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) or the [Metadata API](https://nextjs.org/docs/app/api-reference/file-conventions/metadata).
+如果你使用的是 Next.js，你可能想在 [API 路由](https://nextjs.org/docs/pages/building-your-application/routing/api-routes)、[路由处理程序](https://nextjs.org/docs/app/building-your-application/routing/router-handlers)或者 [Metadata API](https://nextjs.org/docs/app/api-reference/file-conventions/metadata) 中对国际化消息进行翻译。
 
-`next-intl/server` provides a set of awaitable versions of the functions that you usually call as hooks from within components. These are agnostic from React and can be used for these cases.
+`next-intl/server` 提供了一组可等待的函数版本，这些函数通常是以钩子形式在组件内调用的。它们与 React 无关，可以用于这些场景。
 
 ```tsx
 import {getTranslations} from 'next-intl/server';
 
-// The `locale` is received from Next.js via `params`
+// `locale` 是通过 Next.js 的 `params` 接收到的
 const locale = params.locale;
 
-// This creates the same function that is returned by `useTranslations`.
+// 这会创建一个与 `useTranslations` 返回的函数相同的函数
 const t = await getTranslations({locale});
 
-// Result: "Hello world!"
+// 结果："Hello world!"
 t('hello', {name: 'world'});
 ```
 
-## This seems familiar
+## 这看起来很熟悉
 
-If you’ve been working with React for a longer time, you might have experienced the change [from `component{DidMount,DidUpdate,WillUnmount}` to `useEffect`](https://legacy.reactjs.org/docs/hooks-effect.html#explanation-why-effects-run-on-each-update). The reason why `useEffect` is superior is because it nudges the developer into a direction where the app is always in sync and by doing this, a whole array of potential issues just magically disappear.
+如果你使用 React 已经有一段时间了，可能经历过从 [`component{DidMount,DidUpdate,WillUnmount}` 到 `useEffect`](https://legacy.reactjs.org/docs/hooks-effect.html#explanation-why-effects-run-on-each-update) 的转变。`useEffect` 更优的原因在于它促使开发者将应用保持同步，从而一系列潜在问题自然消失。
 
-By limiting ourselves to only format messages during render, we're in a similar situation: The rendered output of translated messages is always in sync with app state and we can rely on the app being consistent.
+通过限制自己只在渲染期间格式化消息，我们处于类似的情形：翻译消息的渲染输出总是与应用状态同步，我们可以信赖应用的一致性。
 
-Related: ["How can I reuse messages?" in the structuring messages docs](/docs/usage/translations#structuring-messages)
+相关内容：[在结构化消息文档中“如何复用消息？”](/docs/usage/translations#structuring-messages)
 
 <StayUpdated />

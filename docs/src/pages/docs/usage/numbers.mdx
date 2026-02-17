@@ -2,27 +2,27 @@ import Callout from '@/components/Callout';
 import PartnerContentLink from '@/components/PartnerContentLink';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Number formatting
+# 数字格式化
 
-Prefer to watch a video?
+想要观看视频吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/05-formatting/01-number-formatting"
-  title="Number formatting"
+  title="数字格式化"
 />
 
-The formatting of numbers can vary depending on the user's locale and may include different rules such as:
+数字的格式化会根据用户的区域设置有所不同，可能包括不同的规则，例如：
 
-1. Decimal separators (e.g. "12.3" in `en-US` vs. "12,3" in `de-DE`)
-2. Digit grouping (e.g. "120,000" in `en-US` vs. "1,20,000" in `hi-IN`)
-3. Currency sign position (e.g. "12 €" in `de-DE` vs. "€ 12" in `de-AT`)
+1. 小数分隔符（例如 `en-US` 中的 "12.3" 与 `de-DE` 中的 "12,3"）
+2. 位数分组（例如 `en-US` 中的 "120,000" 与 `hi-IN` 中的 "1,20,000"）
+3. 货币符号位置（例如 `de-DE` 中的 "12 €" 与 `de-AT` 中的 "€ 12"）
 
-By using the formatting capabilities provided by `next-intl`, you can adjust to these variations and ensure that numbers are displayed accurately across your Next.js app for all users.
+通过使用 `next-intl` 提供的格式化功能，您可以适应这些差异，确保在您的 Next.js 应用中为所有用户准确显示数字。
 
-## Formatting plain numbers
+## 格式化普通数字
 
-When you're formatting plain numbers that are not part of a message, you can use a separate hook:
+当你格式化独立的数字（不作为消息的一部分）时，可以使用一个单独的 hook：
 
 ```js
 import {useFormatter} from 'next-intl';
@@ -30,52 +30,52 @@ import {useFormatter} from 'next-intl';
 function Component() {
   const format = useFormatter();
 
-  // Renders "$499.90"
+  // 渲染 "$499.90"
   format.number(499.9, {style: 'currency', currency: 'USD'});
 }
 ```
 
-See the MDN docs about [`NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat#Using_options) to learn more about the options you can pass to the `number` function or try the [interactive explorer](https://www.intl-explorer.com/NumberFormat) for `Intl.NumberFormat`.
+请参阅 MDN 文档中的 [`NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat#Using_options) 了解可传递给 `number` 函数的选项，或者尝试使用 [交互式浏览器](https://www.intl-explorer.com/NumberFormat) 探索 `Intl.NumberFormat`。
 
-If you have [global formats](/docs/usage/configuration#formats) configured, you can reference them by passing a name as the second argument:
+如果你配置了[全局格式](/docs/usage/configuration#formats)，可以通过传递名称作为第二个参数来引用它们：
 
 ```js
-// Use a global format
+// 使用全局格式
 format.number(499.9, 'precise');
 
-// Optionally override some options
+// 可选地覆盖一些选项
 format.number(499.9, 'price', {currency: 'USD'});
 ```
 
-## Numbers within messages
+## 消息中的数字
 
-Numbers can be embedded within messages by using the ICU syntax.
+数字可以通过 ICU 语法嵌入消息中。
 
 ```json filename="en.json"
 {
-  "basic": "Basic formatting: {value, number}",
-  "percentage": "Displayed as a percentage: {value, number, percent}",
-  "custom": "At most 2 fraction digits: {value, number, ::.##}"
+  "basic": "基础格式化：{value, number}",
+  "percentage": "以百分比显示：{value, number, percent}",
+  "custom": "最多 2 位小数：{value, number, ::.##}"
 }
 ```
 
-Note the leading `::` that is used to indicate that a skeleton should be used. See the ICU docs on [number skeletons](https://unicode-org.github.io/icu/userguide/format_parse/numbers/skeletons.html) to learn more about this.
+注意开头的 `::` 用于表示应使用 skeleton。想了解更多，请参阅 ICU 文档中的[数字 skeleton](https://unicode-org.github.io/icu/userguide/format_parse/numbers/skeletons.html)。
 
-These formats are supported out of the box: `currency` and `percent`.
+这些格式默认支持：`currency` 和 `percent`。
 
 <Callout>
 
-If you work with translators, it can be helpful for them to use an editor that supports the ICU syntax for numbers (e.g. the <PartnerContentLink name="numbers-messages" href="https://support.crowdin.com/icu-message-syntax/#number">Crowdin Editor</PartnerContentLink>).
+如果您与翻译人员合作，使用支持 ICU 数字语法的编辑器可能对他们有所帮助（例如 <PartnerContentLink name="numbers-messages" href="https://support.crowdin.com/icu-message-syntax/#number">Crowdin 编辑器</PartnerContentLink>）。
 
 </Callout>
 
-### Custom number formats
+### 自定义数字格式
 
-To use custom formats in messages, you can provide formatters that can be referenced by name.
+要在消息中使用自定义格式，您可以提供可通过名称引用的格式化程序。
 
 ```json filename="en.json"
 {
-  "price": "This product costs {price, number, currency}"
+  "price": "该产品价格为 {price, number, currency}"
 }
 ```
 
@@ -96,6 +96,6 @@ t(
 
 <Callout>
 
-To reuse number formats for multiple components, you can configure [global formats](/docs/usage/configuration#formats).
+若想在多个组件间复用数字格式，您可以配置[全局格式](/docs/usage/configuration#formats)。
 
 </Callout>

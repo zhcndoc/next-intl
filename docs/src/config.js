@@ -1,6 +1,6 @@
 module.exports = {
-  title: 'next-intl',
-  description: 'Internationalization (i18n) for Next.js',
+  title: 'Next.js 的国际化（i18n）',
+  description: 'Next Intl 中文文档',
   baseUrl: process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? 'https://' + process.env.VERCEL_PROJECT_PRODUCTION_URL
     : 'http://localhost:3000',

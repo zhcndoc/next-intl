@@ -1,43 +1,43 @@
 ---
 title: 'useExtracted'
-subtitle: The Tailwind of i18n?
+subtitle: i18n 的 Tailwind 版？
 ---
 
 import StayUpdated from '@/components/StayUpdated.mdx';
 import PartnerContentLink from '@/components/PartnerContentLink';
 import BlogVideo from '@/components/BlogVideo';
 
-# useExtracted: The Tailwind of i18n?
+# useExtracted: i18n 的 Tailwind 版？
 
-<small>Nov 7, 2025 · by Jan Amann</small>
+<small>2025年11月7日 · 作者 Jan Amann</small>
 
-For quite some time, I used to be a Tailwind skeptic. But one day, I decided to _give it five minutes_ — and I was hooked. It's core idea is just so irresistibly pragmatic. Once you've tried it, you just can't go back.
+曾经很长一段时间，我对 Tailwind 持怀疑态度。但有一天，我决定 _试用五分钟_ ——结果一发不可收拾。它的核心理念实在是太务实了，一旦尝试过，就回不去了。
 
-It made me wonder: "What would the Tailwind for i18n look like?"
+这让我思考：“i18n 的 Tailwind 会是什么样子呢？”
 
-Now first of all, `next-intl` is doing very well and has recently crossed [1M weekly downloads](https://www.npmjs.com/package/next-intl) (thank you everyone!). So it seems like there are plenty of people who are quite happy with how it works today. And it's core APIs like `useTranslations` are surely here to stay.
+首先，`next-intl` 表现非常不错，最近刚刚突破了 [每周 100 万次下载量](https://www.npmjs.com/package/next-intl)（感谢大家！）。这说明有很多人对它现有的使用方式很满意。而且它的核心 API 例如 `useTranslations` 也肯定会继续存在。
 
-But will we continue to write code the same way tomorrow, as we do today?
+但明天我们还会像今天这样写代码吗？
 
-It seems evident that we will not. AI agents are increasingly making their way into our workflows, and innovations like Cursor and Claude Code are becoming more powerful by the day.
+显然不会。越来越多的 AI 代理融入了我们的工作流，像 Cursor 和 Claude Code 这样的创新也日新月异。
 
-So what makes a library suitable for AI-first development? Probably, that it was already a great option for humans in the first place. Tailwind wasn't "built for AI", it was a fantastic idea for how to make styling easy for humans. But now, it's become the default for agentic tools when it comes to styling.
+那么，什么样的库适合 AI 优先的开发呢？大概是：一开始对人类开发者就非常友好。Tailwind 并非“为 AI 打造”，而是为简化人类的样式编写而诞生的绝佳方案。如今，它成了代理工具默认的样式选择。
 
-So what makes Tailwind _Tailwind_?
+那什么造就了 Tailwind 的独特之处？
 
-## Design principles
+## 设计原则
 
-If we consider the design of Tailwind, we can see that an i18n solution that follows the same principles might look something like this:
+如果我们看看 Tailwind 的设计，那么一个遵循相同原则的 i18n 解决方案可能是这样的：
 
-1. **Colocation**: Similar to how Tailwind avoids the need to manage separate stylesheets, there should not be a need for manually managing JSON message catalogs when adding, updating or removing messages. Message catalogs can however act as a compile target.
-2. **Local reasoning**: Generative AI is very good at Tailwind since it only requires very small context windows. Having to read entire message catalogs leads to context pollution and should therefore be avoided (at least not without tool calls).
-3. **No naming of things**: Not having to come up with names is a major productivity boost, therefore manual keys should be avoided as much as possible.
-4. **Purging**: When code is quickly changed, there shouldn't be any dead code left behind. Similar to how Tailwind can purge unused styles, we should purge unused messages automatically.
-5. **Minification**: Tailwind class names have a tiny bundle footprint. In the same way, messages should also use minified keys that ensures bundles are as small as possible.
-6. **Prototype-friendly, production-ready**: Tailwind looks exactly the same, regardless of whether it's used for a quick prototype or a production app. In the same way, there should be a single API that avoids upfront structural decisions related to the project's size and complexity.
-7. **Refactoring-friendly**: Moving code across components is seamless with Tailwind, this should be the case for your messages as well.
+1. **共置（Colocation）**：类似 Tailwind 避免管理分离的样式表，添加、更新或删除消息时不应需要手动管理 JSON 消息目录。但消息目录依然可以作为编译目标。
+2. **局部推理（Local reasoning）**：生成式 AI 之所以擅长 Tailwind，是因为它只需很小的上下文窗口。读取整个消息目录会导致上下文污染，因此应避免（至少不应在无工具调用时这么做）。
+3. **无需命名（No naming of things）**：不必想名字极大提升生产力，因此应尽可能避免手动定义键。
+4. **清理（Purging）**：代码经常修改时不应留下死代码。类似 Tailwind 会清除未使用的样式，我们也应自动清除未使用的消息。
+5. **压缩（Minification）**：Tailwind 类名极简，消息也应使用压缩后的键，确保包体积最小。
+6. **既适合原型又适合生产（Prototype-friendly, production-ready）**：无论是快速原型还是生产应用，Tailwind 都表现一致。同样，应该有单一 API，避免事先对项目大小和复杂度做结构性判断。
+7. **便于重构（Refactoring-friendly）**：Tailwind 在跨组件移动代码时非常无缝，消息也应具备同样能力。
 
-While `next-intl` has answers to some of these questions, ultimately the truth is that there's currently potential left on the table. Therefore, after [publishing an RFC](https://github.com/amannn/next-intl/blob/main/rfcs/001-message-extraction.md) about two months ago—today, I'm incredibly excited to share what I believe could be the answer to this:
+虽然 `next-intl` 对其中某些问题已有解决方案，但实际上还有提升空间。因此，在大约两个月前发布了一个 [RFC](https://github.com/amannn/next-intl/blob/main/rfcs/001-message-extraction.md)，今天我非常兴奋地分享我认为可能就是答案的方案：
 
 ```tsx
 import {useExtracted} from 'next-intl';
@@ -48,29 +48,29 @@ function InlineMessages() {
 }
 ```
 
-## `useExtracted` in action
+## `useExtracted` 现场演示
 
-I already made you read far too much, so here's a demo to show you how it works.
+我已经让你读了太多文字，下面给你看个演示。
 
-Let's start with an app that has `next-intl` installed, and we'll make a previously static label eligible for translation to other languages:
+我们先从一个安装了 `next-intl` 的应用开始，把之前写死的文本标签改成支持翻译的：
 
 <BlogVideo muted src="/blog/use-extracted/demo-01.mp4" />
 
-No naming of keys, no CLI to invoke, just `next dev` as you're used to.
+不用写键，也不用调 CLI，就像平常一样直接运行 `next dev`。
 
-And you get an always-in-sync JSON catalog for free.
+而且你会免费获得始终同步的 JSON 目录。
 
-## Everything you like about `useTranslations`, but without the keys
+## 拥有你喜欢的 `useTranslations` 功能，却无需键名
 
-If you've internationalized an app before, you know that we need to translate more than just plain strings.
+如果你之前做过国际化，你会知道需要翻译的远不止简单字符串。
 
-So let's use some ICU features:
+所以我们用一些 ICU 功能：
 
 <BlogVideo muted src="/blog/use-extracted/demo-02.mp4" />
 
-Yep, TypeScript will automatically validate that you're using the `number` formatter in your messages when needed—all without additional setup. By doing this, we can ensure that `Intl.NumberFormat` will be used to turn a raw number into a readable string that uses locale-sensitive formatting.
+没错，TypeScript 会自动校验你在消息中需要使用数字格式化时，是放了 `number` 格式化器——完全无需额外设置。这样可以保证用 `Intl.NumberFormat` 把数字格式化为符合地区习惯的可读字符串。
 
-Also `t.rich` is of course supported:
+当然 `t.rich` 也支持：
 
 ```tsx
 t.rich('Please refer to the <link>guidelines</link>.', {
@@ -78,7 +78,7 @@ t.rich('Please refer to the <link>guidelines</link>.', {
 });
 ```
 
-And yes, there's also an awaitable version for Server Components and friends:
+且有适用于服务器组件及相关环境的异步版本：
 
 ```tsx filename="page.tsx"
 import {getExtracted} from 'next-intl/server';
@@ -97,17 +97,17 @@ export default async function ProfilePage() {
 
 ---
 
-Ok, now let's take a step back. Components that use inline messages appear to be easy to generate for AIs, all without having to load lengthy message catalogs into its precious context window.
+好，稍作回顾。使用内联消息的组件易于由 AI 生成，也无需把大量消息目录加载进宝贵的上下文窗口。
 
-But what about using AI to _translate_ your messages?
+但是用 AI 来 _翻译_ 你的消息怎么样？
 
-## Context is key
+## 上下文才是关键
 
-While providing context was always important for translators, it seems like in the AI era, doing this in an easy-to-digest way that's based on text is even more important.
+虽然为译者提供上下文一直很重要，似乎在 AI 时代，用易于理解的文本方式提供上下文更是关键。
 
-If you've previously used hand-crafted keys like `auth.login.title`, you already did your part to provide some context that clarifies the intent of the message.
+如果你之前用过 `auth.login.title` 这样手动设计的键，已经在一定程度上帮助澄清了消息意图。
 
-But what if our translations look like this:
+但如果翻译看起来是这样：
 
 ```json
 {
@@ -115,11 +115,11 @@ But what if our translations look like this:
 }
 ```
 
-Not so easy.
+就不那么容易理解了。
 
-But again, making something easy for AIs was probably always about making it easy for humans in the first place. And we already found a solution to this—wait for it—**30 years ago**!
+但再次强调，为 AI 设计的简单办法其实就是为人类设计简单办法。我们找到了解决方案——并且是在 **30 年前**！
 
-[GNU gettext](https://en.wikipedia.org/wiki/Gettext) introduced `.po` files for message catalogs, which look like this:
+[GNU gettext](https://en.wikipedia.org/wiki/Gettext) 引入了 `.po` 文件作为消息目录，格式如下：
 
 ```po
 #. Greeting shown to user when logging back in
@@ -128,43 +128,43 @@ msgid "0MXX5B"
 msgstr "Welcome back!"
 ```
 
-Everything is there: An optional description, a filename reference, an ID and the label itself.
+这里包含了：可选描述、文件路径引用、ID 以及文本本身。
 
-So this is what you'll now be able to use with `next-intl` as well:
+这正是你现在能在 `next-intl` 中使用的：
 
 <BlogVideo muted src="/blog/use-extracted/demo-03.mp4" />
 
-Note how enabling the `.po` formatter also activates a Turbopack loader that will parse your locale catalogs as plain JavaScript objects for you, making them easy to consume in your app. It's really just a compile target.
+注意启用 `.po` 格式后，也会激活 Turbopack 的一个加载器，帮你把本地目录解析为普通的 JavaScript 对象，方便在应用中使用。它的本质就是个编译目标。
 
-That being said, if JSON is your jam, that's totally fine too. And soon, there will also be support for custom formatters that will allow you to incorporate file references and descriptions in whatever format you prefer.
+当然，如果你喜欢 JSON 格式，也完全没问题。此外，即将支持自定义格式化器，允许你用自己喜欢的格式包含文件引用和描述信息。
 
-## Now we're ready to translate
+## 现在，我们准备翻译了
 
-With this, we're in a much better position to get accurate and user-friendly translations.
+这样，我们能获得更准确且用户友好的翻译。
 
-So first of all, let's add a new locale:
+首先，添加一个新语言环境：
 
 <BlogVideo muted src="/blog/use-extracted/demo-04.mp4" />
 
-Nope, the video wasn't cut. Neither was there a paste from the clipboard. When you add a new locale, `next-intl` will automatically populate the catalog with empty entries for all messages that you support.
+没剪辑，也没粘贴。当你添加新语言时，`next-intl` 会自动为所有支持的消息创建空条目。
 
-So from here, you can start translating your messages however you want, either with an editor, or in the easiest case by using an AI-based translation service like <PartnerContentLink href="https://crowdin.com" title="Crowdin">Crowdin</PartnerContentLink>:
+接下来，你可以用编辑器翻译这些消息，或者使用基于 AI 的翻译服务，比如 <PartnerContentLink href="https://crowdin.com" title="Crowdin">Crowdin</PartnerContentLink>：
 
 <BlogVideo muted src="/blog/use-extracted/demo-05.mp4" />
 
-More on this in the [localization management docs](/docs/workflows/localization-management).
+更多内容请参考 [本地化管理文档](/docs/workflows/localization-management)。
 
-## What sorcery is this?
+## 这是什么魔法？
 
-Behind the scenes, `useExtracted` integrates with Next.js at two touch points:
+`useExtracted` 在幕后与 Next.js 有两个衔接点：
 
-**1. Turbopack loader for extration**
+**1. 用于提取的 Turbopack 加载器**
 
-The core piece is a loader that will be called for source files containing `useExtracted` calls.
+核心是一个加载器，会针对包含 `useExtracted` 的源码文件调用。
 
-Note that only Next.js 16+ is supported, since it introduced an optimization for Turbopack that allows to peak inside files to check if they even use the `useExtracted` hook before actually processing the file.
+注意仅支持 Next.js 16+，因为其引入了 Turbopack 优化，能在处理文件前预先检查是否真的用到了 `useExtracted`。
 
-If `useExtracted` is found, then SWC—the Rust-based compiler that powers Next.js—will parse the file, followed by a JavaScript transformer that will compile the file to a `useTranslations` call:
+如果发现 `useExtracted`，则由 SWC（Next.js 使用的 Rust 编译器）解析文件，接着一个 JavaScript 转换器会将其编译成调用 `useTranslations`：
 
 ```tsx
 import {useTranslations} from 'next-intl';
@@ -172,18 +172,18 @@ import {useTranslations} from 'next-intl';
 function InlineMessages() {
   const t = useTranslations();
 
-  // Pick up the minified key
+  // 取用压缩后的键
   return <h1>{t('dPSc42')}</h1>;
 }
 ```
 
-Additionally, in case there are changes to the messages previously known for this file, the loader will also emit an updated messages catalog for your source locale, and also your target locales will be kept in sync. By doing this, Turbopack HMR will reflect the changes instantly in your running app.
+另外，如果这次保存中消息发生了变化，加载器会生成更新后的消息目录（包含源语言和目标语言），从而 Turbopack 的 HMR 会即时反映到运行中的应用上。
 
-If no messages were changed as part of a save, the extraction part will be skipped altogether.
+如果保存时消息未变，提取过程将直接跳过。
 
-**2. Turbopack loader for catalogs**
+**2. 用于消息目录的 Turbopack 加载器**
 
-To support catalog formats like `.po` (and custom ones in the future), a second Turbopack loader will be enabled that efficiently reads your catalogs and returns them as plain JavaScript objects:
+为了支持 `.po`（以及未来的自定义格式），会启用第二个加载器，高效读取你的目录并转换成普通 JavaScript 对象：
 
 ```tsx filename="i18n/request.ts"
 import {getRequestConfig} from 'next-intl/server';
@@ -191,35 +191,35 @@ import {getRequestConfig} from 'next-intl/server';
 export default getRequestConfig(async () => {
   const locale = 'en';
 
-  // E.g. `{"NhX4DJ": "Hello"}`
+  // 例如 `{"NhX4DJ": "Hello"}`
   const messages = (await import(`../../messages/${locale}.po`)).default;
 
   // ...
 });
 ```
 
-Oh and yes, Webpack is also supported.
+哦对，Webpack 也支持。
 
-## Ready to try it?
+## 准备好试试了吗？
 
-I could probably go on, e.g. about how `useExtracted` also works out-of-the-box in test environments without any compilation at all, but I think I've already made my point.
+我本可以继续讲，比如 `useExtracted` 在测试环境中开箱即用，甚至无需编译，但我想我已经说够了。
 
-If you're excited about this as well, I'd really love to hear your feedback.
+如果你也对此感兴趣，欢迎反馈。
 
-Give the [demo app](https://github.com/amannn/next-intl-example-extracted) a try and share your [feedback](https://github.com/amannn/next-intl/discussions/2036) with me. If you're an early adopter, you can already try this feature in your app with `next-intl@4.5`, but please note that it's currently considered experimental, so changes should be expected.
+试试 [演示应用](https://github.com/amannn/next-intl-example-extracted)，并给我分享你的 [反馈](https://github.com/amannn/next-intl/discussions/2036)。如果你是早期用户，可以在 `next-intl@4.5` 版本中试用此功能，但请注意它目前处于实验阶段，功能还会变化。
 
-Also, it's worth mentioning again that the `useTranslations` API that you might be using today is not going anywhere. If you're already happy with it, then by all means keep using it. Personally, I think `useExtracted` has a lot of potential, but only time will tell if this is true.
+另外，再次强调你今天用的 `useTranslations` API 不会消失。如果你对此满意，请继续使用。个人认为 `useExtracted` 有很大潜力，但时间会检验一切。
 
-As the feature stabilizes, you'll of course be the first to hear about best practices and in-depth tutorials if you're a member of 🌐 [learn.next-intl.dev](https://learn.next-intl.dev).
+随着功能稳定，如果你是 🌐 [learn.next-intl.dev](https://learn.next-intl.dev) 的会员，你将第一时间收到最佳实践和深入教程。
 
 — Jan
 
-PS: A special thank you goes to projects & companies like [gettext](https://en.wikipedia.org/wiki/Gettext), [Lingui](https://lingui.dev/), [FormatJS](https://formatjs.github.io/), [Wordpress](https://www.npmjs.com/package/@wordpress/i18n), and [Zendesk](https://www.youtube.com/watch?v=fUQAXo2DayQ) for their pioneering work in the space of message extraction. I'd also like to thank [Jan Nicklas](https://x.com/jantimon) for his work on [`next-yak`](https://github.com/DigitecGalaxus/next-yak), pushing the boundaries of Turbopack and sharing his insights.
+附言：特别感谢像 [gettext](https://en.wikipedia.org/wiki/Gettext)、[Lingui](https://lingui.dev/)、[FormatJS](https://formatjs.github.io/)、[Wordpress](https://www.npmjs.com/package/@wordpress/i18n) 和 [Zendesk](https://www.youtube.com/watch?v=fUQAXo2DayQ) 这些项目和公司在消息提取领域的开创性工作。我也感谢 [Jan Nicklas](https://x.com/jantimon) 在 [`next-yak`](https://github.com/DigitecGalaxus/next-yak) 方面的成果，他推动了 Turbopack 的边界并分享了相关见解。
 
-**Further reading:**
+**相关阅读：**
 
-- [Message extraction docs](/docs/usage/extraction)
-- [Next.js plugin docs](/docs/usage/plugin)
-- [RFC: Message extraction](https://github.com/amannn/next-intl/blob/main/rfcs/001-message-extraction.md)
+- [消息提取文档](/docs/usage/extraction)
+- [Next.js 插件文档](/docs/usage/plugin)
+- [RFC：消息提取](https://github.com/amannn/next-intl/blob/main/rfcs/001-message-extraction.md)
 
 <StayUpdated />

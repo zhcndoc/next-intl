@@ -1,44 +1,44 @@
 ---
-title: 'Ahead-of-time compilation for next-intl'
+title: 'next-intl 的预编译（Ahead-of-time compilation）'
 ---
 
 import StayUpdated from '@/components/StayUpdated.mdx';
 
-# Ahead-of-time compilation for next-intl
+# next-intl 的预编译（Ahead-of-time compilation）
 
-<small>Jan 28, 2026 · by Jan Amann</small>
+<small>2026年1月28日 · 作者 Jan Amann</small>
 
-**tl;dr:** By flipping a single `precompile` flag in your `next.config.ts`, you can **immediately drop ~9KB** of compressed JavaScript from your bundle size and also improve the runtime performance of your app.
+**简要说明：** 只需在你的 `next.config.ts` 中切换一个 `precompile` 标志，就能**立刻减少约 9KB** 压缩后的 JavaScript 包大小，同时提升应用的运行时性能。
 
-The cost of adding `next-intl` with a single client-side translation to an app now amounts to **~4KB** of compressed JavaScript.
+现在，向一个应用添加 `next-intl` 并用单一客户端翻译的代价约为**~4KB** 压缩后的 JavaScript。
 
-## How we got here
+## 我们是如何走到这里的
 
-When React Server Components were announced, I was pretty excited.
+当 React Server Components 宣布时，我非常激动。
 
-I immediately saw [potential for `next-intl`](https://www.smashingmagazine.com/2023/03/internationalization-nextjs-13-react-server-components/) to improve performance for its users by moving more work to the server—leaving the client with less JavaScript to parse and evaluate.
+我立刻看到了[ `next-intl` 的潜力](https://www.smashingmagazine.com/2023/03/internationalization-nextjs-13-react-server-components/)，因为它可以通过将更多的工作转移到服务器端来提升用户的性能表现——使客户端解析和执行的 JavaScript 量减少。
 
-But I also have to admit, I got a bit carried away. While for very interactive apps this was never really an option, when working on apps with very sensitive performance requirements, I'd try to almost dogmatically avoid client-side translations entirely.
+但我也得承认，我有些过于兴奋了。对于高度交互的应用来说，这从来都不是一个真正可行的选项，而当我在处理对性能极其敏感的应用时，我几乎会固执地避免在客户端进行翻译。
 
-And while you can get pretty far with this approach, it can require quite a few tricks like leaning heavily into [donut components](https://nextjs.org/docs/app/getting-started/server-and-client-components#interleaving-server-and-client-components) and other fancy patterns.
+虽然这种做法能取得不错的效果，但通常需要借助一些技巧，比如大量使用[甜甜圈组件（donut components）](https://nextjs.org/docs/app/getting-started/server-and-client-components#interleaving-server-and-client-components)和其他复杂的模式。
 
-It almost felt like a game of "the floor is lava", trying to find clever tricks to avoid touching the client with translations and ultimately avoid shipping an ICU parser to the client. I know some of you did the same.
+这几乎像在玩“地板是熔岩”的游戏，想尽办法避免让客户端处理翻译，最终避免将 ICU 解析器打包发送给客户端。我知道你们中有人也这么做过。
 
-## A different perspective
+## 不同的视角
 
-About three years ago, I started a conversation with [Jan Nicklas](https://x.com/jantimon) about how we could best leverage the new Server Components paradigm for internationalization.
+大约三年前，我和 [Jan Nicklas](https://x.com/jantimon) 开启了一场关于如何最优利用新的 Server Components 范式来做国际化的讨论。
 
-At some point, he shared an idea with me that he'd implement in a prototype: `icu-to-json`, a fresh take on removing the ICU parser from the runtime. I always wanted to integrate this into `next-intl`, but for the longest time, it seemed like a big ask architecturally.
+在某个时刻，他和我分享了他想在原型中实现的一个想法：`icu-to-json`，这是一个全新的思路，用于从运行时剥离 ICU 解析器。我一直想把它集成到 `next-intl` 中，但很长一段时间，这在架构上看起来是一个很大的挑战。
 
-But then, about two months ago, I shipped the first implementation of [`useExtracted`](/docs/usage/extraction), which happened to provide just the infrastructure that finally unlocked this feature.
+不过，大约两个月前，我发布了 [`useExtracted`](/docs/usage/extraction) 的第一个实现，它恰好提供了最终实现这个功能所需的基础设施。
 
-The loader I implemented for processing `.po` files and later for [custom formats](/docs/usage/plugin#formats-custom) looked like a perfect fit to precompile messages ahead of time.
+我为处理 `.po` 文件以及后续支持的[自定义格式](/docs/usage/plugin#formats-custom)实现的 loader，看起来非常适合在构建时预编译消息。
 
-So it was time to get to work.
+于是，工作就开始了。
 
-## Challenges with precompilation
+## 预编译的挑战
 
-When compiling a simple message like `Hello {name}!`, you might get the following AST as a result:
+当编译一条简单的消息，如 `Hello {name}!`，你可能得到如下的 AST 结构：
 
 ```json
 [
@@ -48,13 +48,13 @@ When compiling a simple message like `Hello {name}!`, you might get the followin
 ]
 ```
 
-In this case, `0` represents a string node and `1` represents an argument.
+这里，`0` 表示字符串节点，`1` 表示参数。
 
-But while the compilation work is already done, the size of the AST data structure is significantly larger than our initial message. So even though this can avoid work at runtime, it adds significant weight to the bundle.
+虽然编译工作已经完成，但 AST 数据结构的大小远大于我们最初的消息文本。因此，尽管这能避免运行时的解析工作，却增加了包的体积。
 
 ---
 
-Another approach is to compile messages into function modules, like this:
+另一种方法是将消息编译成函数模块，像这样：
 
 ```tsx filename="messages/en.js"
 function hello(name) {
@@ -62,46 +62,46 @@ function hello(name) {
 }
 ```
 
-The problem with this approach, however, is that such functions cannot be serialized across the RSC bridge when passed to Client Components. Libraries that use this approach therefore resort to importing the generated function into components to avoid crossing the bridge.
+但问题是，这类函数不能跨越 RSC 桥传递给客户端组件。采用这种方式的库不得不将生成的函数直接导入组件中，以避免跨桥传递。
 
-And in turn, this results in all locale-specific variants of a message being bundled with your code, thereby defeating the possibility of splitting messages by locale.
+这反过来导致所有基于 locale 的消息变体都会被打包进你的代码，失去了按语言拆分消息的可能性。
 
-`next-intl` is used by websites like [Ethereum.org](https://ethereum.org), which currently ships in 67 languages. So the function-based approach is just not an option here.
+`next-intl` 被像 [Ethereum.org](https://ethereum.org) 这样使用 67 种语言的网站采用，所以基于函数的方式对我们来说根本不是选项。
 
-## Minified ASTs
+## 精简的 AST
 
-Architecturally, precompiled ASTs are a better fit for `next-intl`—but they were too large.
+从架构上讲，预编译的 AST 更适合 `next-intl`——但它们太大了。
 
-The core idea of Jan Nicklas's prototype was to minify ASTs, largely avoiding object properties in favor of arrays with positional entries. I took his idea and was able to squeeze the size even further.
+Jan Nicklas 原型的核心思路是对 AST 进行压缩，主要避免使用对象属性，转而用带有位置项的数组。我采纳了他的想法，并进一步压缩了体积。
 
-So here's what it looks like:
+它看起来是这样：
 
 ```tsx
 compile('Hello {name}!');
 ```
 
-… becomes:
+… 变为：
 
 ```json
 ["Hello ", ["name"], "!"]
 ```
 
-… and from there, we can evaluate the AST with a minimal runtime:
+然后我们可以用一个极简运行时对这个 AST 进行求值：
 
 ```tsx
 // "Hello World!"
 format(compiled, 'en', {name: 'World'});
 ```
 
-And the best part is that this doesn't have any overhead at all for plain strings:
+最棒的是，这对纯字符串没有任何开销：
 
 ```
 "Welcome!" → "Welcome!"
 ```
 
-Based on my experience, such plain strings often account for the majority of messages that typical apps ship with, so this is a big win.
+根据我的经验，这类纯字符串通常占据应用大部分消息的比例，所以这是一个非常重要的优化。
 
-That said, this approach scales up to more complex messages and supports the full range of ICU features that you know from `next-intl`:
+同时，这个方法也支持更复杂的消息和所有 `next-intl` 支持的 ICU 特性：
 
 ```tsx
 compile(
@@ -109,7 +109,7 @@ compile(
 );
 ```
 
-… becomes:
+… 变成：
 
 ```
 ["You have ", ["count", 2, {
@@ -119,39 +119,39 @@ compile(
 }], "."]
 ```
 
-Also, rich text is of course supported:
+当然，也支持富文本：
 
 ```tsx
 compile('Hello <b>World</b>');
 ```
 
-… becomes:
+… 变成：
 
 ```json
 ["Hello ", ["b", "World"]]
 ```
 
-## Minimal runtime
+## 极简运行时
 
-So what is this `format` function?
+那么这个 `format` 函数究竟是什么？
 
 ```tsx
 format(compiled, 'en', {count: 2});
 ```
 
-It's a minimal runtime that efficiently evaluates the optimized AST and calls into native `Intl` APIs to format dates, numbers, and more.
+它是一个极简运行时，可以高效地计算优化后的 AST，调用原生的 `Intl` API 来格式化日期、数字等。
 
-All that, in **~650 bytes** (compressed).
+而这部分代码的大小约为**~650 字节**（压缩后）。
 
-So if you make the switch to ahead-of-time compilation, this will **immediately drop ~9KB** of compressed JavaScript from both your server and client bundle. The cost of adding `next-intl` with a single client-side translation to an app now amounts to **~4KB** of compressed JavaScript.
+所以如果你切换到预编译，这会**立即减少约 9KB** 压缩后的 JavaScript 体积，服务器和客户端的包都能减小。使用带有单一客户端翻译的 `next-intl`，整体成本缩减到约 **4KB** 压缩后。
 
-Additionally, formatting of messages will now be significantly faster, as the parsing overhead is gone from the runtime and evaluation of the optimized AST is very cheap.
+另外，消息格式化的速度也会大幅提升，因为运行时不再需要进行解析，评估优化后的 AST 开销极小。
 
-## Turn on precompilation today
+## 立即开启预编译
 
-The good news is that all of this is built right into `next-intl`, and there's no new API to learn.
+好消息是，这一切都内建在 `next-intl` 中，无需学习新 API。
 
-Just flip a switch:
+只需开启一个开关：
 
 ```tsx filename="next.config.ts" {9-10}
 import createNextIntlPlugin from 'next-intl/plugin';
@@ -163,7 +163,7 @@ const withNextIntl = createNextIntlPlugin({
       locales: 'infer',
       format: 'json',
 
-      // Enable precompilation
+      // 启用预编译
       precompile: true
     }
   }
@@ -172,41 +172,41 @@ const withNextIntl = createNextIntlPlugin({
 export default withNextIntl();
 ```
 
-If you haven't seen the `messages` config option yet, it was previously shipped as part of `useExtracted` and is now relevant for precompilation as well.
+如果你还没接触过 `messages` 配置项，它之前是随 `useExtracted` 发布的，现在预编译也用得上它。
 
-But that's it. Your existing calls to `useTranslations` and `useExtracted` will automatically benefit from this optimization—no code changes needed.
+就这些。你现有对 `useTranslations` 和 `useExtracted` 的调用将自动受益于此优化，无需改动代码。
 
-## One gotcha though
+## 但有一点需要注意
 
-One aspect to call out here is that [`t.raw`](/docs/usage/translations#raw-messages) is not supported with precompilation.
+需要指出的是，预编译不支持 [`t.raw`](/docs/usage/translations#raw-messages)。
 
-As messages are parsed at build time, we can't know if you're planning to call `t.raw` on them later, so this feature isn't supported with precompiled messages.
+因为消息在构建时已被解析，编译时无法判断你是否会在运行时调用 `t.raw`，所以预编译消息不支持这个特性。
 
-But let's take a step back here.
+不过，请稍作回顾。
 
-Historically, `t.raw` was added to support raw HTML content in your messages. However, time has shown that this is cumbersome in practice for long-form content and that there are better alternatives:
+历史上，`t.raw` 是用来支持消息中的原始 HTML 内容。不过事实证明，对于长文本内容这很难用，且有更好的替代方案：
 
-1. **MDX for local content**: For imprint pages and similar, grouping your localized content into files like `content.en.mdx` and `content.es.mdx` is significantly easier to manage.
-2. **CMS for remote content**: Content management systems typically ship with a portable format that allows you to express rich text in an HTML-agnostic way, enabling you to use the same content for mobile apps and more (see, for example, [Sanity's Portable Text](https://www.sanity.io/docs/developer-guides/presenting-block-text)).
+1. **本地内容使用 MDX**：比如版权声明页和类似页面，将本地化内容组织到如 `content.en.mdx`、`content.es.mdx` 文件中，管理起来要简单得多。
+2. **远程内容使用 CMS**：内容管理系统通常包含一种可移植格式，可以以与 HTML 解耦的方式表达富文本，方便你将内容用于移动端等多种场景（参考例如 [Sanity 的 Portable Text](https://www.sanity.io/docs/developer-guides/presenting-block-text)）。
 
-The other use case that `t.raw` was traditionally (ab)used for is handling arrays of messages. The recommended pattern for this has always been to use individual messages for each string (see [arrays of messages](/docs/usage/translations#arrays-of-messages)). This pattern also has the benefit of being [statically analyzable](/docs/workflows/messages).
+另一种传统上` t.raw `被（滥）用的场景是处理消息数组。推荐的模式一直是为每条字符串使用单独消息（参见[消息数组](/docs/usage/translations#arrays-of-messages)）。此模式还有个好处是可以被[静态分析](/docs/workflows/messages)支持。
 
-Related to this, the recently introduced [`useExtracted`](/blog/use-extracted) doesn't support `t.raw` either, since it doesn't fit this paradigm in the first place.
+相关地，新引入的 [`useExtracted`](/blog/use-extracted) 也不支持 `t.raw`，因为它本身就不符合这套范式。
 
-Because of this, it's recommended to migrate to one of the mentioned alternatives if you'd like to benefit from ahead-of-time compilation. If you're heavily using `t.raw`, you can of course also decide to leave the optimization off for now.
+因此，建议如果想用上预编译功能，迁移到上述替代方案。如果你严重依赖 `t.raw` ，当然也可以暂时关闭此优化。
 
-Potentially in a future release, `t.raw` might be deprecated entirely due to the downsides this API has—but this is still up for discussion.
+未来某个版本中，`t.raw` 可能会因这个 API 的缺点而被彻底弃用——但这一点还在讨论中。
 
-## Ready to try it?
+## 准备好试试了吗？
 
-If you're excited about ahead-of-time compilation as well, I'd really love to hear your feedback.
+如果你也对预编译感兴趣，我非常希望听到你的反馈。
 
-Give it a try in your app with `next-intl@4.8` and share your [feedback](https://github.com/amannn/next-intl/discussions/2209) with me. Please note that this feature is currently considered experimental, so changes are expected.
+在你的项目内用 `next-intl@4.8` 试试，然后通过[反馈](https://github.com/amannn/next-intl/discussions/2209)告诉我。请注意该功能目前处于实验阶段，可能会有变动。
 
-As a closing note, the final frontier for `next-intl` performance optimization is automatic tree shaking of messages. I hope to have more to share on this later this year!
+最后一点，`next-intl` 性能优化的终极目标是实现消息的自动摇树优化（tree shaking）。希望今年稍晚能分享更多相关进展！
 
 — Jan
 
-PS: If you're interested in more technical details, I've written an [RFC](https://github.com/amannn/next-intl/blob/main/rfcs/002-icu-message-precompilation.md) that describes the design decisions and tradeoffs for this feature in more detail.
+PS：如果你对更多技术细节感兴趣，我写过一篇[RFC](https://github.com/amannn/next-intl/blob/main/rfcs/002-icu-message-precompilation.md)，详细描述了该功能的设计决策和权衡。
 
 <StayUpdated />

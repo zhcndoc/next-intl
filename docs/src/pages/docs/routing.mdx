@@ -2,26 +2,26 @@ import Card from '@/components/Card';
 import Cards from '@/components/Cards';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Routing
+# 路由
 
-`next-intl` integrates with Next.js' routing system in two places:
+`next-intl` 在两个地方集成了 Next.js 的路由系统：
 
-1. **Proxy / middleware**: Negotiates the locale and handles redirects & rewrites (e.g. `/` → `/en`)
-2. **Navigation APIs**: Lightweight wrappers around Next.js' navigation APIs like `<Link />`
+1. **代理 / 中间件**：协商语言环境并处理重定向和重写（例如 `/` → `/en`）
+2. **导航 API**：对 Next.js 的导航 API（如 `<Link />`）的轻量封装
 
-This enables you to express your app in terms of APIs like `<Link href="/about">`, while aspects like the locale and user-facing pathnames are automatically handled behind the scenes (e.g. `/de/über-uns`).
+这使您可以通过类似 `<Link href="/about">` 的 API 来表达您的应用，同时语言环境和用户面向的路径名等方面会在幕后自动处理（例如 `/de/über-uns`）。
 
 <Cards className="mt-8 max-w-[300px]">
-  <Card title="Set up routing" href="/docs/routing/setup" />
-  <Card title="Configuration" href="/docs/routing/configuration" />
-  <Card title="Proxy / middleware" href="/docs/routing/middleware" />
-  <Card title="Navigation APIs" href="/docs/routing/navigation" />
+  <Card title="设置路由" href="/docs/routing/setup" />
+  <Card title="配置" href="/docs/routing/configuration" />
+  <Card title="代理 / 中间件" href="/docs/routing/middleware" />
+  <Card title="导航 API" href="/docs/routing/navigation" />
 </Cards>
 
-Prefer to watch a video?
+想看视频教程吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/06-routing/01-setup"
-  title="Locale-based routing"
+  title="基于语言环境的路由"
 />

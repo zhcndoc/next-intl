@@ -3,21 +3,21 @@ import PartnerContentLink from '@/components/PartnerContentLink';
 import Details from '@/components/Details';
 import {CourseVideoBanner} from '@/components/CourseBanner';
 
-# Date and time formatting
+# 日期和时间格式化
 
-Prefer to watch a video?
+想看视频吗？
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/05-formatting/03-date-formatting"
-  title="Date formatting"
+  title="日期格式化"
 />
 
-The formatting of dates and times varies greatly between locales (e.g. "Apr 24, 2023" in `en-US` vs. "24 квіт. 2023 р." in `uk-UA`). By using the formatting capabilities of `next-intl`, you can handle i18n differences in your Next.js app automatically.
+日期和时间的格式在不同地区差异很大（例如，`en-US` 中是 "Apr 24, 2023"，而 `uk-UA` 中是 "24 квіт. 2023 р."）。通过使用 `next-intl` 的格式化功能，您可以在 Next.js 应用中自动处理国际化差异。
 
-## Formatting dates and times [#dates-times]
+## 格式化日期和时间 [#dates-times]
 
-You can format plain dates that are not part of a message with the `dateTime` function that is returned from the `useFormatter` hook:
+您可以使用从 `useFormatter` 钩子返回的 `dateTime` 函数格式化不属于消息的纯日期：
 
 ```js
 import {useFormatter} from 'next-intl';
@@ -26,50 +26,50 @@ function Component() {
   const format = useFormatter();
   const dateTime = new Date('2020-11-20T10:36:01.516Z');
 
-  // Renders "Nov 20, 2020"
+  // 渲染结果为 "Nov 20, 2020"
   format.dateTime(dateTime, {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
 
-  // Renders "11:36 AM"
+  // 渲染结果为 "11:36 AM"
   format.dateTime(dateTime, {hour: 'numeric', minute: 'numeric'});
 }
 ```
 
-See the MDN docs on [`DateTimeFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat#Using_options) to learn more about the options that you can provide to the `dateTime` function or try the [interactive explorer](https://www.intl-explorer.com/DateTimeFormat) for `Intl.DateTimeFormat`.
+查看 MDN 上关于 [`DateTimeFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat#Using_options) 的文档了解可以传递给 `dateTime` 函数的更多选项，或者尝试 [交互式探索器](https://www.intl-explorer.com/DateTimeFormat) 来体验 `Intl.DateTimeFormat`。
 
-If you have [global formats](/docs/usage/configuration#formats) configured, you can reference them by passing a name as the second argument:
+如果您配置了[全局格式](/docs/usage/configuration#formats)，可以通过将名称作为第二个参数传递来引用它们：
 
 ```js
-// Use a global format
+// 使用全局格式
 format.dateTime(dateTime, 'short');
 
-// Optionally override some options
+// 可选覆盖部分选项
 format.dateTime(dateTime, 'short', {year: 'numeric'});
 ```
 
 <Details id="parsing-manipulation">
-<summary>How should I store and parse dates and time zones?</summary>
+<summary>我应该如何存储和解析日期和时区？</summary>
 
-You should ensure that dates are full [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) strings, e.g. `2020-11-20T10:36:01.516Z`.
+您应确保日期是完整的 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 字符串，例如 `2020-11-20T10:36:01.516Z`。
 
-Since `next-intl` is only concerned with formatting dates, you can use the `Date` constructor to parse them before formatting them in the frontend.
+由于 `next-intl` 只负责格式化日期，您可以在前端通过 `Date` 构造函数解析后进行格式化。
 
-**Learn more:**
+**更多学习：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/05-formatting/02-dates-timezones"
-  title="Dates & time zones"
+  title="日期与时区"
 />
 
 </Details>
 
-## Formatting relative times [#relative-times]
+## 格式化相对时间 [#relative-times]
 
-You can format plain dates that are not part of a message with the `relativeTime` function:
+您可以使用 `relativeTime` 函数格式化不属于消息的纯日期：
 
 ```js
 import {useFormatter} from 'next-intl';
@@ -78,27 +78,27 @@ function Component() {
   const format = useFormatter();
   const dateTime = new Date('2020-11-20T08:30:00.000Z');
 
-  // A reference point in time
+  // 一个参考时间点
   const now = new Date('2020-11-20T10:36:00.000Z');
 
-  // This will render "2 hours ago"
+  // 这将渲染为 "2 hours ago"
   format.relativeTime(dateTime, now);
 }
 ```
 
-Note that values are rounded, so e.g. if 126 minutes have passed, "2 hours ago" will be returned.
+注意，数值会被四舍五入，例如经过 126 分钟，会返回 "2 hours ago"。
 
-**Learn more:**
+**更多学习：**
 
 <CourseVideoBanner
   className="mt-2"
   href="https://learn.next-intl.dev/chapters/05-formatting/05-relative-times"
-  title="Relative times"
+  title="相对时间"
 />
 
-### `useNow` [#relative-times-usenow]
+### `useNow` 钩子 [#relative-times-usenow]
 
-Since providing `now` is a common pattern, `next-intl` provides a convenience hook that can be used to retrieve the current date and time:
+由于传入 `now` 是常见模式，`next-intl` 提供了一个便捷钩子来获取当前日期时间：
 
 ```tsx {4}
 import {useNow, useFormatter} from 'next-intl';
@@ -111,39 +111,39 @@ function FormattedDate({date}) {
 }
 ```
 
-In contrast to simply calling `new Date()` in your component, `useNow` has some benefits:
+与在组件中直接调用 `new Date()` 相比，`useNow` 有以下优势：
 
-1. The returned value is consistent across re-renders on the client side.
-2. You can optionally use [`updateInterval`](#relative-times-update) to update the value continuously.
-3. The value can optionally be initialized from a [global value](/docs/usage/configuration#now). By default, `useNow` will use the current time.
+1. 在客户端重新渲染时返回的值一致。
+2. 可以可选使用 [`updateInterval`](#relative-times-update) 持续更新数值。
+3. 数值可以可选从[全局值](/docs/usage/configuration#now)初始化。默认情况下，`useNow` 会使用当前时间。
 
-### `updateInterval` [#relative-times-update]
+### `updateInterval` 参数 [#relative-times-update]
 
-In case you want a relative time value to update over time, you can do so with the [`useNow`](/docs/usage/configuration#use-now) hook:
+如果希望相对时间随时间更新，可以使用 [`useNow`](/docs/usage/configuration#use-now) 钩子实现：
 
 ```js
 import {useNow, useFormatter} from 'next-intl';
 
 function Component() {
-  // Use the global now value initially …
+  // 初始使用全局的 now 值 …
   const now = useNow({
-    // … and update it every 10 seconds
+    // … 并且每 10 秒更新一次
     updateInterval: 1000 * 10
   });
 
   const format = useFormatter();
   const dateTime = new Date('2020-11-20T10:36:01.516Z');
 
-  // Renders e.g. "2 hours ago" and updates continuously
+  // 渲染例如 "2 hours ago" 并持续更新
   format.relativeTime(dateTime, now);
 }
 ```
 
-### Customizing the unit [#relative-times-unit]
+### 自定义单位 [#relative-times-unit]
 
-By default, `relativeTime` will pick a unit based on the difference between the passed date and `now` like "3 seconds" or "5 days".
+默认情况下，`relativeTime` 会基于传入的日期和 `now` 之间的差异自动选择单位，比如 "3 seconds" 或者 "5 days"。
 
-If you want to use a specific unit, you can provide options via the second argument:
+如果想使用特定单位，可以通过第二个参数传递选项：
 
 ```js
 import {useFormatter} from 'next-intl';
@@ -153,14 +153,14 @@ function Component() {
   const dateTime = new Date('2020-03-20T08:30:00.000Z');
   const now = new Date('2020-11-22T10:36:00.000Z');
 
-  // Renders "247 days ago"
+  // 渲染 "247 days ago"
   format.relativeTime(dateTime, {now, unit: 'day'});
 }
 ```
 
-## Formatting date and time ranges [#date-time-ranges]
+## 格式化日期和时间范围 [#date-time-ranges]
 
-You can format ranges of dates and times with the `dateTimeRange` function:
+您可以使用 `dateTimeRange` 函数格式化日期和时间区间：
 
 ```js
 import {useFormatter} from 'next-intl';
@@ -170,7 +170,7 @@ function Component() {
   const dateTimeA = new Date('2020-11-20T08:30:00.000Z');
   const dateTimeB = new Date('2021-01-24T08:30:00.000Z');
 
-  // Renders "Nov 20, 2020 – Jan 24, 2021"
+  // 渲染 "Nov 20, 2020 – Jan 24, 2021"
   format.dateTimeRange(dateTimeA, dateTimeB, {
     year: 'numeric',
     month: 'short',
@@ -179,19 +179,19 @@ function Component() {
 }
 ```
 
-If you have [global formats](/docs/usage/configuration#formats) configured, you can reference them by passing a name as the third argument:
+如果您配置了[全局格式](/docs/usage/configuration#formats)，可以通过第三个参数传入格式名称来引用它们：
 
 ```js
-// Use a global format
+// 使用全局格式
 format.dateTimeRange(dateTimeA, dateTimeB, 'short');
 
-// Optionally override some options
+// 可选覆盖部分选项
 format.dateTimeRange(dateTimeA, dateTimeB, 'short', {year: 'numeric'});
 ```
 
-## Dates and times within messages
+## 消息中的日期和时间
 
-Dates and times can be embedded within messages by using the ICU syntax.
+日期和时间可以通过 ICU 语法嵌入消息中。
 
 ```json filename="en.json"
 {
@@ -199,47 +199,47 @@ Dates and times can be embedded within messages by using the ICU syntax.
 }
 ```
 
-These formats are supported out of the box: `full`, `long`, `medium` and `short`.
+默认支持的格式包括：`full`、`long`、`medium` 和 `short`。
 
 <Callout>
 
-If you work with translators, it can be helpful for them to use an editor that supports the ICU syntax for dates and times (e.g. the <PartnerContentLink name="dates-times-messages" href="https://support.crowdin.com/icu-message-syntax/#date-time">Crowdin Editor</PartnerContentLink>).
+如果您与翻译人员合作，使用支持 ICU 日期时间语法的编辑器会非常有帮助（例如 <PartnerContentLink name="dates-times-messages" href="https://support.crowdin.com/icu-message-syntax/#date-time">Crowdin 编辑器</PartnerContentLink>）。
 
 </Callout>
 
-You can customize the formatting by using date skeletons:
+您也可以使用日期骨架自定义格式：
 
 ```json filename="en.json"
 {
-  // Renders e.g. "Ordered on Jul 9, 2024"
+  // 渲染例如 "Ordered on Jul 9, 2024"
   "ordered": "Ordered on {orderDate, date, ::yyyyMMMd}"
 }
 ```
 
-Note the leading `::` that is used to indicate that a skeleton should be used.
+注意前导的 `::` 表示应使用骨架格式。
 
-**These formats from ICU are supported:**
+**支持的 ICU 格式如下：**
 
-| Symbol | Meaning                                | Pattern                                  | Example                                             |
-| :----: | :------------------------------------- | ---------------------------------------- | --------------------------------------------------- |
-|   G    | Era designator (includes the date)     | G<br/>GGGG<br/>GGGGG                     | 7/9/2024 AD<br/>7/9/2024 Anno Domini<br/>7/9/2024 A |
-|   y    | Year                                   | y<br/>yy<br/>yyyy                        | 2024<br/>24<br/>2024                                |
-|   M    | Month in year                          | M<br/>MM<br/>MMM<br/>MMMM<br/>MMMMM<br/> | 7<br/>07<br/>Jul<br/>July<br/>J                     |
-|   d    | Day in month                           | d<br/>dd                                 | 9<br/>09                                            |
-|   E    | Day of week                            | E<br/>EEEE<br/>EEEEE                     | Tue<br/>Tuesday<br/>T                               |
-|   h    | Hour (1-12)                            | h<br/>hh                                 | 9 AM<br/>09 AM                                      |
-|   K    | Hour (0-11)                            | K<br/>KK                                 | 0 AM (12 AM with `h`)<br/>00 AM                     |
-|   H    | Hour (0-23)                            | HH                                       | 09                                                  |
-|   k    | Hour (1-24)                            | kk                                       | 24 (00 with `H`)                                    |
-|   m    | Minute (2 digits if used with seconds) | m<br/>mmss                               | 6<br/>06:03                                         |
-|   s    | Second (2 digits if used with minutes) | s<br/>mmss                               | 3<br/>06:03                                         |
-|   z    | Time zone                              | z<br/>zzzz                               | GMT+2<br/>Central European Summer Time              |
+| 符号 | 含义                                 | 模式                                     | 示例                                               |
+| :--: | :---------------------------------- | ---------------------------------------- | ------------------------------------------------- |
+|  G   | 纪元设计ator（包含日期）              | G<br/>GGGG<br/>GGGGG                     | 7/9/2024 AD<br/>7/9/2024 Anno Domini<br/>7/9/2024 A |
+|  y   | 年                                  | y<br/>yy<br/>yyyy                        | 2024<br/>24<br/>2024                              |
+|  M   | 月份（年内）                         | M<br/>MM<br/>MMM<br/>MMMM<br/>MMMMM     | 7<br/>07<br/>Jul<br/>July<br/>J                   |
+|  d   | 月内日期                            | d<br/>dd                                | 9<br/>09                                          |
+|  E   | 星期几                              | E<br/>EEEE<br/>EEEEE                     | Tue<br/>Tuesday<br/>T                             |
+|  h   | 小时（1-12）                        | h<br/>hh                                | 9 AM<br/>09 AM                                    |
+|  K   | 小时（0-11）                        | K<br/>KK                                | 0 AM (12 AM 使用 `h`)<br/>00 AM                   |
+|  H   | 小时（0-23）                        | HH                                      | 09                                                |
+|  k   | 小时（1-24）                        | kk                                      | 24（使用 `H` 时为 00）                            |
+|  m   | 分钟（如果包含秒数则为两位）           | m<br/>mmss                             | 6<br/>06:03                                       |
+|  s   | 秒数（如果包含分钟则为两位）            | s<br/>mmss                             | 3<br/>06:03                                       |
+|  z   | 时区                                | z<br/>zzzz                             | GMT+2<br/>Central European Summer Time            |
 
-Patterns can be combined with each other, therefore e.g. `yyyyMMMd` would return "Jul 9, 2024".
+模式可以互相组合，例如 `yyyyMMMd` 会输出 "Jul 9, 2024"。
 
-### Custom date and time formats
+### 自定义日期和时间格式
 
-To use custom formats in messages, you can provide formatters based on [`DateTimeFormat` options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat#Using_options) that can be referenced by name.
+想在消息中使用自定义格式，可以基于 [`DateTimeFormat` 选项](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat#Using_options) 提供格式化器并通过名称引用。
 
 ```json filename="en.json"
 {
@@ -264,6 +264,6 @@ t(
 ```
 
 <Callout>
-  To reuse date and time formats for multiple components, you can configure
-  [global formats](/docs/usage/configuration#formats).
+  若要在多个组件间复用日期和时间格式，可以配置
+  [全局格式](/docs/usage/configuration#formats)。
 </Callout>

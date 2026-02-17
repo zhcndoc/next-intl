@@ -1,15 +1,15 @@
 ---
-title: Reliable date formatting in Next.js
+title: 在 Next.js 中可靠地格式化日期
 ---
 
 import {Tweet} from 'react-tweet';
 import StayUpdated from '@/components/StayUpdated.mdx';
 
-# Reliable date formatting in Next.js
+# 在 Next.js 中可靠地格式化日期
 
-<small>Sep 25, 2024 (updated on Mar 28, 2025) · by Jan Amann</small>
+<small>2024年9月25日（2025年3月28日更新） · 作者 Jan Amann</small>
 
-Let's take a look at the following component:
+让我们来看一下下面的组件：
 
 ```tsx
 import {formatDistance} from 'date-fns';
@@ -21,92 +21,92 @@ type Props = {
 export default function BlogPostPublishedDate({published}: Props) {
   const now = new Date();
 
-  // ... is this ok? 🤔
+  // ... 这样写可以吗？🤔
   return <p>{formatDistance(published, now, {addSuffix: true})}</p>;
 }
 ```
 
-A quick local test of this component renders the expected result:
+对这个组件进行快速的本地测试，会渲染出预期的结果：
 
 ```
 1 hour ago
 ```
 
-So, should we push this to production?
+那么，我们应该将这段代码推向生产环境吗？
 
-Hmm, wait—something feels a bit off here. Let's take a closer look together.
+嗯，等等——感觉有点不对劲。让我们一起仔细看看。
 
-## Environment differences
+## 环境差异
 
-Since this component neither uses any interactive features of React like `useState`, nor does it read from server-side data sources, it can be considered a [shared component](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md#sharing-code-between-server-and-client). This means that depending on where the component is being imported from, it may render as either a Server Component or a Client Component.
+由于该组件既没有使用 React 的任何交互特性（如 `useState`），也没有读取服务器端数据，因此可以视为一个[共享组件](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md#sharing-code-between-server-and-client)。这意味着根据组件被导入的位置不同，它可能渲染为服务器组件或客户端组件。
 
-Let's consider where the component renders in either case:
+让我们来看看在不同情况下该组件的渲染环境：
 
-| Type             | Server | Client |
-| ---------------- | ------ | ------ |
-| Server Component | ✅     |        |
-| Client Component | ✅     | ✅     |
+| 类型              | 服务器 | 客户端 |
+| ----------------- | ------ | ------ |
+| 服务器组件        | ✅     |        |
+| 客户端组件        | ✅     | ✅     |
 
-Now the good news is that if we render this component as a Server Component, there's only one environment to consider: _the server_. The final markup is generated there, and this is what the user will see.
+好消息是，如果我们把该组件作为服务器组件渲染，只需考虑一个环境：_服务器_。最终的标记就是在那里生成的，这也是用户所看到的内容。
 
-When it comes to Client Components, the situation is a bit more complex. Since the server and the client likely have a different local time when the component is rendered, we can already anticipate that this component may render inconsistently depending on the environment.
+对于客户端组件，情况则复杂一些。因为服务器和客户端在组件渲染时的本地时间很可能不同，我们可以预料到该组件在不同环境下的渲染结果可能不一致。
 
-There's some interesting nuance here as well: Since our component qualifies as a shared component, it can run in either environment. Even if the developer originally intended the component to run as a Server Component, it may silently switch to a Client Component if it gets imported into a Client Component in the future—leading to the additional rendering environment to consider.
+这里还有一个有趣的细节：由于我们的组件被归类为共享组件，它可以在任一环境中运行。即使开发者最初期望它作为服务器组件运行，如果将来该组件被导入到客户端组件中，它可能会无声地切换成客户端组件——从而增加了需要考虑的渲染环境。
 
-## Hydration mismatches
+## 水合不匹配
 
-Let's take a closer look at what happens when `BlogPostPublishedDate` renders as a Client Component.
+让我们仔细看看当 `BlogPostPublishedDate` 被当作客户端组件渲染时会发生什么。
 
-In this case, the value for `now` will always differ between the server and client, due to the latency between these two environments. Depending on factors like caching, the difference may be even significant.
+在这种情况下，`now` 变量在服务器和客户端之间总是会不同，因为这两个环境之间存在延迟。根据缓存等因素，这种差异可能还会非常显著。
 
 ```tsx
-// Server: "1 hour ago"
+// 服务器端: "1 hour ago"
 formatDistance(published, now, {addSuffix: true})}
 
-// Client: "8 days ago"
+// 客户端: "8 days ago"
 formatDistance(published, now, {addSuffix: true})}
 ```
 
-React is not particularly happy when it encounters such a situation:
+当 React 遇到这种情况时，通常会报错：
 
-> Text content does not match server-rendered HTML
+> 文本内容与服务器渲染的 HTML 不匹配
 
-Interestingly, there's a discussion about React patching the `Date` object in the future, which could potentially help to mitigate this issue.
+有趣的是，社区里也在讨论未来 React 可能会修补 `Date` 对象，这或许能帮助缓解此类问题。
 
 <Tweet id="1785691330988986587" />
 
-This is however not the case currently, and there's a also bit more to it—so let's move on for now.
+不过目前情况并非如此，还有更多细节需要考虑——我们先继续往下说。
 
-## Purity
+## 纯净性
 
-The crucial part of the component is here:
+这个组件的关键部分是：
 
 ```tsx
 const now = new Date();
 ```
 
-If you've been using React for a while, you may be familiar with the necessity of components being _pure_.
+如果你使用 React 有一段时间了，可能熟悉组件必须是_纯净的_这个概念。
 
-Quoting from the React docs, we can [keep a component pure](https://react.dev/learn/keeping-components-pure) by considering these two aspects:
+引用 React 官方文档，我们可以通过两点[保持组件纯净](https://react.dev/learn/keeping-components-pure)：
 
-> **It minds its own business:** It does not change any objects or variables that existed before it was called.
-> **Same inputs, same output:** Given the same inputs, a pure function should always return the same result.
+> **专注自身，不影响外部：** 不修改调用它之前存在的任何对象或变量。
+> **相同输入，输出相同：** 给定相同的输入，一个纯函数应该始终返回相同的结果。
 
-Since the component is reading from the constantly changing `new Date()` constructor during rendering, it violates the principle of "same inputs, same output". React components require functional purity to ensure consistent output when being re-rendered (which can happen at any time and often without the user explicitly asking the UI to update).
+由于组件在渲染中读取了持续变化的 `new Date()`，它违反了“相同输入，输出相同”的原则。React 组件需要函数式纯净性，确保在重新渲染时（可能随时发生，且往往用户没有显式请求更新时）输出一致。
 
-But is this true for all components? In fact, with the introduction of Server Components, there's a new type of component in town that doesn't have the restriction of "same inputs, same output". Server Components can for instance fetch data, making their output reliant on the state of an external system. This is fine, because Server Components only generate an output once—_on the server_.
+但这对所有组件都适用吗？事实上，随着服务器组件的引入，出现了一种新的组件类型，它不受“相同输入，输出相同”这一限制。服务器组件可以获取数据，输出依赖外部系统的状态。这也没关系，因为服务器组件只会生成一次输出——_在服务器端_。
 
-So what does this mean for our component?
+那么这对我们的组件意味着什么？
 
-## Leveraging Server Components
+## 利用服务器组件
 
-Right, you may have guessed it: We can move the creation of the `now` variable to a Server Component and pass it down as a prop.
+没错，你可能已经猜到了：我们可以将 `now` 变量的创建移到服务器组件里，并作为 prop 传递下去。
 
 ```tsx filename="page.tsx"
 import BlogPostPublishedDate from './BlogPostPublishedDate';
 
 export default function BlogPostPage() {
-  // ✅ Is only called on the server
+  // ✅ 仅在服务器调用
   const now = new Date();
 
   const published = ...;
@@ -115,52 +115,51 @@ export default function BlogPostPage() {
 }
 ```
 
-Pages in Next.js render as Server Components by default, so if we don't see a `'use client'` directive in this file, we can be sure that the `now` variable is only created on the server side.
+Next.js 中页面默认作为服务器组件渲染，因此如果此文件没有 `'use client'` 指令，我们可以确定 `now` 变量只在服务器端创建。
 
-The `now` prop that we're passing to `BlogPostPublishedDate` is an instance of `Date` that can naturally be [serialized](https://react.dev/reference/rsc/use-client#serializable-types) by React. This means that we can pick it up in our component—both when executing on the server, as well as on the client.
+传递给 `BlogPostPublishedDate` 的 `now` prop 是一个 `Date` 实例，React 可以自然地[序列化](https://react.dev/reference/rsc/use-client#serializable-types) 它。这意味着无论组件是在服务器还是客户端执行，都能正确使用这个值。
 
-It's worth mentioning that the published date will now update based on the caching rules of the page, therefore if your page renders statically, you might want to consider introducing a [`revalidate`](https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration) interval.
+值得一提的是，发布时间现在会根据页面的缓存规则更新，因此如果页脚是静态渲染的，你可能想要引入[`revalidate`](https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration) 策略。
 
-There's an argument that you might even _want_ to render an updated date on the client side—however, this approach comes with the tradeoff that your final render depends on client-side code to be executed. If this is what makes sense for your use case, you can instead use [`suppressHydrationWarning`](https://react.dev/reference/react-dom/client/hydrateRoot#suppressing-unavoidable-hydration-mismatch-errors) to tell React that it's ok for this markup to be updated on the client side.
+有人可能会争辩说，你甚至可能_想_在客户端渲染更新后的时间——但这种方法的权衡是最终渲染依赖客户端代码执行。如果这符合场景需求，你也可以使用 [`suppressHydrationWarning`](https://react.dev/reference/react-dom/client/hydrateRoot#suppressing-unavoidable-hydration-mismatch-errors) 来告诉 React 允许客户端更新该标记。
 
-Are we done yet?
+我们现在完成了吗？
 
-## What time is it?
+## 几点时间？
 
-What if we have more components that rely on the current time? We could instantiate the `now` variable in each component that needs it, but if you consider that even during a single render pass there can be timing differences, this might result in inconsistencies if you're working with dates that require precision.
+如果我们有更多依赖当前时间的组件怎么办？我们可以在每个需要的组件中实例化 `now`，但考虑到单次渲染过程中也可能存在时间差异，若你使用需要精准时间的日期数据，可能会产生不一致。
 
-An option to ensure that a single `now` value is used across all components that render as part of a single request is to use the [`cache()`](https://react.dev/reference/react/cache) function from React:
+一种确保所有组件共用单一 `now` 值的方法是使用 React 的 [`cache()`](https://react.dev/reference/react/cache) 函数：
 
 ```tsx filename="getNow.ts"
 import {cache} from 'react';
 
-// The first component that calls `getNow()` will
-// trigger the creation of the `Date` instance.
+// 第一个调用 `getNow()` 的组件会触发创建 `Date` 实例。
 const getNow = cache(() => new Date());
 
 export default getNow;
 ```
 
-… and use it in our page component:
+… 并在页面组件中这样使用：
 
 ```tsx filename="page.tsx"
 import getNow from './getNow';
 
 export default function BlogPostPage() {
-  // ✅ Will be consistent for the current request,
-  // regardless of the timing of different calls
+  // ✅ 当前请求中保持一致，
+  // 无论调用时机如何
   const now = getNow();
   // ...
 }
 ```
 
-Now, the first component to call `getNow()` will trigger the creation of the `Date` instance. The instance is now bound to the request and will be reused across all subsequent calls to `getNow()`.
+这样，第一个调用 `getNow()` 的组件会创建时间实例，并绑定到该请求，随后所有调用都会复用这个实例。
 
-Well, are we done now?
+好，现在完成了吗？
 
-## Where are we?
+## 现在到了哪一步？
 
-We've carefully ensured that our app is free of hydration mismatches and have established consistent time handling across all components. But what happens if we decide one day that we don't want to render a relative time like "2 days ago", but a specific date like "Sep 25, 2024"?
+我们已仔细避免水合不匹配，并在所有组件中建立了一致的时间处理。但如果有一天我们决定不显示相对时间（例如“2天前”），而是显示具体日期（如“2024年9月25日”）呢？
 
 ```tsx
 import {format} from 'date-fns';
@@ -170,43 +169,43 @@ type Props = {
 };
 
 export default function BlogPostPublishedDate({published}: Props) {
-  // `now` is no longer needed? 🤔
+  // 现在不再需要 `now` 了？🤔
   return <p>{format(published, 'MMM d, yyyy')}</p>;
 }
 ```
 
-A quick local test shows that everything seems fine, so let's push this to production.
+本地快速测试一切正常，所以我们推向生产环境。
 
-> Text content does not match server-rendered HTML
+> 文本内容与服务器渲染的 HTML 不匹配
 
-Back to square one.
+又回到原点了。
 
-What's happening here? While our local test worked fine, we're suddenly getting an error in production.
+这是怎么回事？尽管本地测试正常，但在生产环境中却出现错误。
 
-The reason for this is: **Time zones**.
+原因是：**时区**。
 
-## Handling time zones
+## 处理时区
 
-While we, as performance-oriented developers, try to serve our app from a location that's close to the user, we can't expect that the server and the client share the same time zone. This means that the call to `format` can lead to different results on the server and the client.
+作为性能导向的开发者，我们可能希望将应用部署在接近用户的位置，但不能指望服务器和客户端共享同一时区。这意味着调用 `format` 时，服务器和客户端上的结果可能不同。
 
-In our case, this can lead to different dates being displayed. Even more intricate: Only at certain times of the day, where the time zone difference is significant enough between the two environments.
+就我们而言，可能导致显示不同的日期。更复杂的是，这种情况只有在一天中特定时间，在两个环境的时区差异足够显著时才会出现。
 
-A bug like this can involve quite some detective work. I've learned this first hand, having written more than one lengthy pull request description, containing fixes for such issues in apps I've worked on.
+这类 bug 可能需要大量排查调试。我深有体会，曾写过多个冗长的 PR 描述来修复这类问题。
 
-To fix our new bug, the solution is similar to the one we've used for the `now` variable: We can create a `timeZone` variable in a Server Component and use that as the source of truth.
+修复方案与我们对 `now` 变量的处理类似：可以在服务器组件创建一个 `timeZone` 变量，将其作为单一真实来源。
 
 ```tsx filename="page.tsx"
 export default function BlogPostPage() {
   // ...
 
-  // Use the time zone of the server
+  // 使用服务器的时区
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   return <BlogPostPublishedDate timeZone={timeZone} published={published} />;
 }
 ```
 
-To incorporate this into our date formatting, we can use the `date-fns-tz` package, which wraps `date-fns` and adds support for formatting dates in a given time zone.
+要将时区信息融入日期格式化中，可以使用 `date-fns-tz` 包，它是基于 `date-fns` 的拓展，支持根据指定时区格式化日期。
 
 ```tsx
 import {format} from 'date-fns-tz';
@@ -221,28 +220,28 @@ export default function BlogPostPublishedDate({published, timeZone}: Props) {
 }
 ```
 
-Sticking to a single time zone for your app is definitely the easiest solution here. However, in case you'd like to format dates in the user's time zone, a reasonable approach might require having the time zone available on the server side so that it can be used in server-only code.
+对于你的应用来说，坚持使用单一时区无疑是最简单的解决方案。但如果你想按照用户的时区格式化日期，则可能需要在服务器端知道用户时区，以便在服务器端代码中使用。
 
-As browsers don't include the time zone of the user in an HTTP request, there are two primary ways to retrieve it on the server side:
+因为浏览器不会在 HTTP 请求里携带用户时区信息，主要有两种方法在服务器端获取：
 
-1. Set a cookie with the browser time zone on the client and retrieve it on the server side using [`cookies()`](https://nextjs.org/docs/app/api-reference/functions/cookies)
-2. Use approximate geographical information from the user's IP address (e.g. [`x-vercel-ip-timezone`](https://vercel.com/docs/headers/request-headers#x-vercel-ip-timezone)). However, it's important to note that this is only an approximation.
+1. 在客户端设置包含浏览器时区的 cookie，然后服务器端通过 [`cookies()`](https://nextjs.org/docs/app/api-reference/functions/cookies) 读取
+2. 利用用户 IP 的大致地理信息（如 [`x-vercel-ip-timezone`](https://vercel.com/docs/headers/request-headers#x-vercel-ip-timezone)），但需要注意这只是估算。
 
-## Localized date formatting
+## 本地化日期格式
 
-So far, we've assumed that our app will be used by American English users, with dates being formatted like:
+到目前为止，我们默认假设应用面向的是讲美式英文的用户，日期格式是：
 
 ```
 Sep 25, 2024
 ```
 
-Our situation gets interesting again, once we consider that the date format is not universal. In Great Britain, for instance, the same date might be formatted as "19 Sept 2024", with the day and month being swapped.
+情况会变得更有趣，如果考虑到日期格式并非一致的。例如英国可能写作 “19 Sept 2024”，日和月顺序调换。
 
-In case we want to localize our app to another language, or even support multiple languages, we now need to consider the _locale_ of the user. Simply put, a locale represents the language of the user, optionally combined with additional information like the region (e.g. `en-GB` represents English as spoken in Great Britain).
+如果想要本地化应用到其他语言，或支持多语言，就得考虑用户的_地区设置_（locale）。简单来说，locale 代表用户语言，且可包含额外信息，例如地区（如 `en-GB` 代表英国英语）。
 
-To address this new requirement, you might already have a hunch where this is going.
+面对这个新需求，你可能已经猜到下一步怎么做了。
 
-Ensuring consistent date formatting across the server and client requires that we'll create a `locale` variable in a Server Component and pass it down to relevant components. This can in turn be used by a library like `date-fns-tz` to format the date accordingly.
+为了确保服务器和客户端间日期格式一致，我们需要在服务器组件中创建一个 `locale` 变量并传递给相关组件，配合像 `date-fns-tz` 这样的库一起根据 locale 格式化日期。
 
 ```tsx
 import {format} from 'date-fns-tz';
@@ -262,44 +261,44 @@ export default function BlogPostPublishedDate({
 }
 ```
 
-It's important to pass the `locale` to all formatting calls now, as this can differ by environment—just like the `timeZone` and our value for `now` from earlier.
+现在重要的是，要将 `locale` 传递给所有格式化调用，因为它和之前的 `timeZone`、`now` 值一样，都可能因环境不同而异。
 
-## Can `next-intl` help?
+## `next-intl` 能帮忙吗？
 
-The main problem we've addressed in this post revolves around hydration mismatches that occur when formatting dates across the server and client in Next.js applications. To avoid these errors, we need to ensure that three key environment properties are shared across the entire app:
+本文讨论的主要问题，是 Next.js 中在服务器和客户端之间格式化日期时出现的水合不匹配。为避免这些错误，我们需要确保三个关键环境属性在整个应用中保持共享：
 
-1. `now`: A single, shared timestamp representing the current time
-2. `timeZone`: Geographical location of the user, affecting date offsets
-3. `locale`: Language and regional settings for localization
+1. `now`：表示当前时间的单一共享时间戳
+2. `timeZone`：用户的地理时区，影响日期偏移
+3. `locale`：语言和区域设置，用于本地化
 
-Since you're reading this post on the `next-intl` blog, you've probably already guessed that we have an opinion on this subject. Note that this is not at all a critizism of libraries like `date-fns` & friends. On the contrary, I can only recommend these packages.
+既然你正在阅读 `next-intl` 官方博客，可能已经猜到我们对此有自己的见解。需要说明的是，这并非在批评诸如 `date-fns` 之类的库，我反而非常推荐它们。
 
-The challenge we've discussed in this post is rather about the centralization and distribution of environment configuration across a Next.js app, involving interleaved rendering across the server and client that is required for formatting dates consistently. Even when only supporting a single language within your app, this already requires careful consideration.
+本帖讨论的挑战主要是如何在 Next.js 应用中集中管理并分发环境配置，涉及服务器和客户端间的混合渲染，确保日期格式化一致。即使仅支持单一语言，也需要细致思考。
 
-`next-intl` uses a centralized [`i18n/request.ts`](/docs/getting-started/app-router#i18n-request) module that allows to provide request-specific environment configuration like `now`, `timeZone` and the `locale` of the user.
+`next-intl` 通过一个集中式的 [`i18n/request.ts`](/docs/getting-started/app-router#i18n-request) 模块来提供请求特定的环境配置，如 `now`、`timeZone` 及用户 `locale`。
 
 ```tsx filename="src/i18n/request.ts"
 import {getRequestConfig} from 'next-intl/server';
 
 export default getRequestConfig(async () => ({
-  // (opt-in to use a shared value across the app)
+  // （可选择在应用中共享的值）
   now: new Date(),
 
-  // (defaults to the server's time zone)
+  // （默认使用服务器时区）
   timeZone: 'Europe/Berlin',
 
-  // (requires an explicit preference)
+  // （需要显式设置偏好）
   locale: 'en'
 
   // ...
 }));
 ```
 
-It's worth noting that a shared value for `now` is opt-in, as some apps might prefer rendering updated dates on the client side when using [relative time formatting](/docs/usage/dates-times#relative-times) or might be fine with slightly diverging dates in favor of granular cache control when using [`dynamicIO`](/docs/usage/dates-times#relative-times-server).
+值得注意的是，共享 `now` 是可选的，因为有些应用可能希望在客户端渲染相对时间时显示更新的日期，或者为了更细粒度的缓存控制，允许稍有差异的日期显示，配合 [`dynamicIO`](/docs/usage/dates-times#relative-times-server) 使用。
 
-Note that, as the name of `getRequestConfig` implies, the configuration object can be created per request, allowing for dynamic configuration based on a given user's preferences.
+正如 `getRequestConfig` 名称所示，配置对象是按请求动态创建的，可以根据特定用户偏好来动态调整。
 
-This can now be used to format dates in components—at any point of the server-client spectrum:
+这套机制可用于任何服务器和客户端混合环境中的组件日期格式化：
 
 ```tsx
 import {useFormatter} from 'next-intl';
@@ -309,7 +308,7 @@ type Props = {
 };
 
 export default function BlogPostPublishedDate({published}: Props) {
-  // ✅ Works in any environment
+  // ✅ 在任意环境下均可使用
   const format = useFormatter();
 
   // "Sep 25, 2024"
@@ -320,20 +319,20 @@ export default function BlogPostPublishedDate({published}: Props) {
 }
 ```
 
-Behind the scenes, `i18n/request.ts` is consulted by all server-only code, typically Server Components, but also Server Actions or Route Handlers. In turn, a component called [`NextIntlClientProvider`](/docs/getting-started/app-router#layout), commonly placed in the root layout of your app, inherits this configuration and makes it available to all client-side code.
+在背后，`i18n/request.ts` 由所有只运行于服务器的代码（通常是服务器组件，也包括服务器操作或路由处理器）引用。反过来，通常位于应用根布局的 [`NextIntlClientProvider`](/docs/getting-started/app-router#layout) 继承该配置并让所有客户端代码可用。
 
-As a result, formatting functions like `format.dateTime(…)` can seamlessly access the necessary configuration in any environment. This configuration is then passed to native JavaScript APIs like [`Intl.DateTimeFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat) to achieve correct and consistent formatting.
+如此一来，诸如 `format.dateTime(…)` 这类格式化函数就能在任何环境中无缝访问所需配置。配置随后传递给 JavaScript 原生 API 如 [`Intl.DateTimeFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)，实现正确且一致的格式化。
 
-(this post has been updated for `next-intl@4.0`)
+（本文已针对 `next-intl@4.0` 进行了更新）
 
 ---
 
-**Related resources**
+**相关阅读**
 
-While the main focus of this post was on date formatting, there are a few related resources that I can recommend if you're interested in digging deeper into the topic:
+虽然本文主要聚焦于日期格式化，但如果你想深入了解这个主题，我推荐以下资源：
 
-1. [API and JavaScript Date Gotcha's](https://www.solberg.is/api-dates) by [Jökull Solberg](https://x.com/jokull)
-2. [The Problem with Time & Timezones](https://www.youtube.com/watch?v=-5wpm-gesOY) by [Computerphile](https://www.youtube.com/@Computerphile)
-3. [`date-fns`](https://date-fns.org/) by [Sasha Koss](https://x.com/kossnocorp)
+1. [API 和 JavaScript 日期陷阱](https://www.solberg.is/api-dates) —— Jökull Solberg
+2. [时间与时区的问题](https://www.youtube.com/watch?v=-5wpm-gesOY) —— Computerphile
+3. [`date-fns`](https://date-fns.org/) —— Sasha Koss
 
 <StayUpdated />

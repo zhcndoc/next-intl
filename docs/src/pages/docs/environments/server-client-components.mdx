@@ -1,17 +1,17 @@
 import Callout from '@/components/Callout';
 import Details from '@/components/Details';
 
-# Internationalization of Server & Client Components
+# 服务器组件和客户端组件的国际化
 
-[React Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components) allow you to implement components that remain server-side only if they don’t require React’s interactive features, such as `useState` and `useEffect`.
+[React 服务器组件](https://nextjs.org/docs/app/building-your-application/rendering/server-components) 允许你实现仅保留在服务器端的组件，前提是它们不需要 React 的交互功能，例如 `useState` 和 `useEffect`。
 
-This applies to handling internationalization too.
+这同样适用于处理国际化。
 
 ```tsx filename="page.tsx"
 import {useTranslations} from 'next-intl';
 
-// Since this component doesn't use any interactive features
-// from React, it can be run as a Server Component.
+// 由于此组件不使用 React 的任何交互功能，
+// 它可以作为服务器组件运行。
 
 export default function HomePage() {
   const t = useTranslations('HomePage');
@@ -19,27 +19,27 @@ export default function HomePage() {
 }
 ```
 
-Moving internationalization to the server side unlocks new levels of performance, leaving the client side for interactive features.
+将国际化移至服务器端能够解锁新的性能层次，同时将客户端留给交互功能。
 
-**Benefits of server-side internationalization:**
+**服务器端国际化的好处：**
 
-1. Your messages never leave the server and don't need to be passed to the client side
-2. Library code for internationalization doesn't need to be loaded on the client side
-3. No need to split your messages, e.g. based on routes or components
-4. No runtime cost on the client side
+1. 你的消息永远不会离开服务器，也不需要传递给客户端
+2. 用于国际化的库代码不需要在客户端加载
+3. 不需要拆分消息，比如基于路由或组件
+4. 客户端没有运行时成本
 
-## Using internationalization in Server Components
+## 在服务器组件中使用国际化
 
-Server Components can be declared in two ways:
+服务器组件可以通过两种方式声明：
 
-1. Async components
-2. Non-async, regular components
+1. 异步组件
+2. 非异步的普通组件
 
-In a typical app, you'll likely find both types of components. `next-intl` provides corresponding APIs that work for the given component type.
+在典型应用中，你很可能会遇到这两种类型的组件。`next-intl` 提供了适用于对应组件类型的 API。
 
-### Async components
+### 异步组件
 
-These are primarly concerned with fetching data and [can not use hooks](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md#capabilities--constraints-of-server-and-client-components). Due to this, `next-intl` provides a set of awaitable versions of the functions that you usually call as hooks from within components.
+这类组件主要关注数据获取，[不能使用钩子](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md#capabilities--constraints-of-server-and-client-components)。因此，`next-intl` 提供了一整套可等待的函数版本，代替通常在组件内部以钩子方式调用的函数。
 
 ```tsx filename="page.tsx"
 import {getTranslations} from 'next-intl/server';
@@ -56,7 +56,7 @@ export default async function ProfilePage() {
 }
 ```
 
-These functions are available:
+以下函数可用：
 
 - `getTranslations`
 - `getFormatter`
@@ -65,11 +65,11 @@ These functions are available:
 - `getMessages`
 - `getLocale`
 
-### Non-async components [#shared-components]
+### 非异步组件 [#shared-components]
 
-Components that aren't declared with the `async` keyword and don't use interactive features like `useState`, are referred to as [shared components](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md#sharing-code-between-server-and-client). These can render either as a Server or Client Component, depending on where they are imported from.
+未用 `async` 关键字声明且不使用 `useState` 等交互功能的组件被称为[共享组件](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md#sharing-code-between-server-and-client)。这些组件可视其被导入的位置，作为服务器组件或客户端组件渲染。
 
-In Next.js, Server Components are the default, and therefore shared components will typically execute as Server Components:
+在 Next.js 中，服务器组件是默认，因此共享组件通常会作为服务器组件执行：
 
 ```tsx filename="UserDetails.tsx"
 import {useTranslations} from 'next-intl';
@@ -77,9 +77,8 @@ import {useTranslations} from 'next-intl';
 export default function UserDetails({user}) {
   const t = useTranslations('UserProfile');
 
-  // This component will execute as a Server Component by default.
-  // However, if it is imported from a Client Component, it will
-  // execute as a Client Component.
+  // 该组件默认作为服务器组件执行。
+  // 但若由客户端组件导入，则作为客户端组件执行。
   return (
     <section>
       <h2>{t('title')}</h2>
@@ -89,63 +88,63 @@ export default function UserDetails({user}) {
 }
 ```
 
-If you import `useTranslations`, `useFormatter`, `useLocale`, `useNow` and `useTimeZone` from a shared component, `next-intl` will automatically provide an implementation that works best for the environment this component executes in (server or client).
+如果你从共享组件中导入了 `useTranslations`、`useFormatter`、`useLocale`、`useNow` 和 `useTimeZone`，`next-intl` 会自动提供适合该组件执行环境（服务器或客户端）的实现。
 
 <Details id="rsc-background">
-<summary>How does the Server Components integration work?</summary>
+<summary>服务器组件集成如何工作？</summary>
 
-`next-intl` uses [`react-server` conditional exports](https://github.com/reactjs/rfcs/blob/main/text/0227-server-module-conventions.md#react-server-conditional-exports) to load code that is optimized for the usage in Server or Client Components. While configuration for hooks like `useTranslations` is read via `useContext` on the client side, on the server side it is loaded via [`i18n/request.ts`](/docs/usage/configuration#i18n-request).
+`next-intl` 利用 [`react-server` 条件导出](https://github.com/reactjs/rfcs/blob/main/text/0227-server-module-conventions.md#react-server-conditional-exports) 加载针对服务器或客户端组件使用优化的代码。客户端钩子如 `useTranslations` 的配置通过 `useContext` 读取，而服务器端通过 [`i18n/request.ts`](/docs/usage/configuration#i18n-request) 加载。
 
-Hooks are currently primarly known for being used in Client Components since they are typically stateful or don't apply to a server environment. However, hooks like [`useId`](https://react.dev/reference/react/useId) can be used in Server Components too. Similarly, `next-intl` provides a hooks-based API that looks identical, regardless of if it's used in a Server or Client Component.
+钩子目前主要为客户端组件设计，因为它们通常是有状态的或不适合服务器环境。不过，类似 [`useId`](https://react.dev/reference/react/useId) 这样的钩子也可以用于服务器组件。同样，`next-intl` 提供的基于钩子的 API 无论是在服务器还是客户端组件中使用，外观均相同。
 
-The one restriction that currently comes with this pattern is that hooks can not be called from `async` components. `next-intl` therefore provides a separate set of [awaitable APIs](#async-components) for this use case.
+当前这种模式的一条限制是钩子不能在异步组件中调用。因此，`next-intl` 提供了另一套面向此用例的[可等待 API](#async-components)。
 
 </Details>
 
 <Details id="async-or-non-async">
-<summary>Should I use async or non-async functions for my components?</summary>
+<summary>我应该为组件使用异步函数还是非异步函数？</summary>
 
-If you implement components that qualify as shared components, it can be beneficial to implement them as non-async functions. This allows to use these components either in a server or client environment, making them really flexible. Even if you don't intend to to ever run a particular component on the client side, this compatibility can still be helpful, e.g. for simplified testing.
+若你实现的组件符合共享组件的定义，将其实现为非异步函数可能更有益。这允许组件在服务器或客户端环境中使用，使其非常灵活。即便你不打算在哪些客户端运行某个组件，这种兼容性仍有帮助，比如简化测试。
 
-However, there's no need to dogmatically use non-async functions exclusively for handling internationalization—use what fits your app best.
+不过，你无需拘泥于使用非异步函数处理国际化——按你的应用需求选择即可。
 
-Regarding performance, async functions and hooks can be used interchangeably. The configuration from [`i18n/request.ts`](/docs/usage/configuration#i18n-request) is only loaded once upon first usage and both implementations use request-based caching internally where relevant. The only minor difference is that async functions have the benefit that rendering can be resumed right after an async function has been invoked. In contrast, in case a hook call triggers the initialization in `i18n/request.ts`, the component will suspend until the config is resolved and will re-render subsequently, possibly re-executing component logic prior to the hook call. However, once config has been resolved as part of a request, hooks will execute synchronously without suspending, resulting in less overhead in comparison to async functions since rendering can be resumed without having to wait for the microtask queue to flush (see [resuming a suspended component by replaying its execution](https://github.com/acdlite/rfcs/blob/first-class-promises/text/0000-first-class-support-for-promises.md#resuming-a-suspended-component-by-replaying-its-execution) in the corresponding React RFC).
+性能方面，异步函数和钩子可以互换使用。配置来自 [`i18n/request.ts`](/docs/usage/configuration#i18n-request)，首次使用时仅加载一次，相关实现内部均采用基于请求的缓存。唯一细微差别在于：异步函数的优点是调用后渲染可以立即恢复。相比之下，若钩子调用触发了 `i18n/request.ts` 的初始化，组件会挂起直到配置解析完成，然后重新渲染，可能会重新执行钩子调用之前的组件逻辑。但一旦请求中配置解析完成，钩子将同步执行，无挂起，相较异步函数因无需等待微任务队列清空，开销更小（参见相应 React RFC 中[通过重放执行恢复挂起组件](https://github.com/acdlite/rfcs/blob/first-class-promises/text/0000-first-class-support-for-promises.md#resuming-a-suspended-component-by-replaying-its-execution)）。
 
 </Details>
 
-## Using internationalization in Client Components
+## 在客户端组件中使用国际化
 
-Depending on your situation, you may need to handle internationalization in Client Components. Providing all messages to the client side is the easiest way to get started, therefore `next-intl` automatically does this when you render [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider). This is a reasonable approach for many apps.
+根据情况，你可能需要在客户端组件中处理国际化。向客户端提供所有消息是最简单的起步方式，因此 `next-intl` 在渲染 [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider) 时会自动完成此操作。这对许多应用来说是合理的做法。
 
-However, you can be more selective about which messages are passed to the client side if you're interested in optimizing the performance of your app:
+然而，如果你希望优化应用性能，可以更有选择性地将消息传递给客户端：
 
 ```tsx filename="layout.tsx"
 <NextIntlClientProvider
-  // Don't pass any messages to the client
+  // 不向客户端传递任何消息
   messages={null}
 >
   ...
 </NextIntlClientProvider>
 ```
 
-You can still add another instance of `NextIntlClientProvider` for certain parts of your app in case you want to pass `messages` to the client there.
+你仍然可以为应用中的某些部分添加另一个 `NextIntlClientProvider` 实例，以便在那里向客户端传递消息。
 
-There are several options for using translations from `next-intl` in Client Components, listed here in order of enabling the best performance:
+以下列出了在客户端组件中使用 `next-intl` 翻译的几种方式，按性能优先顺序排列：
 
-### Option 1: Passing translated labels to Client Components
+### 方案 1：将翻译后的标签传递给客户端组件
 
-The preferred approach is to pass the processed labels as props or `children` from a Server Component.
+首选方式是从服务器组件将处理后的标签以 props 或 `children` 传给客户端组件。
 
 ```tsx filename="FAQEntry.tsx" {11-13}
 import {useTranslations} from 'next-intl';
-import Expandable from './Expandable'; // A Client Component
+import Expandable from './Expandable'; // 一个客户端组件
 import FAQContent from './FAQContent';
 
 export default function FAQEntry() {
-  // Call `useTranslations` in a Server Component ...
+  // 在服务器组件中调用 `useTranslations`...
   const t = useTranslations('FAQEntry');
 
-  // ... and pass translated content to a Client Component
+  // ...并将翻译内容传给客户端组件
   return (
     <Expandable title={t('title')}>
       <FAQContent content={t('description')} />
@@ -175,23 +174,22 @@ function Expandable({title, children}) {
 }
 ```
 
-By doing this, we can use interactive features from React like `useState` on translated content, even though the translation only runs on the server side.
+这样，我们即使在翻译只在服务器端执行的情况下，也能在翻译内容上使用 React 的交互功能（如 `useState`）。
 
-Learn more in the Next.js docs: [Passing Server Components to Client Components as Props](https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#supported-pattern-passing-server-components-to-client-components-as-props)
+更多内容请参阅 Next.js 文档：[将服务器组件作为 props 传递给客户端组件](https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#supported-pattern-passing-server-components-to-client-components-as-props)
 
 <Details id="example-locale-switcher">
-<summary>Example: How can I implement a locale switcher?</summary>
+<summary>示例：如何实现语言切换器？</summary>
 
-If you implement a locale switcher as an interactive select, you can keep internationalization on the server side by rendering the labels from a Server Component and only marking the `select` element as a Client Component.
+如果你将语言切换实现为交互式选择框，你可以通过从服务器组件渲染标签，仅将 `select` 元素标记为客户端组件，从而保持国际化在服务器端进行。
 
 ```tsx filename="LocaleSwitcher.tsx"
 import {useLocale, useTranslations} from 'next-intl';
 import {locales} from '@/config';
 
-// A Client Component that registers an event listener for
-// the `change` event of the select, uses `useRouter`
-// to change the locale and uses `useTransition` to display
-// a loading state during the transition.
+// 一个客户端组件，监听 `select` 的 `change` 事件，
+// 使用 `useRouter` 切换语言，并使用 `useTransition`
+// 在切换期间显示加载状态。
 import LocaleSwitcherSelect from './LocaleSwitcherSelect';
 
 export default function LocaleSwitcher() {
@@ -210,34 +208,32 @@ export default function LocaleSwitcher() {
 }
 ```
 
-[Example implementation](https://github.com/amannn/next-intl/blob/main/examples/example-app-router/src/components/LocaleSwitcher.tsx) ([demo](https://next-intl-example-app-router.vercel.app/en))
+[示例实现](https://github.com/amannn/next-intl/blob/main/examples/example-app-router/src/components/LocaleSwitcher.tsx) ([演示](https://next-intl-example-app-router.vercel.app/en))
 
-See also: [`useRouter`](/docs/routing/navigation#userouter)
+另见: [`useRouter`](/docs/routing/navigation#userouter)
 
 </Details>
 
 <Details id="example-form">
-<summary>Example: How can I implement a form?</summary>
+<summary>示例：如何实现一个表单？</summary>
 
-Forms need client-side state for showing loading indicators and validation errors.
+表单需要客户端状态来显示加载指示和校验错误。
 
-To keep internationalization on the server side, it can be helpful to structure your components in a way where the interactive parts are moved out to leaf components instead of marking the whole form with `'use client';`.
+为了保持国际化在服务器端，将交互部分拆分到叶子组件中，而非整个表单都标记为 `'use client';` 是个有用的结构方法。
 
-**Example:**
+**示例：**
 
 ```tsx filename="app/register/page.tsx"
 import {useTranslations} from 'next-intl';
 
-// A Client Component, so that `useActionState` can be used
-// to potentially display errors received after submission.
+// 客户端组件，以便使用 `useActionState`
+// 可能显示提交后的错误。
 import RegisterForm from './RegisterForm';
 
-// A Client Component, so that `useFormStatus` can be used
-// to disable the input field during submission.
+// 客户端组件，用于在提交时禁用输入框。
 import FormField from './FormField';
 
-// A Client Component, so that `useFormStatus` can be used
-// to disable the submit button during submission.
+// 客户端组件，用于在提交时禁用提交按钮。
 import FormSubmitButton from './FormSubmitButton';
 
 export default function RegisterPage() {
@@ -262,9 +258,9 @@ export default function RegisterPage() {
 
 </Details>
 
-### Option 2: Moving state to the server side
+### 方案 2：将状态移到服务器端
 
-You might run into cases where you have dynamic state, such as pagination, that should be reflected in translated messages.
+你可能遇到需要动态状态（如分页）反映在翻译消息中的情况。
 
 ```tsx filename="Pagination.tsx"
 function Pagination({curPage, totalPages}) {
@@ -273,25 +269,21 @@ function Pagination({curPage, totalPages}) {
 }
 ```
 
-You can still manage your translations on the server side by using:
+你仍可以使用以下方式在服务器端管理翻译：
 
-1. Page or search params
-2. Cookies
-3. Database state
+1. 页面参数或查询参数
+2. Cookie
+3. 数据库状态
 
-In particular, page and search params are often a great option because they offer additional benefits such as preserving the state of the app when the URL is shared, as well as integration with the browser history.
+尤其是页面和查询参数经常是很好的选项，因为它们还带来额外好处，比如分享 URL 时能保持应用状态，且与浏览器历史集成。
 
 <Callout>
-  There's an article on Smashing Magazine about [using `next-intl` in Server
-  Components](https://www.smashingmagazine.com/2023/03/internationalization-nextjs-13-react-server-components)
-  which explores the usage of search params through a real-world example
-  (specifically the section about [adding
-  interactivity](https://www.smashingmagazine.com/2023/03/internationalization-nextjs-13-react-server-components/#adding-interactivity-dynamic-ordering-of-photos)).
+  Smashing Magazine 上有一篇关于 [在服务器组件中使用 next-intl](https://www.smashingmagazine.com/2023/03/internationalization-nextjs-13-react-server-components) 的文章，探讨了通过实际示例使用查询参数（尤其是关于[添加交互性](https://www.smashingmagazine.com/2023/03/internationalization-nextjs-13-react-server-components/#adding-interactivity-dynamic-ordering-of-photos)的部分）。
 </Callout>
 
-### Option 3: Providing individual messages
+### 方案 3：提供单独的消息
 
-If you need to incorporate dynamic state into components that can not be moved to the server side, you can wrap these components with `NextIntlClientProvider` and provide the relevant messages.
+如果你需要在无法移至服务器端的组件中合入动态状态，可以用 `NextIntlClientProvider` 包裹这些组件，并提供相关的消息。
 
 ```tsx filename="Counter.tsx"
 import pick from 'lodash/pick';
@@ -299,13 +291,13 @@ import {NextIntlClientProvider, useMessages} from 'next-intl';
 import ClientCounter from './ClientCounter';
 
 export default function Counter() {
-  // Receive messages provided in `i18n/request.ts` …
+  // 接收 `i18n/request.ts` 中提供的消息…
   const messages = useMessages();
 
   return (
     <NextIntlClientProvider
       messages={
-        // … and provide the relevant messages
+        // …并提供相关消息
         pick(messages, 'ClientCounter')
       }
     >
@@ -316,17 +308,17 @@ export default function Counter() {
 ```
 
 <Details id="messages-client-namespaces">
-<summary>How can I know which messages I need to provide to the client side?</summary>
+<summary>如何知道我需要向客户端提供哪些消息？</summary>
 
-Currently, the messages you select for being passed to the client side need to be picked based on knowledge about the implementation of the wrapped components.
+目前，需要基于对被包裹组件实现的了解，有选择地挑选消息传给客户端。
 
-An automatic, compiler-driven approach is being evaluated in [`next-intl#1`](https://github.com/amannn/next-intl/issues/1).
+自动化的基于编译器的方案正在 [`next-intl#1`](https://github.com/amannn/next-intl/issues/1) 中评估。
 
 </Details>
 
-### Option 4: Providing all messages
+### 方案 4：提供所有消息
 
-If you're building a highly dynamic app where most components use React's interactive features, you may prefer to make all messages available to Client Components—this is the default behavior of `next-intl`.
+如果你正在构建一个高度动态的应用，大部分组件都使用 React 的交互功能，可能更愿意将所有消息都提供给客户端组件——这也是 `next-intl` 的默认行为。
 
 ```tsx filename="layout.tsx" /NextIntlClientProvider/
 import {NextIntlClientProvider} from 'next-intl';
@@ -343,43 +335,43 @@ export default async function RootLayout(/* ... */) {
 ```
 
 <Details id="client-messages-performance">
-<summary>How does loading messages on the client side relate to performance?</summary>
+<summary>客户端加载消息如何影响性能？</summary>
 
-Depending on the requirements for your app, you might want to monitor your [Core Web Vitals](https://web.dev/articles/vitals) to ensure your app meets your performance goals.
+根据你应用的需求，你可能想监控你的 [核心网页指标](https://web.dev/articles/vitals)，以确保应用满足性能目标。
 
-If you pass messages to `NextIntlClientProvider`, Next.js will emit them during the streaming render to the markup of the page so that they can be used by Client Components. This can contribute to the [total blocking time](https://web.dev/articles/tbt), which in turn can relate to the [interaction to next paint](https://web.dev/articles/inp) metric. If you're seeking to improve these metrics in your app, you can be more selective about which messages are passed to the client side.
+若你将消息传递给 `NextIntlClientProvider`，Next.js 会在流式渲染时将它们注入页面标记中，供客户端组件使用。这可能增加[总阻塞时间](https://web.dev/articles/tbt)，进而影响[交互到下一次绘制时间](https://web.dev/articles/inp)指标。若你想提升这些指标，可以更有选择性地传递消息给客户端。
 
-However, as the general rule for optimization goes: Always measure before you optimize. If your app already performs well, there's no need for optimization.
+但通常的优化原则是：先测量后优化。如果你的应用性能已经很好，则无需优化。
 
-There are currently two research areas that aim to maximize the performance of using messages on the client side:
+当前有两项研究致力于最大化客户端消息使用的性能：
 
-1. [Automatic tree shaking of messages](https://github.com/amannn/next-intl/issues/1)
-2. [Ahead-of-time compilation of messages](https://github.com/amannn/next-intl/issues/962)
+1. [消息的自动摇树优化](https://github.com/amannn/next-intl/issues/1)
+2. [消息的预编译](https://github.com/amannn/next-intl/issues/962)
 
-The goal of these are to optimize the patterns you're already using with `next-intl`, enabling best-in-class performance for your app without changes to your code.
+目标是优化你已使用的 `next-intl` 模式，让你的应用无需改动即可获得一流性能。
 
 </Details>
 
-## Troubleshooting
+## 故障排查
 
-### "Failed to call `useTranslations` because the context from `NextIntlClientProvider` was not found." [#missing-context]
+### “无法调用 `useTranslations`，因为未找到 `NextIntlClientProvider` 的上下文。” [#missing-context]
 
-You might encounter this error or a similar one referencing `useFormatter` while working on your app.
+你开发时可能会遇到此错误或类似关于 `useFormatter` 的错误。
 
-This can happen because:
+原因可能是：
 
-1. You're intentionally calling the hook from a Client Component, but `NextIntlClientProvider` is not present as an ancestor in the component tree. If this is the case, you can [wrap your component in `NextIntlClientProvider`](#option-3-providing-individual-messages) to resolve this error.
-2. The component that calls the hook accidentally ended up in a client-side module graph, but you expected it to render as a Server Component. If this is the case, try to [pass this component via `children`](#option-1-passing-translations-to-client-components) to the Client Component instead.
+1. 你刻意在客户端组件调用钩子，但组件树中没有 `NextIntlClientProvider` 作为祖先。此时，你可以[将组件用 `NextIntlClientProvider` 包裹](#option-3-providing-individual-messages) 以解决该错误。
+2. 实际调用钩子的组件意外被纳入客户端模块图，尽管你预计它是服务器组件。此时尝试通过 [将该组件作为 `children` 传递](#option-1-passing-translations-to-client-components) 给客户端组件。
 
-### "Functions cannot be passed directly to Client Components because they're not serializable." [#non-serializable-props]
+### “函数不能直接传递给客户端组件，因为它们不可序列化。” [#non-serializable-props]
 
-You might encounter this error when you try to pass a non-serializable prop to `NextIntlClientProvider`.
+当你试图将不可序列化的属性传给 `NextIntlClientProvider` 时，可能会遇到此错误。
 
-The component accepts the following props that are not serializable:
+该组件接受以下不可序列化的属性：
 
 1. [`onError`](/docs/usage/configuration#error-handling)
 2. [`getMessageFallback`](/docs/usage/configuration#error-handling)
 
-To configure these, you can wrap `NextIntlClientProvider` with another component that is marked with `'use client'` and defines the relevant props.
+若要配置它们，可以用另一个标记了 `'use client'` 的组件包裹 `NextIntlClientProvider` 并定义相关属性。
 
-See: [How can I provide non-serializable props like `onError` to `NextIntlClientProvider`?](/docs/usage/configuration#nextintlclientprovider-non-serializable-props)
+参见：[如何向 `NextIntlClientProvider` 提供不可序列化的属性，如 `onError`？](/docs/usage/configuration#nextintlclientprovider-non-serializable-props)
