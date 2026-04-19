@@ -231,7 +231,7 @@ export const config = {
 
 ## 无代理 / 无中间件使用（静态导出）
 
-若您使用 Next.js 的[静态导出](https://nextjs.org/docs/app/building-your-application/deploying/static-exports) 功能（`output: 'export'`），则代理 / 中间件不会运行。尽管如此，您仍可使用[基于前缀的路由](/docs/routing/configuration#locale-prefix) 来实现国际化，但存在若干限制。
+如果您使用的是 Next.js 的 [静态导出](https://nextjs.org/docs/app/building-your-application/deploying/static-exports) 功能（`output: 'export'`），则不会运行代理 / 中间件。您仍然可以使用基于前缀的路由[（prefix-based routing）](/docs/routing/configuration#locale-prefix)，以便对应用进行国际化，但会适用一些权衡。
 
 **静态导出限制：**
 

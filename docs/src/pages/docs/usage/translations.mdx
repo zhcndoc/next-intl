@@ -15,7 +15,7 @@ import {CourseVideoBanner} from '@/components/CourseBanner';
 
 ## 术语
 
-- **Locale （语言区域）**：我们用该术语描述包含用户语言和格式偏好的标识符。除了语言之外，locale 还可以包含可选的区域信息（例如 `en-US`）。
+- **Locale（语言区域）**：我们用该术语描述包含用户语言和格式偏好的标识符。除了语言之外，locale 还可以包含可选的区域信息（例如 `en-US`）。
 - **Messages（消息）**：这些是以 locale 为单位分组的键/翻译对集合（例如 `en-US.json`）。
 
 ## 消息结构
@@ -132,7 +132,7 @@ function SignUp() {
 <Details id="messages-other-styles">
 <summary>我可以用其他方式组织消息吗？</summary>
 
-命名空间键不能包含字符“.”，因为它用于表示嵌套——其它字符正常使用。
+Namespace keys cannot contain the character "." as this is used to express nesting—all other characters are fine to use.
 
 如果你之前使用扁平结构且在消息键中包含“.”，可以按下面代码转换为嵌套结构：
 

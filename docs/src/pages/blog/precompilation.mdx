@@ -1,5 +1,5 @@
 ---
-title: 'next-intl 的预编译（Ahead-of-time compilation）'
+title: 'next-intl 的预编译（提前编译）'
 ---
 
 import StayUpdated from '@/components/StayUpdated.mdx';
@@ -153,7 +153,7 @@ format(compiled, 'en', {count: 2});
 
 只需开启一个开关：
 
-```tsx filename="next.config.ts" {9-10}
+```tsx filename="next.config.ts" {10-11}
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin({
@@ -193,7 +193,7 @@ export default withNextIntl();
 
 相关地，新引入的 [`useExtracted`](/blog/use-extracted) 也不支持 `t.raw`，因为它本身就不符合这套范式。
 
-因此，建议如果想用上预编译功能，迁移到上述替代方案。如果你严重依赖 `t.raw` ，当然也可以暂时关闭此优化。
+因此，建议如果想用上预编译功能，迁移到上述替代方案。如果你严重依赖 `t.raw`，当然也可以暂时关闭此优化。
 
 未来某个版本中，`t.raw` 可能会因这个 API 的缺点而被彻底弃用——但这一点还在讨论中。
 

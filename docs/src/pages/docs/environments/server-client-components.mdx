@@ -39,7 +39,7 @@ export default function HomePage() {
 
 ### 异步组件
 
-这类组件主要关注数据获取，[不能使用钩子](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md#capabilities--constraints-of-server-and-client-components)。因此，`next-intl` 提供了一整套可等待的函数版本，代替通常在组件内部以钩子方式调用的函数。
+这些主要关注数据获取，且[不能使用 hooks](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md#capabilities--constraints-of-server-and-client-components)。由于这一点，`next-intl` 提供了一组可等待（awaitable）版本的函数，这些函数通常是你从组件内部作为 hooks 来调用的。
 
 ```tsx filename="page.tsx"
 import {getTranslations} from 'next-intl/server';
@@ -95,28 +95,28 @@ export default function UserDetails({user}) {
 
 `next-intl` 利用 [`react-server` 条件导出](https://github.com/reactjs/rfcs/blob/main/text/0227-server-module-conventions.md#react-server-conditional-exports) 加载针对服务器或客户端组件使用优化的代码。客户端钩子如 `useTranslations` 的配置通过 `useContext` 读取，而服务器端通过 [`i18n/request.ts`](/docs/usage/configuration#i18n-request) 加载。
 
-钩子目前主要为客户端组件设计，因为它们通常是有状态的或不适合服务器环境。不过，类似 [`useId`](https://react.dev/reference/react/useId) 这样的钩子也可以用于服务器组件。同样，`next-intl` 提供的基于钩子的 API 无论是在服务器还是客户端组件中使用，外观均相同。
+Hooks 目前主要被人们所熟知，通常用于客户端组件，因为它们通常是有状态的，或者不适用于服务器环境。然而像 [`useId`](https://react.dev/reference/react/useId) 这样的 hooks 也可以在服务器组件中使用。同样，`next-intl` 提供了基于 hooks 的 API，其外观在使用于服务器组件或客户端组件时是完全相同的。
 
-当前这种模式的一条限制是钩子不能在异步组件中调用。因此，`next-intl` 提供了另一套面向此用例的[可等待 API](#async-components)。
+目前与该模式相关的唯一限制是：hooks 不能从 `async` 组件中调用。因此，`next-intl` 会为这种用例提供一组独立的 [可等待 API](#async-components)。
 
 </Details>
 
 <Details id="async-or-non-async">
 <summary>我应该为组件使用异步函数还是非异步函数？</summary>
 
-若你实现的组件符合共享组件的定义，将其实现为非异步函数可能更有益。这允许组件在服务器或客户端环境中使用，使其非常灵活。即便你不打算在哪些客户端运行某个组件，这种兼容性仍有帮助，比如简化测试。
+如果你的组件符合共享组件的定义，那么将其实现为非异步函数可能更有益。这允许组件在服务器或客户端环境中使用，使其非常灵活。即便你并不打算在某些客户端运行某个组件，这种兼容性仍然有帮助，比如简化测试。
 
-不过，你无需拘泥于使用非异步函数处理国际化——按你的应用需求选择即可。
+不过，你不必拘泥于使用非异步函数来处理国际化——按你的应用需求选择即可。
 
-性能方面，异步函数和钩子可以互换使用。配置来自 [`i18n/request.ts`](/docs/usage/configuration#i18n-request)，首次使用时仅加载一次，相关实现内部均采用基于请求的缓存。唯一细微差别在于：异步函数的优点是调用后渲染可以立即恢复。相比之下，若钩子调用触发了 `i18n/request.ts` 的初始化，组件会挂起直到配置解析完成，然后重新渲染，可能会重新执行钩子调用之前的组件逻辑。但一旦请求中配置解析完成，钩子将同步执行，无挂起，相较异步函数因无需等待微任务队列清空，开销更小（参见相应 React RFC 中[通过重放执行恢复挂起组件](https://github.com/acdlite/rfcs/blob/first-class-promises/text/0000-first-class-support-for-promises.md#resuming-a-suspended-component-by-replaying-its-execution)）。
+从性能角度来看，异步函数和 hooks 是可以互换使用的。配置来自 [`i18n/request.ts`](/docs/usage/configuration#i18n-request)，首次使用时仅加载一次，相关实现内部均采用基于请求的缓存。唯一的细微差别在于：异步函数的优点是调用后渲染可以立即恢复。相比之下，如果 hooks 调用触发了 `i18n/request.ts` 的初始化，组件会挂起直到配置解析完成，然后重新渲染，此时可能会重新执行 hooks 调用之前的组件逻辑。但一旦请求中配置解析完成，hooks 将同步执行，无需挂起，相较于异步函数由于不需要等待微任务队列清空，开销更小（参见相应 React RFC 中[通过重放执行恢复挂起组件](https://github.com/acdlite/rfcs/blob/first-class-promises/text/0000-first-class-support-for-promises.md#resuming-a-suspended-component-by-replaying-its-execution)）。
 
 </Details>
 
 ## 在客户端组件中使用国际化
 
-根据情况，你可能需要在客户端组件中处理国际化。向客户端提供所有消息是最简单的起步方式，因此 `next-intl` 在渲染 [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider) 时会自动完成此操作。这对许多应用来说是合理的做法。
+根据情况，你可能需要在客户端组件中处理国际化。向客户端提供所有消息是最简单的起步方式，因此 `next-intl` 会在渲染 [`NextIntlClientProvider`](/docs/usage/configuration#nextintlclientprovider) 时自动完成此操作。这对许多应用来说都是合理的做法。
 
-然而，如果你希望优化应用性能，可以更有选择性地将消息传递给客户端：
+然而，如果你希望优化应用性能，你可以更有选择性地将消息传递给客户端：
 
 ```tsx filename="layout.tsx"
 <NextIntlClientProvider
@@ -174,7 +174,7 @@ function Expandable({title, children}) {
 }
 ```
 
-这样，我们即使在翻译只在服务器端执行的情况下，也能在翻译内容上使用 React 的交互功能（如 `useState`）。
+这样，即使在翻译只在服务器端执行的情况下，也可以在翻译内容上使用 React 的交互功能（如 `useState`）。
 
 更多内容请参阅 Next.js 文档：[将服务器组件作为 props 传递给客户端组件](https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#supported-pattern-passing-server-components-to-client-components-as-props)
 
@@ -260,7 +260,7 @@ export default function RegisterPage() {
 
 ### 方案 2：将状态移到服务器端
 
-你可能遇到需要动态状态（如分页）反映在翻译消息中的情况。
+你可能会遇到需要动态状态（如分页）反映在翻译消息中的情况。
 
 ```tsx filename="Pagination.tsx"
 function Pagination({curPage, totalPages}) {
@@ -283,7 +283,7 @@ function Pagination({curPage, totalPages}) {
 
 ### 方案 3：提供单独的消息
 
-如果你需要在无法移至服务器端的组件中合入动态状态，可以用 `NextIntlClientProvider` 包裹这些组件，并提供相关的消息。
+如果你需要将动态状态整合进无法移至服务器端的组件中，你可以用 `NextIntlClientProvider` 包裹这些组件，并提供相关消息。
 
 ```tsx filename="Counter.tsx"
 import pick from 'lodash/pick';
@@ -318,7 +318,7 @@ export default function Counter() {
 
 ### 方案 4：提供所有消息
 
-如果你正在构建一个高度动态的应用，大部分组件都使用 React 的交互功能，可能更愿意将所有消息都提供给客户端组件——这也是 `next-intl` 的默认行为。
+如果你正在构建一个高度动态的应用，大部分组件都使用 React 的交互功能，那么你可能更愿意将所有消息都提供给客户端组件——这也是 `next-intl` 的默认行为。
 
 ```tsx filename="layout.tsx" /NextIntlClientProvider/
 import {NextIntlClientProvider} from 'next-intl';
@@ -339,16 +339,16 @@ export default async function RootLayout(/* ... */) {
 
 根据你应用的需求，你可能想监控你的 [核心网页指标](https://web.dev/articles/vitals)，以确保应用满足性能目标。
 
-若你将消息传递给 `NextIntlClientProvider`，Next.js 会在流式渲染时将它们注入页面标记中，供客户端组件使用。这可能增加[总阻塞时间](https://web.dev/articles/tbt)，进而影响[交互到下一次绘制时间](https://web.dev/articles/inp)指标。若你想提升这些指标，可以更有选择性地传递消息给客户端。
+如果你将消息传递给 `NextIntlClientProvider`，Next.js 会在流式渲染时将它们注入页面标记中，供客户端组件使用。这可能会增加[总阻塞时间](https://web.dev/articles/tbt)，进而影响[交互到下一次绘制时间](https://web.dev/articles/inp)指标。若你想提升这些指标，可以更有选择性地传递消息给客户端。
 
 但通常的优化原则是：先测量后优化。如果你的应用性能已经很好，则无需优化。
 
-当前有两项研究致力于最大化客户端消息使用的性能：
+目前有两项研究致力于最大化客户端消息使用的性能：
 
 1. [消息的自动摇树优化](https://github.com/amannn/next-intl/issues/1)
 2. [消息的预编译](https://github.com/amannn/next-intl/issues/962)
 
-目标是优化你已使用的 `next-intl` 模式，让你的应用无需改动即可获得一流性能。
+目标是优化你已经使用的 `next-intl` 模式，让你的应用无需改动即可获得一流性能。
 
 </Details>
 
