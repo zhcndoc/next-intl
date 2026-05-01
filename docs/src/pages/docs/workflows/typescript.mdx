@@ -247,7 +247,7 @@ messages/*.d.json.ts
 
 ## `Formats`
 
-如果使用[全局格式](/docs/usage/configuration#formats)，可以严格限定传递给 `format.dateTime`、`format.number` 和 `format.list` 的格式名称。
+如果您使用[全局格式](/docs/usage/configuration#formats)，可以严格为在 `format.dateTime`、`format.number`、`format.list` 和 `format.displayName` 调用中引用的格式名称定义类型。
 
 ```tsx
 function Component() {
@@ -264,6 +264,9 @@ function Component() {
 
   // ✅ 有效格式
   format.list(['HTML', 'CSS', 'JavaScript'], 'enumeration');
+
+  // ✅ 有效格式
+  format.displayName('US', 'region');
 }
 ```
 
@@ -289,6 +292,11 @@ export const formats = {
     enumeration: {
       style: 'long',
       type: 'conjunction'
+    }
+  },
+  displayName: {
+    region: {
+      type: 'region'
     }
   }
 } satisfies Formats;

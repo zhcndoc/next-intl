@@ -516,7 +516,7 @@ const now = await getNow();
   title="全局格式"
 />
 
-为了实现日期、时间、数字和列表格式的一致性，您可以定义一套全局格式。
+为了实现一致的日期、时间、数字、列表和显示名称格式化，您可以定义一组全局格式。
 
 <Tabs items={['i18n/request.ts', 'Provider']}>
 <Tabs.Tab>
@@ -543,6 +543,11 @@ export default getRequestConfig(async () => {
         enumeration: {
           style: 'long',
           type: 'conjunction'
+        }
+      },
+      displayName: {
+        region: {
+          type: 'region'
         }
       }
     }
@@ -575,6 +580,11 @@ export default getRequestConfig(async () => {
         style: 'long',
         type: 'conjunction'
       }
+    },
+    displayName: {
+      region: {
+        type: 'region'
+      }
     }
   }}
 >
@@ -596,6 +606,7 @@ function Component() {
   format.dateTime(new Date('2020-11-20T10:36:01.516Z'), 'short');
   format.number(47.414329182, 'precise');
   format.list(['HTML', 'CSS', 'JavaScript'], 'enumeration');
+  format.displayName('US', 'region');
 }
 ```
 

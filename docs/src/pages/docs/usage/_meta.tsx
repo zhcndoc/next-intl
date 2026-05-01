@@ -3,6 +3,7 @@ export default {
   numbers: '数值',
   'dates-times': '日期和时间',
   lists: '列表',
+  'display-name': '显示名称',
   configuration: '请求配置',
   extraction: 'useExtracted',
   plugin: 'Next.js 插件'

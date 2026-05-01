@@ -8,12 +8,13 @@ import Callout from '@/components/Callout';
 
 根据你使用的功能，需要确保目标浏览器支持以下 API：
 
-- 基本使用：`Intl.Locale`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#browser_compatibility)）
-- 日期与时间格式化：`Intl.DateTimeFormat`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#browser_compatibility)）
-- 数字格式化：`Intl.NumberFormat`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#browser_compatibility)）
-- 复数规则：`Intl.PluralRules`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/PluralRules#browser_compatibility)）
-- 相对时间格式化：`Intl.RelativeTimeFormat`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#browser_compatibility)）
-- 列表格式化：`Intl.ListFormat`（[兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat#browser_compatibility)）
+- 基本用法: `Intl.Locale` ([兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#browser_compatibility))
+- 日期和时间格式化: `Intl.DateTimeFormat` ([兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#browser_compatibility))
+- 数字格式化: `Intl.NumberFormat` ([兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#browser_compatibility))
+- 复数处理: `Intl.PluralRules` ([兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/PluralRules#browser_compatibility))
+- 相对时间格式化: `Intl.RelativeTimeFormat` ([兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#browser_compatibility))
+- 列表格式化: `Intl.ListFormat` ([兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat#browser_compatibility))
+- 显示名称格式化: `Intl.DisplayNames` ([兼容性](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#browser_compatibility))
 
 如果你的目标浏览器不支持所有必需的 API，建议使用 polyfill。
 
@@ -40,7 +41,9 @@ function IntlPolyfills() {
     'Intl.RelativeTimeFormat',
     `Intl.RelativeTimeFormat.~locale.${locale}`,
     'Intl.ListFormat',
-    `Intl.ListFormat.~locale.${locale}`
+    `Intl.ListFormat.~locale.${locale}`,
+    'Intl.DisplayNames',
+    `Intl.DisplayNames.~locale.${locale}`
   ];
 
   return (

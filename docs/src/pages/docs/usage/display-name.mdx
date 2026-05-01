@@ -1,0 +1,52 @@
+import Callout from '@/components/Callout';
+
+# 显示名称
+
+当你需要为地区、语言、货币或文字脚本显示符合当前语言环境的名称时，可以使用 `useFormatter` 钩子中的 `displayName` 函数。
+
+输出会自动适配当前语言环境：
+
+- `en-US` 中的 “美国”
+- `fr-FR` 中的 “美国”
+- `de-DE` 中的 “Vereinigte Staaten”
+
+## 格式化显示名称
+
+```js
+import {useFormatter} from 'next-intl';
+
+function Component() {
+  const format = useFormatter();
+
+  // 渲染 “美国”
+  format.displayName('US', {type: 'region'});
+
+  // 渲染 “英语”
+  format.displayName('en', {type: 'language'});
+
+  // 渲染 “美元”
+  format.displayName('USD', {type: 'currency'});
+
+  // 渲染 “拉丁文”
+  format.displayName('Latn', {type: 'script'});
+}
+```
+
+有关你可以传递给 `displayName` 函数的选项，请参阅 MDN 关于 [`DisplayNames`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames) 的文档以了解更多信息。
+
+请注意，`type` 是必填选项。可接受的值取决于运行时，但通常支持的类型有：`region`、`language`、`currency` 和 `script`。
+
+如果你已经配置了 [全局格式](/docs/usage/configuration#formats)，可以通过将名称作为第二个参数来引用它们：
+
+```js
+// 使用全局格式
+format.displayName('US', 'region');
+
+// 可选地覆盖某些选项
+format.displayName('US', 'region', {style: 'narrow'});
+```
+
+<Callout>
+  目前只能通过 `useFormatter` 来格式化显示名称。消息中没有
+  等效的内联语法。
+</Callout>

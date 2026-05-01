@@ -120,7 +120,7 @@ export const routing = defineRouting({
     prefixes: {
       'en-US': '/us',
       'de-AT': '/eu/at'
-      // (/zh 会照原样使用)
+      // （/zh 会照原样使用）
     }
   }
 });
@@ -356,29 +356,39 @@ export const routing = defineRouting({
 
 如果没有匹配的域名，中间件会基于[前缀](/docs/routing/middleware#location-detection-prefix)回退到默认语言匹配（例如，开发环境的 `localhost`）。
 
-另见：[基于域名的路由](/docs/routing/middleware#location-detection-domain)
+可选地，每个域都可以覆盖全局的 `localePrefix` 设置：
 
-<Details id="domains-localeprefix-individual">
-<summary>我可以为不同域名使用不同的 `localePrefix` 配置吗？</summary>
-
-目前框架不直接支持，但你仍可以为每个域名单独构建应用，通过环境变量注入不同的路由配置来实现。
-
-**示例：**
-
-```tsx filename="routing.ts"
+```tsx filename="routing.ts" {6,12,18,24}
 import {defineRouting} from 'next-intl/routing';
 
-const isUsDomain =
-  process.env.VERCEL_PROJECT_PRODUCTION_URL === 'us.example.com';
-
 export const routing = defineRouting({
-  locales: isUsDomain ? ['en-US'] : ['en-CA', 'fr-CA'],
-  defaultLocale: isUsDomain ? 'en-US' : 'en-CA',
-  localePrefix: isUsDomain ? 'never' : 'always'
+  locales: ['en-US', 'en-CA', 'fr-CA', 'fr-FR'],
+  defaultLocale: 'en-US',
+  localePrefix: 'as-needed',
+  domains: [
+    {
+      domain: 'us.example.com',
+      defaultLocale: 'en-US',
+      locales: ['en-US'],
+      localePrefix: 'never'
+    },
+    {
+      domain: 'ca.example.com',
+      defaultLocale: 'en-CA',
+      locales: ['en-CA', 'fr-CA'],
+      localePrefix: 'always'
+    },
+    {
+      domain: 'fr.example.com',
+      defaultLocale: 'fr-FR',
+      locales: ['fr-FR']
+      // 使用全局设置
+    }
+  ]
 });
 ```
 
-</Details>
+另见：[基于域名的路由](/docs/routing/middleware#location-detection-domain)
 
 ### `localeDetection` [#locale-detection]
 
