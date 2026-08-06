@@ -22,21 +22,14 @@ import {CourseVideoBanner} from '@/components/CourseBanner';
 ```tsx filename="layout.tsx"
 import {getTranslations} from 'next-intl/server';
 
-export async function generateMetadata({params}) {
-  const {locale} = await params;
-  const t = await getTranslations({locale, namespace: 'Metadata'});
+export async function generateMetadata() {
+  const t = await getTranslations('Metadata');
 
   return {
     title: t('title')
   };
 }
 ```
-
-<Callout>
-  通过向 `next-intl` 的异步函数显式传入 `locale`，
-  如果你使用[基于语言环境的路由](/docs/routing)，
-  你可以使元数据处理器支持[静态渲染](/docs/routing/setup#static-rendering)。
-</Callout>
 
 ### 服务器操作
 
@@ -45,10 +38,10 @@ export async function generateMetadata({params}) {
 ```tsx
 import {getTranslations} from 'next-intl/server';
 
-async function loginAction(data: FormData) {
+async function loginAction(locale: string, data: FormData) {
   'use server';
 
-  const t = await getTranslations('LoginForm');
+  const t = await getTranslations({namespace: 'LoginForm', locale});
   const areCredentialsValid = /* ... */;
   if (!areCredentialsValid) {
     return {error: t('invalidCredentials')};
@@ -56,7 +49,9 @@ async function loginAction(data: FormData) {
 }
 ```
 
-注意，当你向用户展示服务器操作生成的消息时，应考虑用户在消息显示期间切换语言环境的情况，以确保界面的一致本地化。如果你使用了作为路由策略一部分的[ `[locale]` 片段](/docs/routing)，则会自动处理该情况。如果没有，可能需要手动清除消息，例如通过给相关组件使用 `key={locale}` 来[重置状态](https://react.dev/learn/preserving-and-resetting-state#resetting-a-form-with-a-key)。
+请注意，当你向用户显示服务器操作生成的消息时，应考虑用户是否可能在消息显示期间切换语言环境，以确保界面始终保持一致的本地化状态。
+
+如果你将[一个 `[locale]` 段](/docs/routing)作为路由策略的一部分，那么这一点会自动处理。如果没有使用，你可能需要手动清除消息，例如通过使用 `key={locale}` [重置相应组件的状态](https://react.dev/learn/preserving-and-resetting-state#resetting-a-form-with-a-key)。
 
 <Details id="server-actions-zod">
 <summary>使用 Zod 进行验证时，如何本地化错误消息？</summary>
@@ -75,10 +70,10 @@ const loginFormSchema = z.object({
 
 // ...
 
-async function loginAction(data: FormData) {
+async function loginAction(locale: string, data: FormData) {
   'use server';
 
-  const t = await getTranslations('LoginForm');
+  const t = await getTranslations({namespace: 'LoginForm', locale});
   const values = Object.fromEntries(data);
 
   const result = loginFormSchema.safeParse(values, {
@@ -91,6 +86,42 @@ async function loginAction(data: FormData) {
         }[path];
       }
     }
+  });
+
+  // ...
+}
+```
+
+这种方式使模式与语言环境无关，并允许你针对每个字段调整措辞。
+
+如果你希望在多个模式之间共享错误消息，也可以将映射逻辑移至可复用的辅助函数中：
+
+```tsx filename="getValidationErrorMap.ts"
+import {getTranslations} from 'next-intl/server';
+
+export default async function getValidationErrorMap() {
+  const t = await getTranslations('Validation');
+
+  return function errorMap(issue) {
+    switch (issue.code) {
+      case 'too_small':
+        return t('tooSmall', {minimum: Number(issue.minimum)});
+      case 'invalid_format':
+        return t('invalidFormat');
+      default:
+        return undefined;
+    }
+  };
+}
+```
+
+```tsx
+async function loginAction(data: FormData) {
+  'use server';
+
+  const values = Object.fromEntries(data);
+  const result = loginFormSchema.safeParse(values, {
+    error: await getValidationErrorMap()
   });
 
   // ...

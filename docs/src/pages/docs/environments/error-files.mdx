@@ -1,15 +1,15 @@
 import Callout from '@/components/Callout';
 
-# Next.js 错误文件中的国际化
+# Next.js 错误文件的国际化
 
 Next.js App Router 的文件约定提供了两个可用于错误处理的文件：
 
 1. [`not-found.js`](https://nextjs.org/docs/app/api-reference/file-conventions/not-found)
 2. [`error.js`](https://nextjs.org/docs/app/api-reference/file-conventions/error)
 
-本页提供了这些情况的实用指南。
+本页提供了处理这些情况的实用指南。
 
-**提示：** 你可以查看 [App Router 示例](/examples#app-router) 来探索包含错误处理功能的示例应用。
+**提示：** 你可以查看 [App Router 示例](/examples#app-router)，探索包含错误处理功能的示例应用。
 
 ## `not-found.js`
 
@@ -48,14 +48,12 @@ export default function CatchAllPage() {
 
 当用户请求的路由未被 `next-intl` [middleware](/docs/routing/middleware) 匹配时，请求没有关联的语言环境（取决于你的 [`matcher` 配置](/docs/routing/middleware#matcher-config)，例如 `/unknown.txt` 可能不会被匹配到）。
 
-你可以添加一个根目录的 `not-found` 页面来处理这些情况。
+你还可以添加一个 [`global-not-found`](https://nextjs.org/docs/app/api-reference/file-conventions/not-found#global-not-foundjs-experimental) 页面来处理这些情况：
 
-```tsx filename="app/not-found.tsx"
-'use client';
-
+```tsx filename="app/global-not-found.tsx"
 import Error from 'next/error';
 
-export default function NotFound() {
+export default function GlobalNotFound() {
   return (
     <html lang="en">
       <body>
@@ -66,32 +64,7 @@ export default function NotFound() {
 }
 ```
 
-注意，存在 `app/not-found.tsx` 文件时，根布局是必需的，即使它只是简单地透传 `children`。
-
-```tsx filename="app/layout.tsx"
-// 由于我们有根目录的 `not-found.tsx` 页面，
-// 所以必须定义布局文件，即使只是简单地透传 children。
-export default function RootLayout({children}) {
-  return children;
-}
-```
-
-为了使 404 页面渲染，我们需要在根布局中检测到传入的 `locale` 参数无效时调用 `notFound` 函数。
-
-```tsx filename="app/[locale]/layout.tsx"
-import {hasLocale} from 'next-intl';
-import {notFound} from 'next/navigation';
-import {routing} from '@/i18n/routing';
-
-export default function LocaleLayout({children, params}) {
-  const {locale} = await params;
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-
-  // ...
-}
-```
+为了渲染 404 页面，当遇到 `[locale]` 段的未知值时，我们需要调用 `notFound` 函数——通常是在 [`i18n/request.ts`](/docs/routing/setup#i18n-request) 中调用。
 
 ## `error.js`
 

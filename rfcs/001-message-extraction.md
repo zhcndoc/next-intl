@@ -1,72 +1,10 @@
-# RFC: Message Extraction
+# RFC：消息提取
 
-Start date: 2025-09-24
+开始日期：2025-09-24
 
-## Summary
+## 摘要
 
-This RFC proposes a new way to define messages inline that doesn't require managing keys.
-
-```tsx
-import {useExtracted} from 'next-intl';
-
-function InlineMessages() {
-  const t = useExtracted();
-  return <h1>{t('Look ma, no keys!')}</h1>;
-}
-```
-
-This document contains a lot of background information and reasoning regarding API design and is intended for early adopters who are interested in providing feedback. The eventual goal for end users is to get started without much explanation, so don't feel obliged to dig into this if you're only interested in using this API in the future.
-
-→ [**Discussion**](https://github.com/amannn/next-intl/discussions/2036)
-
-**Table of contents:**
-
-- [Motivation](#motivation)
-- [Proposed API](#proposed-api)
-  - [Simple, plain strings](#simple-plain-strings)
-  - [Statically analyzable](#statically-analyzable)
-  - [ICU features](#icu-features)
-  - [Provide more context](#provide-more-context)
-  - [Explicit IDs](#explicit-ids)
-  - [Optional namespace](#optional-namespace)
-  - [Developer workflow](#developer-workflow)
-- [Implementation details](#implementation-details)
-  - [File formats & AI translation](#file-formats--ai-translation)
-  - [Generating minified keys](#generating-minified-keys)
-  - [Catalog generation](#catalog-generation)
-  - [Bundler integration](#bundler-integration)
-- [Migration](#migration)
-- [Tradeoffs](#tradeoffs)
-- [Considered alternatives](#considered-alternatives)
-  - [Direct concatenation of arguments](#direct-concatenation-of-arguments)
-  - [Supporting human readable strings as keys](#supporting-human-readable-strings-as-keys)
-  - [Macro for defining messages](#macro-for-defining-messages)
-- [Prior art & credits](#prior-art--credits)
-
-## Motivation
-
-This RFC was born out of this question: "What would the Tailwind for i18n look like?"
-
-If we consider the design of Tailwind, we can see that an i18n solution that follows the same principles might look something like this:
-
-1. **Colocation**: Similar to how Tailwind avoids the need to manage separate stylesheets, there should not be a need for manually managing JSON message catalogs when adding, updating or removing messages. Message catalogs can however act as a compile target.
-2. **AI-first**: Generative AI is very good at Tailwind due to local reasoning and small context windows. Having to read entire message catalogs leads to context pollution and should therefore not be necessary (at least not without tool calls).
-3. **No naming of things**: Not having to come up with names is a major productivity boost, therefore manual keys should be avoided as much as possible.
-4. **Purging**: Similar to how Tailwind can purge unused styles, we should purge unused messages automatically. Related to this, changed messages might need to be invalidated.
-5. **Minification**: Tailwind class names have a tiny bundle footprint, messages should also use minified keys (e.g. `uxV9Xq`).
-6. **Prototype-friendly, production-ready**: Tailwind looks exactly the same, regardless of whether it is used for a quick prototype or a production app. In the same way, there should be a single API that avoids upfront structural decisions related to the project's size and complexity.
-7. **Incremental adoption**: Tailwind can be used alongside traditional stylesheets, making it migration-friendly. It should be possible to use inline messages alongside existing translations.
-8. **Refactoring-friendly**: Moving code across components is seamless with Tailwind, this should be possible with inline messages as well.
-
-While `next-intl` has answers to some of these questions, ultimately the truth is that there's currently potential left on the table. Therefore, this RFC aims to introduce a new API that can improve the developer experience for using `next-intl`.
-
-**Important:** This new API is purely additive. All existing functionality will continue to work and will likely also be used behind the scenes by this new API.
-
-## Proposed API
-
-### Simple, plain strings
-
-For the simplest case, the API looks like this:
+本 RFC 提议一种以内联方式定义消息的新方法，无需管理键。
 
 ```tsx
 import {useExtracted} from 'next-intl';
@@ -77,27 +15,89 @@ function InlineMessages() {
 }
 ```
 
-**Notes:**
+本文档包含大量关于 API 设计的背景信息和思考，旨在面向有兴趣提供反馈的早期采用者。对于最终用户而言，我们的目标是让他们无需阅读太多解释即可开始使用，因此如果你只是对未来使用此 API 感兴趣，不必强行深入了解这些内容。
 
-1. Neither a namespace nor a key is needed.
-2. Retrieving `t` from a hook allows us to continue accessing messages either from React Context (Client Components) or from `i18n/request.ts` (Server Components).
-3. The invocation of `t` can be moved to another component without having to update a key. The only requirement is that a call to `useExtracted` is present.
-4. Server Components, Server Actions and other server-only code can use an awaitable version of the hook like `const t = await getExtracted()`.
-5. Dynamic invocations like `t(keyName)` are not allowed and will print an error (related: [Statically analyzable](#statically-analyzable))
-6. IDE tooling like [i18n Ally](https://next-intl.dev/docs/workflows/vscode-integration) is no longer needed.
-7. If the same label is used in multiple places, it will be reused automatically (related: [Explicit IDs](#explicit-ids))
-8. `t.raw` is not supported with this API.
+→ [**讨论**](https://github.com/amannn/next-intl/discussions/2036)
 
-### Statically analyzable
+**目录：**
 
-Since an extractor needs to be able to statically analyze the code, users can't use dynamic invocations:
+- [动机](#motivation)
+- [提议的 API](#proposed-api)
+  - [简单的纯字符串](#simple-plain-strings)
+  - [可静态分析](#statically-analyzable)
+  - [ICU 功能](#icu-features)
+  - [提供更多上下文](#provide-more-context)
+  - [显式 ID](#explicit-ids)
+  - [可选命名空间](#optional-namespace)
+  - [开发者工作流](#developer-workflow)
+- [实现细节](#implementation-details)
+  - [文件格式与 AI 翻译](#file-formats--ai-translation)
+  - [生成最小化键](#generating-minified-keys)
+  - [目录生成](#catalog-generation)
+  - [打包器集成](#bundler-integration)
+- [迁移](#migration)
+- [权衡](#tradeoffs)
+- [考虑过的替代方案](#considered-alternatives)
+  - [直接拼接参数](#direct-concatenation-of-arguments)
+  - [支持将人类可读字符串作为键](#supporting-human-readable-strings-as-keys)
+  - [用于定义消息的宏](#macro-for-defining-messages)
+- [先例与致谢](#prior-art--credits)
+
+## 动机
+
+这份 RFC 源于这样一个问题：“i18n 的 Tailwind 会是什么样的？”
+
+如果我们考虑 Tailwind 的设计理念，可以看出，一个遵循相同原则的 i18n 解决方案可能会是这样的：
+
+1. **就地共置**：类似于 Tailwind 避免了管理独立样式表的需要，在添加、更新或删除消息时，也不应该需要手动管理 JSON 消息目录。不过，消息目录仍然可以作为编译目标。
+2. **AI 优先**：得益于本地推理和较小的上下文窗口，生成式 AI 非常擅长使用 Tailwind。如果必须读取完整的消息目录，就会导致上下文污染，因此这应该不是必要条件（至少不应在没有工具调用的情况下成为必要条件）。
+3. **无需为事物命名**：不必想出各种名称能够极大提升生产力，因此应尽可能避免手动设置键名。
+4. **清除无用内容**：类似于 Tailwind 可以清除未使用的样式，我们也应该自动清除未使用的消息。与此相关的是，发生变更的消息可能需要被失效处理。
+5. **压缩**：Tailwind 的类名占用的资源极少，消息也应使用经过压缩的键（例如 `uxV9Xq`）。
+6. **适合原型开发，同时满足生产需求**：无论 Tailwind 用于快速原型还是生产应用，其表现都完全一致。同样地，应该提供一套统一的 API，避免根据项目的规模和复杂程度预先做出结构性决策。
+7. **渐进式采用**：Tailwind 可以与传统样式表并用，因此便于迁移。同样，也应该能够将内联消息与现有翻译结合使用。
+8. **便于重构**：使用 Tailwind 时，在组件之间移动代码非常顺畅；内联消息也应该支持这一点。
+
+虽然 `next-intl` 已经回答了其中一些问题，但归根结底，目前仍有一些潜力尚未被充分挖掘。因此，本 RFC 旨在引入一个新的 API，以改善使用 `next-intl` 时的开发者体验。
+
+**重要提示：** 这个新 API 完全是增量式的。所有现有功能都将继续正常工作，并且很可能也会在幕后被这个新 API 使用。
+
+## 提议的 API
+
+### 简单的纯字符串
+
+对于最简单的情况，API 如下所示：
 
 ```tsx
-// ❌ Will print an error
+import {useExtracted} from 'next-intl';
+
+function InlineMessages() {
+  const t = useExtracted();
+  return <h1>{t('Look ma, no keys!')}</h1>;
+}
+```
+
+**注意：**
+
+1. 不需要命名空间或键。
+2. 从 Hook 中获取 `t`，可以让我们继续从 React Context（客户端组件）或 `i18n/request.ts`（服务端组件）访问消息。
+3. 无需更新键，即可将 `t` 的调用移至另一个组件。唯一的要求是其中存在对 `useExtracted` 的调用。
+4. 服务端组件、服务端操作以及其他仅限服务端的代码可以使用该 Hook 的可等待版本，例如 `const t = await getExtracted()`。
+5. 不允许使用 `t(keyName)` 这样的动态调用，并且会打印错误（相关内容：[可静态分析](#statically-analyzable)）。
+6. 不再需要 [i18n Ally](https://next-intl.dev/docs/workflows/vscode-integration) 等 IDE 工具。
+7. 如果同一个标签在多个地方使用，它会被自动复用（相关内容：[显式 ID](#explicit-ids)）。
+8. 此 API 不支持 `t.raw`。
+
+### 可静态分析
+
+由于提取器需要能够静态分析代码，因此用户不能使用动态调用：
+
+```tsx
+// ❌ 将打印错误
 t(keyName);
 ```
 
-E.g. for arrays of items, this pattern is recommended:
+例如，对于项目数组，建议使用以下模式：
 
 ```tsx
 const items = [
@@ -112,19 +112,19 @@ const items = [
 ];
 ```
 
-Besides message extraction, static analysis of messages might in the future be used for [tree shaking](https://github.com/amannn/next-intl/issues/1), therefore this restriction is important beyond the scope of this RFC.
+除了消息提取之外，未来还可能会将消息的静态分析用于[摇树优化](https://github.com/amannn/next-intl/issues/1)，因此这一限制的重要性不仅限于本 RFC 的范围。
 
-### ICU features
+### ICU 功能
 
-For ICU features like argument interpolation, the ICU string can be defined inline and enriched with values.
+对于参数插值等 ICU 功能，可以在行内定义 ICU 字符串，并使用值对其进行丰富。
 
-**Interpolation of arguments**
+**参数插值**
 
 ```tsx
 t('Hello, {name}!', {name: 'John'});
 ```
 
-**Cardinal pluralization**
+**基数复数**
 
 ```tsx
 t(
@@ -133,7 +133,7 @@ t(
 );
 ```
 
-**Ordinal pluralization**
+**序数复数**
 
 ```tsx
 t(
@@ -142,7 +142,7 @@ t(
 );
 ```
 
-**Select values**
+**选择值**
 
 ```tsx
 t('{gender, select, female {She is} male {He is} other {They are}} online.', {
@@ -150,7 +150,7 @@ t('{gender, select, female {She is} male {He is} other {They are}} online.', {
 });
 ```
 
-**Rich text**
+**富文本**
 
 ```tsx
 t.rich('Please refer to the <link>guidelines</link>.', {
@@ -158,18 +158,18 @@ t.rich('Please refer to the <link>guidelines</link>.', {
 });
 ```
 
-Note that we can piggyback on the recently-introduced [strictly-typed ICU arguments](https://next-intl.dev/blog/next-intl-4-0#strictly-typed-icu-arguments) to validate aspects like:
+请注意，我们可以利用最近引入的[严格类型化 ICU 参数](https://next-intl.dev/blog/next-intl-4-0#strictly-typed-icu-arguments)，来验证以下方面：
 
-1. Are the correct values provided?
-2. Are `number` and `date` formatters used when passing such a value?
+1. 是否提供了正确的值？
+2. 传递此类值时，是否使用了 `number` 和 `date` 格式化器？
 
-Another benefit of the inline API is that we're no longer limited by [TypeScript#32063](https://github.com/microsoft/TypeScript/issues/32063).
+行内 API 的另一个好处是，我们不再受 [TypeScript#32063](https://github.com/microsoft/TypeScript/issues/32063) 的限制。
 
-Related: [Direct concatenation of arguments](#direct-concatenation-of-arguments)
+相关内容：[参数的直接拼接](#direct-concatenation-of-arguments)
 
-### Provide more context
+### 提供更多上下文
 
-If the developer wants to clarify the intent of a message, they can provide additional context by passing an object:
+如果开发者希望明确消息的意图，可以通过传递对象来提供额外上下文：
 
 ```tsx
 t({
@@ -178,11 +178,11 @@ t({
 });
 ```
 
-Related: [File formats & AI translation](#file-formats--ai-translation)
+相关内容：[文件格式与 AI 翻译](#file-formats--ai-translation)
 
-### Explicit IDs
+### 显式 ID
 
-Optionally, the user can set a key explicitly:
+用户可以选择显式设置一个键：
 
 ```tsx
 const t = useExtracted();
@@ -192,11 +192,11 @@ t({
 });
 ```
 
-One use case is when you have a label that is used in multiple places, but should have different translations in other languages. This is an escape hatch that should rarely be necessary.
+一种使用场景是：某个标签在多个地方使用，但在其他语言中应当拥有不同的翻译。这是一种逃生口，通常很少有必要使用。
 
-### Optional namespace
+### 可选命名空间
 
-The user can provide an optional namespace:
+用户可以提供一个可选的命名空间：
 
 ```tsx
 function Modal() {
@@ -205,7 +205,7 @@ function Modal() {
 }
 ```
 
-… would generate e.g.:
+……将生成例如以下内容：
 
 ```json
 {
@@ -215,29 +215,29 @@ function Modal() {
 }
 ```
 
-This is useful for:
+这对于以下情况很有用：
 
-1. **Libraries**: E.g. if you have a monorepo with multiple packages, you might want to merge messages from multiple packages into a single catalog that is used at runtime. This ensures that overlapping keys between packages are not merged.
-2. **Splitting**: While [`next-intl#1`](https://github.com/amannn/next-intl/issues/1) is the ultimate goal for splitting messages automatically, for the time being users might want to split messages manually by a namespace.
+1. **库**：例如，如果你有一个包含多个包的 monorepo，可能希望将多个包中的消息合并到一个运行时使用的目录中。这可以确保不同包之间的重复键不会被合并。
+2. **拆分**：虽然 [`next-intl#1`](https://github.com/amannn/next-intl/issues/1) 是自动拆分消息的最终目标，但目前用户可能希望通过命名空间手动拆分消息。
 
-### Developer workflow
+### 开发者工作流
 
-From the perspective of the developer, the workflow is as follows:
+从开发者的角度来看，工作流如下：
 
-1. Setup `next-intl` with the Next.js plugin
-2. Run dev server
-3. Write code with inline messages
-4. All catalogs are continuously updated (related: [Catalog generation](#catalog-generation))
-5. Commit a feature
-6. Optional: Translate new or changed messages with AI or via manual translation
+1. 使用 Next.js 插件配置 `next-intl`
+2. 运行开发服务器
+3. 使用行内消息编写代码
+4. 所有目录都会持续更新（相关内容：[目录生成](#catalog-generation)）
+5. 提交一个功能
+6. 可选：使用 AI 或手动翻译新消息或发生变化的消息
 
-## Implementation details
+## 实现细节
 
-### File formats & AI translation
+### 文件格式与 AI 翻译
 
-Since keys will be autogenerated and are non-descriptive, message extraction requires an equivalent that describes context like where a message is used and what it intends to convey.
+由于键将自动生成且不具描述性，因此消息提取需要一种能够描述上下文的等价形式，例如消息的使用位置以及其意图表达的内容。
 
-E.g. if you consider this catalog:
+例如，如果你考虑以下目录：
 
 ```json
 {
@@ -245,36 +245,36 @@ E.g. if you consider this catalog:
 }
 ```
 
-… then it's ambiguous whether "right" refers to a direction (left/right) or whether something is correct.
+……那么就无法确定“right”指的是方向（左/右），还是表示某件事是正确的。
 
-While providing context for translators was always important, especially with the rise of AI translation, it's becoming more and more important to do this in a structured way that doesn't rely on trying to find messages in a running app.
+虽然为翻译人员提供上下文一直很重要，尤其是随着 AI 翻译的兴起，这一点变得越来越重要，但更重要的是以结构化的方式提供上下文，而不是尝试在运行中的应用中查找消息。
 
-The following file formats are being considered:
+目前正在考虑以下文件格式：
 
-#### 1. Portable object catalog (.po)
+#### 1. 可移植对象目录（.po）
 
 ```
 #. Advance to the next slide
-#: src/components/Carousel.tsx:13
+#: src/components/Carousel.tsx
 msgid "5VpL9Z"
 msgstr "Right"
 
 ...
 ```
 
-**Pro's:**
+**优点：**
 
-- Standardized format
-- Can attach contextual descriptions
-- File path(s) can be automatically added during extraction (and also updated if call sites are moved without invalidating the key)
+- 标准化格式
+- 可以附加上下文描述
+- 在提取过程中可以自动添加文件路径（如果调用位置发生移动，也可以更新文件路径，而不会使键失效）
 
-**Cons:**
+**缺点：**
 
-- Potentially less familiar for some developers (but `next-intl` will automatically handle parsing, so there's no effort here on the user side)
+- 对部分开发者来说可能不太熟悉（但 `next-intl` 会自动处理解析，因此用户端无需付出额外 effort）
 
-**Future exploration:** Provide supplemental descriptions for translations automatically via AI (related: [Crowdin Context Harvester](https://store.crowdin.com/crowdin-context-harvester-cli))
+**未来探索：** 通过 AI 自动为翻译提供补充描述（相关内容：[Crowdin Context Harvester](https://store.crowdin.com/crowdin-context-harvester-cli)）
 
-#### 2. Structured JSON
+#### 2. 结构化 JSON
 
 ```json
 {
@@ -285,25 +285,25 @@ msgstr "Right"
 }
 ```
 
-This is an example of what [`chrome.i18n`](https://developer.chrome.com/docs/extensions/reference/api/i18n) uses.
+这是 [`chrome.i18n`](https://developer.chrome.com/docs/extensions/reference/api/i18n) 使用的示例。
 
-Unfortunately, this is not a universal standard—to only list a few:
+遗憾的是，这并不是一个通用标准——这里只列举几个：
 
-1. [Chrome JSON as supported by Crowdin](https://store.crowdin.com/chrome-json)
-2. [Structured JSON as supported by Lokalise](https://docs.lokalise.com/en/articles/3229161-structured-json)
-3. [Structured JSON as supported by Smartling](https://help.smartling.com/hc/en-us/articles/360008000733-JSON#StringInstructions)
-4. [Structured JSON as supported by Transifex](https://help.transifex.com/en/articles/6220899-structured-json)
+1. [Crowdin 支持的 Chrome JSON](https://store.crowdin.com/chrome-json)
+2. [Lokalise 支持的结构化 JSON](https://docs.lokalise.com/en/articles/3229161-structured-json)
+3. [Smartling 支持的结构化 JSON](https://help.smartling.com/hc/en-us/articles/360008000733-JSON#StringInstructions)
+4. [Transifex 支持的结构化 JSON](https://help.transifex.com/en/articles/6220899-structured-json)
 
-**Pro's:**
+**优点：**
 
-- Can attach contextual descriptions
+- 可以附加上下文描述
 
-**Cons:**
+**缺点：**
 
-- No universal standard
-- Might have to merge file metadata with descriptions
+- 没有通用标准
+- 可能需要将文件元数据与描述合并
 
-#### 3. Simple JSON
+#### 3. 简单 JSON
 
 ```json
 {
@@ -311,97 +311,97 @@ Unfortunately, this is not a universal standard—to only list a few:
 }
 ```
 
-**Pro's:**
+**优点：**
 
-- Popular and widely used
-- Likely used by practically all `next-intl` users
+- 流行且广泛使用
+- 几乎所有 `next-intl` 用户都可能使用
 
-**Cons:**
+**缺点：**
 
-- No contextual descriptions
+- 没有上下文描述
 
 ---
 
-Due to this, it seems like `.po` might qualify as the best option for a default format that doesn't force users down the road to migrate to another format once the need for contextual descriptions arises. Still, it's important to have this be configurable and also support simple JSON.
+因此，`.po` 似乎可以作为默认格式的最佳选择，因为它不会迫使用户在将来需要上下文描述时迁移到其他格式。不过，让格式可配置并同时支持简单 JSON 也很重要。
 
-**Future exploration:** A migration script for migrating from one format to another.
+**未来探索：** 提供从一种格式迁移到另一种格式的迁移脚本。
 
-### Generating minified keys
+### 生成压缩键
 
-An important consideration is which aspects of a message are used when generating minified keys.
+需要考虑的一个重要问题是，生成压缩键时应使用消息的哪些方面。
 
-To avoid invalidating messages that are moved between components, file paths and names will _not_ be included in the key.
+为了避免消息在组件之间移动时失效，文件路径和名称将_不会_包含在键中。
 
-Instead, keys should only hash the message content:
+相反，键应只对消息内容进行哈希：
 
 ```tsx
 const message = 'Hello {name}';
 const hash = crypto.createHash('sha512').update(message).digest();
-const base64 = hash.toString('base64');
+const base64 = hash.toString('base64url');
 const key = base64.slice(0, 6);
 
 key === 'QM7ITA';
 ```
 
-**Notes:**
+**注意：**
 
-- In my benchmarks on a 2019 MacBook Pro, SHA-512 appears to produce similar results as SHA-256 for real-world use cases, there doesn't seem to be a clear winner. FormatJS uses SHA-512, so being compatible here might be helpful.
-- Base64 is helpful to reduce collision risk (e.g. compared to hex), while keeping the key readable (e.g. avoiding cryptic symbols)
-- Descriptions are another candidate for the hash, but could lead to an increase in accidental invalidation. If collisions should be avoided for a particular message, an [explicit ID](#explicit-ids) should be used instead.
+- 在我使用 2019 年款 MacBook Pro 进行的基准测试中，对于实际使用场景，SHA-512 的表现似乎与 SHA-256 相近，没有明显的优胜者。FormatJS 使用 SHA-512，因此在此保持兼容可能会有所帮助。
+- Base64 有助于降低冲突风险（例如与十六进制相比），同时保持键的可读性。使用 URL 安全的 Base64 可以避免出现 `+` 和 `/` 字符，因为当这些字符出现在序列化的页面数据中时，可能会被误解为 URL 路径。
+- 描述也可以作为哈希的候选内容，但这可能会增加意外失效的情况。如果需要避免某条消息发生冲突，则应改用[显式 ID](#explicit-ids)。
 
-### Catalog generation
+### 目录生成
 
-**Workflows:**
+**工作流：**
 
-- **A new message is added**: Extract the message to the source locale catalog and add empty translations for all secondary locales
-- **A message is updated**: Extract the message to the source locale catalog and reset translations for all secondary locales
-- **A message is removed**: Extract the message to the source locale catalog and remove translations for all secondary locales
+- **添加新消息**：将消息提取到源语言目录，并为所有次要语言添加空翻译
+- **更新消息**：将消息提取到源语言目录，并重置所有次要语言的翻译
+- **删除消息**：将消息从源语言目录中提取并删除，同时移除所有次要语言的翻译
 
-**Future explorations:**
+**未来探索：**
 
-- **Typo fixing**: Consider adding a workflow to fix typos in the source language while keeping existing translations (e.g. a magic comment like `t(/* keep */ 'Fixed message')` that is automatically removed during extraction)
-- **Source text review**: Beyond just fixing typos, some projects require extensive [STR](https://support.crowdin.com/enterprise/source-text-review/) before translation work begins. For this use case, it could be helpful if there was a tool that syncs an updated source locale catalog back into source code. Alternatively, for projects where source text changes frequently in an external system, a key-based approach might still be more convenient. Related to this, there's also an architectural aspect to consider putting frequently-changing marketing labels into a CMS instead.
+- **修复拼写错误**：考虑添加一种工作流，在保留现有翻译的同时修复源语言中的拼写错误（例如使用类似 `t(/* keep */ 'Fixed message')` 的魔法注释，并在提取期间自动移除该注释）
+- **源文本审查**：除修复拼写错误之外，一些项目还要求在翻译工作开始前进行广泛的 [STR](https://support.crowdin.com/enterprise/source-text-review/)。针对这种情况，如果有一个工具能够将更新后的源语言目录同步回源代码，可能会很有帮助。或者，对于源文本在外部系统中频繁变化的项目，基于键的方法可能仍然更加方便。与此相关的还有一个架构层面的考虑：是否应该将频繁变化的营销标签放入 CMS。
 
-### Bundler integration
+### 打包器集成
 
-The extraction is primarily designed to be used with a running dev server. A Turbopack plugin will analyze relevant code, extract messages and will transform the source file to use a generated key that is referenced with `useTranslations()`.
+该提取功能主要设计为配合正在运行的开发服务器使用。Turbopack 插件将分析相关代码，提取消息，并转换源文件，使其使用通过 `useTranslations()` 引用的生成键。
 
-To get the extracted messages back into the app, a Turbopack loader will transform the messages catalogs on-the-fly into simple JSON messages that can be returned from `i18n/request.ts`. This happens behind the scenes and there's no public API necessary.
+为了将提取出的消息重新加载到应用中，Turbopack loader 会即时将消息目录转换为简单 JSON 消息，这些消息可以从 `i18n/request.ts` 返回。这一过程在后台完成，无需公开 API。
 
-For edge cases, one-off extraction will be possible, but potentially only with a Node.js API and no separate CLI. The reason is some configuration will be necessary and this way it can be shared across the Next.js plugin in `next.config.ts` and a potential custom script. A config file like `next-intl.config.js` should be avoided.
+对于边缘情况，将支持一次性提取，但可能只提供 Node.js API，而不提供单独的 CLI。原因是需要进行一些配置，这样可以在 `next.config.ts` 中的 Next.js 插件与潜在的自定义脚本之间共享配置。应避免使用类似 `next-intl.config.js` 的配置文件。
 
-## Migration
+## 迁移
 
-First of all, if the current APIs of `next-intl` are exactly what you like to use, there's no need to migrate in the first place.
+首先，如果 `next-intl` 当前的 API 正是你想使用的 API，那么一开始就没有迁移的必要。
 
-Other than that, there are two use cases:
+除此之外，还有两种使用场景：
 
-1. **Mixed codebases**: Users might want to try this API in some places to see if it's a good fit for them, while keeping all existing translations as-is.
-2. **Full migration**: If users are interested in migrating to the new API completely, ideally an automated migration is available.
+1. **混合代码库**：用户可能希望在某些地方试用此 API，以了解它是否适合自己，同时保留所有现有翻译不变。
+2. **完整迁移**：如果用户有兴趣完全迁移到新 API，理想情况下应提供自动化迁移方案。
 
-**Future exploration:** Consider a [Codemod](https://codemod.com/) for migrating the usage of `useTranslations` to `useExtracted`.
+**未来探索：** 考虑使用 [Codemod](https://codemod.com/) 将 `useTranslations` 的用法迁移到 `useExtracted`。
 
-## Tradeoffs
+## 权衡
 
-1. **Relies on a build step:** The current API with `useTranslations` in theory works without a build step, but especially with recent innovations like `'use client'` it's clear that build steps are here to stay.
-2. **Reset of translations:** If a translation is fixed in the source locale, the translations of secondary locales will be reset. While this might be desired for substantial changes, it can be annoying e.g. for fixing typos. I think there's room for special handling of this case though (related: [Catalog generation](#catalog-generation)).
-3. **Changing source locale translations in a TMS:** This would lead to a weird situation where the code contains a label that doesn't appear in this form in the app. For the current scope of this RFC, it's expected that developers take care of changing source locale labels. However, tooling could potentially help to support other workflows (related: [Catalog generation](#catalog-generation)).
+1. **依赖构建步骤：** 当前使用 `useTranslations` 的 API 理论上可以在没有构建步骤的情况下运行，但尤其是随着 `'use client'` 等近期创新的出现，显然构建步骤将会长期存在。
+2. **翻译重置：** 如果源语言中的翻译被修复，次要语言的翻译将被重置。虽然对于重大变更而言这可能是期望的行为，但例如修复拼写错误时，这可能会令人烦恼。不过，我认为仍有针对这种情况进行特殊处理的空间（相关内容：[目录生成](#catalog-generation)）。
+3. **在 TMS 中更改源语言翻译：** 这会导致一种奇怪的情况：代码中包含的标签在应用中并不会以这种形式出现。对于本 RFC 的当前范围，预计由开发者负责更改源语言标签。不过，工具可以帮助支持其他工作流（相关内容：[目录生成](#catalog-generation)）。
 
-**Future exploration:** Consider adding validation that extracted messages match the source locale catalog. On top of this, consider adding a workflow that syncs differences back into app code.
+**未来探索：** 考虑添加验证，以确保提取出的消息与源语言目录匹配。在此基础上，考虑添加一种工作流，将差异同步回应用代码中。
 
-## Considered alternatives
+## 考虑过的替代方案
 
-This section lists some alternative ideas that were considered, but don't seem to be a good fit for `next-intl`.
+本节列出了一些曾考虑过的替代方案，但它们似乎并不适合 `next-intl`。
 
-### Direct concatenation of arguments
+### 直接拼接参数
 
-Another approach for defining messages is to directly interpolate values into translations:
+定义消息的另一种方式是直接将值插入翻译中：
 
 ```tsx
 t(`Hello ${name}!`);
 ```
 
-If you take a few more ICU features into account, it could look like this:
+如果再考虑一些 ICU 功能，可以写成这样：
 
 ```tsx
 t(`Published on ${t.date(publishedAt)}!`);
@@ -422,20 +422,20 @@ t(
 );
 ```
 
-This might be fine, but in the case of rich text this gets more complicated:
+这可能没什么问题，但对于富文本来说，情况会变得更加复杂：
 
 ```tsx
-// ❌ We can't concatenate strings with JSX elements
+// ❌ 我们无法将字符串与 JSX 元素拼接
 t.rich('This is ' + <b>{userName}</b> + '.');
 
-// Let's assume we pass the parts individually …
+// 假设我们将各个部分分别传入……
 t.rich('This is ', <b>{userName}</b>, '.');
 
-// ❌ But now, how can we define static text within JSX? Another call to `t`?
+// ❌ 但现在，如何在 JSX 中定义静态文本？再调用一次 `t`？
 t.rich('This is ', <b>{t('important')}</b>, '.');
 ```
 
-It seems like a JSX-based alternative works better here:
+在这里，基于 JSX 的替代方案似乎效果更好：
 
 ```tsx
 <t.rich>
@@ -443,9 +443,9 @@ It seems like a JSX-based alternative works better here:
 </t.rich>
 ```
 
-… this however doesn't really appear like a unified API in combination with `t` which is based on being called as a function.
+……不过，与基于函数调用的 `t` 结合使用时，这并不像一个统一的 API。
 
-Having a non-JSX variant is very important for certain use cases:
+对于某些使用场景而言，拥有非 JSX 版本非常重要：
 
 ```tsx
 function onClick() {
@@ -455,10 +455,10 @@ function onClick() {
 <img alt={t('Red running shoes on white background')} src="/shoes.jpg" />;
 ```
 
-It might be personal preference, but a JSX-based approach can also become quite opaque for complex cases:
+这可能属于个人偏好，但对于复杂场景，基于 JSX 的方式也可能变得相当不透明：
 
 ```tsx
-// What are the static parts that will be extracted? 🤔
+// 将会被提取的静态部分是什么？🤔
 <t.rich>
   Visit
   <Link
@@ -470,7 +470,7 @@ It might be personal preference, but a JSX-based approach can also become quite 
   to learn more
 </t.rich>;
 
-// … in comparison to:
+// ……与下面的方式相比：
 t('Visit <link>{name}‘s profile</link> to learn more', {
   name: (await getUser()).name,
   link: (chunks) => (
@@ -484,77 +484,77 @@ t('Visit <link>{name}‘s profile</link> to learn more', {
 });
 ```
 
-Also, there's another case with [HTML markup](https://next-intl.dev/docs/usage/translations#html-markup) which would again require a different call site.
+此外，还有一种涉及 [HTML 标记](https://next-intl.dev/docs/usage/translations#html-markup) 的情况，这同样需要使用不同的调用方式。
 
-Apart from rich text, there are further trade-offs:
+除了富文本之外，还有进一步的权衡：
 
-1. The extractor needs to guess a variable name (e.g. `name` in the first example above). While this works for simple cases, it breaks down for more complex cases like `Hello ${getName()}`, so at some point we have to resort to generic names like `$0`, `$1`, etc.
-2. For strings like `Page {index, number} out of {total, number}`, we can currently statically analyze with TypeScript that you're using the `number` formatter in the message definition. The same is true for `date`. If we use the above API with simple string concatenation, this is not possible.
-3. We can provide type-safety that avoids passing invalid values like `undefined` that would break translations.
-4. If we ever add a [macro for defining messages](#macro-for-defining-messages), this approach can't be used since arguments might not be available where the message is defined.
+1. 提取器需要猜测变量名（例如上面第一个示例中的 `name`）。对于简单场景，这种方式可以正常工作，但对于 `Hello ${getName()}` 这类更复杂的场景就会失效，因此最终我们不得不使用 `$0`、`$1` 等通用名称。
+2. 对于 `Page {index, number} out of {total, number}` 这样的字符串，我们目前可以通过 TypeScript 进行静态分析，确认你在消息定义中使用了 `number` 格式化器。`date` 也是如此。如果使用上面基于简单字符串拼接的 API，则无法实现这一点。
+3. 我们可以提供类型安全，避免传入 `undefined` 这类会导致翻译失效的无效值。
+4. 如果我们以后添加用于定义消息的 [宏](#macro-for-defining-messages)，由于定义消息的位置可能无法访问参数，因此无法使用这种方式。
 
-So it takes quite a bit of design effort to find something that works well, and also the implementation might take more effort to get right. If we just use inline ICU strings, we can avoid this.
+因此，要找到一种既运行良好、又易于正确实现的方案，需要投入相当多的设计工作，实现本身也可能需要更多精力。如果我们直接使用内联 ICU 字符串，就可以避免这些问题。
 
-It largely depends on the project, but I've repeatedly seen that the majority of messages in a typical app are simple strings, with rather the smaller part of cases requiring ICU features. So my impression is that for the common case this shouldn't make a difference anyway and therefore it might not be worth the effort to go down this path.
+这在很大程度上取决于项目，但我反复观察到，典型应用中的大多数消息都是简单字符串，只有相对较少的场景需要 ICU 功能。因此，我的印象是，对于常见情况而言，这种差异无论如何都不会造成影响，所以可能不值得投入精力继续探索这条路径。
 
-### Supporting human readable strings as keys
+### 支持以人类可读的字符串作为键
 
-Some of the discussed benefits of this proposal would be possible if we'd allow human readable messages as keys. This is currently not supported because `next-intl` doesn't allow `.` to be used in keys.
+如果允许使用人类可读的消息作为键，那么本提案中讨论的一些优势将可以实现。目前不支持这一点，因为 `next-intl` 不允许在键中使用 `.`。
 
-If we did allow this, it would still come with tradeoffs like having to extract messages yourself, not being able to minify keys, and more. So going all in with proper message extraction seems largely preferable.
+即使允许这样做，也会带来一些权衡，例如必须自行提取消息、无法压缩键名等。因此，全面采用完善的消息提取方案似乎更为可取。
 
-### Macro for defining messages
+### 用于定义消息的宏
 
-Other solutions allow defining messages outside of components, e.g.:
+其他方案允许在组件之外定义消息，例如：
 
 ```tsx
-// Define a message …
+// 定义一条消息……
 const message = msg`Hello {name}`;
 
-// … and use it later
+// ……稍后使用
 t(message, {name: 'John'});
 ```
 
-The issue with this pattern is that we can't statically analyze which module graphs use which messages (related to [next-intl#1](https://github.com/amannn/next-intl/issues/1)).
+这种模式的问题在于，我们无法静态分析哪些模块图使用了哪些消息（与 [next-intl#1](https://github.com/amannn/next-intl/issues/1) 相关）。
 
-Additionally, we already restrict calls to `t` to be in components to avoid [stale translations](https://next-intl.dev/blog/translations-outside-of-react-components), so potentially it could simplify the mental model to also not allow the definition of messages outside of components.
+此外，为了避免 [翻译过期](https://next-intl.dev/blog/translations-outside-of-react-components)，我们已经限制 `t` 的调用必须位于组件中，因此不允许在组件外定义消息，也有可能进一步简化开发者的心智模型。
 
-Related: [Statically analyzable](#statically-analyzable)
+相关内容：[可进行静态分析](#statically-analyzable)
 
-## Prior art & credits
+## 先前成果与致谢
 
-This RFC draws a lot of inspiration from the following projects:
+本 RFC 从以下项目中汲取了大量灵感：
 
 [**gettext**](https://en.wikipedia.org/wiki/Gettext)
 
-- Code example: `printf(_("My name is %s."), my_name)`
-- Default key strategy: Uses message as key
-- Default format: `.pot`
+- 代码示例：`printf(_("My name is %s."), my_name)`
+- 默认键策略：使用消息作为键
+- 默认格式：`.pot`
 
 [**Lingui**](https://lingui.dev/)
 
-- Code example: `<Trans>My name is {name}.</Trans>`
-- Default key strategy: `hexToBase64(sha256(msg + UNIT_SEPARATOR + (context | ""))).slice(0, 6)`
-- Default format: `.po`
+- 代码示例：`<Trans>My name is {name}.</Trans>`
+- 默认键策略：`hexToBase64(sha256(msg + UNIT_SEPARATOR + (context | ""))).slice(0, 6)`
+- 默认格式：`.po`
 
 [**FormatJS**](https://formatjs.github.io/)
 
-- Code example: `<FormattedMessage defaultMessage="My name is {name}." values={{name: 'John'}} />`
-- Default key strategy: `[sha512:contenthash:base64:6]`
-- Default format: Chrome JSON
+- 代码示例：`<FormattedMessage defaultMessage="My name is {name}." values={{name: 'John'}} />`
+- 默认键策略：`[sha512:contenthash:base64:6]`
+- 默认格式：Chrome JSON
 
 [**@wordpress/i18n**](https://www.npmjs.com/package/@wordpress/i18n)
 
-- Code example: `sprintf(__( 'Hello %s', 'my-text-domain' ), name)`
-- Default key strategy: Uses message as key
-- Default format: `.pot`
+- 代码示例：`sprintf(__( 'Hello %s', 'my-text-domain' ), name)`
+- 默认键策略：使用消息作为键
+- 默认格式：`.pot`
 
-[**i18n at zendesk**](https://www.youtube.com/watch?v=fUQAXo2DayQ)
+[**Zendesk 的 i18n**](https://www.youtube.com/watch?v=fUQAXo2DayQ)
 
-- Code example: `t('Hello ${name}')`
-- Default key strategy: Hash + message as key
-- Default format: Structured JSON
+- 代码示例：`t('Hello ${name}')`
+- 默认键策略：哈希值 + 消息作为键
+- 默认格式：结构化 JSON
 
 ---
 
-Many thanks to the authors of these projects for their work and inspiration!
+衷心感谢这些项目的作者，感谢他们的工作与启发！

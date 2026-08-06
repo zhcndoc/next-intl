@@ -132,7 +132,7 @@ function SignUp() {
 <Details id="messages-other-styles">
 <summary>我可以用其他方式组织消息吗？</summary>
 
-Namespace keys cannot contain the character "." as this is used to express nesting—all other characters are fine to use.
+命名空间键不能包含字符“.”，因为该字符用于表示嵌套——其他字符均可使用。
 
 如果你之前使用扁平结构且在消息键中包含“.”，可以按下面代码转换为嵌套结构：
 
@@ -169,7 +169,7 @@ const output = Object.entries(input).reduce(
 
 这样保持了层级结构，同时去掉了重复的父级键名。你可以在单次脚本中执行此转换，也可以在将消息传给 `next-intl` 前先进行转换。
 
-如果你之前使用可读文本作为键，也可以在传给 `next-intl` 前将 `.` 替换成别的符号（如 `_`），但一般推荐使用 ID 作为键。若主要目的是在编辑器中查看可读标签，可使用 [VSCode 集成](/docs/workflows/vscode-integration) 来展示消息中的人类可读标签。
+如果你之前使用可读性较强的句子作为键，理论上可以在将消息传给 `next-intl` 之前，将字符“.”映射为其他字符（例如“_”），但通常建议使用 ID 作为键。如果你使用可读性较强的键主要是为了在编辑器中查看消息中的可读标签，那么仍然可以使用[编辑器集成](https://learn.next-intl.dev/chapters/03-translations/05-tooling)来实现这一点。
 
 </Details>
 
@@ -192,7 +192,7 @@ const output = Object.entries(input).reduce(
 ```
 
 ```js
-t('message'); // "Hello world!"
+t('message'); // "你好，世界！"
 ```
 
 ### 参数插入 [#arguments]
@@ -204,7 +204,7 @@ t('message'); // "Hello world!"
 ```
 
 ```js
-t('message', {name: 'Jane'}); // "Hello Jane!"
+t('message', {name: 'Jane'}); // "你好，Jane！"
 ```
 
 <Details id="interpolation-supported-characters">
@@ -214,7 +214,7 @@ t('message', {name: 'Jane'}); // "Hello Jane!"
 
 </Details>
 
-### 基数复数（Cardinal Pluralization）
+### 基数复数
 
 用 `plural` 参数表达物品数量的复数：
 
@@ -223,7 +223,7 @@ t('message', {name: 'Jane'}); // "Hello Jane!"
 ```
 
 ```js
-t('message', {count: 3580}); // "You have 3,580 followers."
+t('message', {count: 3580}); // "你有 3,580 位关注者。"
 ```
 
 注意，使用 `#` 将对值进行[数字格式化](/docs/usage/numbers)。
@@ -233,24 +233,24 @@ t('message', {count: 3580}); // "You have 3,580 followers."
 
 不同语言有不同的复数规则，消息应依据这些规则设计。
 
-例如，英文有两种形式：单数（如 "1 _follower_"）和其他（如 "0 _followers_"，"2 _followers_"）。中文只有一种形式，阿拉伯语则有六种。
+例如，英文有两种形式：单数（如“1 位关注者”）和其他（如“0 位关注者”、“2 位关注者”）。中文只有一种形式，阿拉伯语则有六种。
 
-另一方面，从可用性考虑，常会考虑增加特殊零的情况（如 "No followers yet" 替代 "0 followers"）。
+另一方面，从可用性考虑，常会考虑增加特殊零的情况（如“还没有关注者”替代“0 位关注者”）。
 
 你可以用 `=value` 精确匹配数字（如 `=0`），也可用以下标签指定语言语法规则：
 
 - `zero`：适用于有零物品语法的语言（如拉脱维亚语、威尔士语）。
 - `one`：适用于单数语法的语言（如英语、德语）。
 - `two`：适用于双数语法（如阿拉伯语、威尔士语）。
-- `few`：适用于少数项目语法（如阿拉伯语、克罗地亚语）。
-- `many`：适用于大量项目语法（如阿拉伯语、克罗地亚语）。
+- `few`：适用于少数项目语法的语言（如阿拉伯语、克罗地亚语）。
+- `many`：适用于大量项目语法的语言（如阿拉伯语、克罗地亚语）。
 - `other`：用于不匹配其它类别的情况。
 
 `next-intl` 利用 [`Intl.PluralRules`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules) 来判断一个数字对应哪个复数标签。`few` 和 `many` 的具体范围因 locale 而异（详见 Unicode CLDR 中[语言复数规则](https://www.unicode.org/cldr/charts/43/supplemental/language_plural_rules.html)表格）。
 
 </Details>
 
-### 序数复数（Ordinal Pluralization）
+### 序数复数
 
 用 `selectordinal` 参数基于顺序数字实行复数：
 
@@ -263,7 +263,7 @@ t('message', {count: 3580}); // "You have 3,580 followers."
 
 不同语言支持不同序数复数形式。
 
-例如英语有四种：th、st、nd、rd（如 1st, 2nd, 3rd, 4th... 11th, 12th, 13th... 21st, 22nd, 23rd, 24th 等）。中文和阿拉伯语仅用一种形式。
+例如英语有四种：th、st、nd、rd（如 1st、2nd、3rd、4th……11th、12th、13th……21st、22nd、23rd、24th 等）。中文和阿拉伯语仅用一种形式。
 
 `next-intl` 使用 [`Intl.PluralRules`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules) 判定给定数值应使用哪个 _标签_。
 
@@ -291,7 +291,7 @@ t('message', {count: 3580}); // "You have 3,580 followers."
 ```
 
 ```js
-t('message', {gender: 'female'}); // "She is online."
+t('message', {gender: 'female'}); // "她在线。"
 ```
 
 **注意**：`other` 项必填，且在无具体匹配时使用。
@@ -407,7 +407,7 @@ function UserPage({username}) {
 
 ```json filename="en.json"
 {
-  "message": "Hello,<br></br>how are you?"
+  "message": "你好，<br></br>最近怎么样？"
 }
 ```
 

@@ -1,0 +1,59 @@
+import PartnerContentLink from '@/components/PartnerContentLink';
+
+# AI 代理
+
+Claude Code、Codex 和 Cursor 等 AI 代理正越来越多地在我们的应用中编写代码，包括面向用户的标签。本页面介绍如何设置项目，以便代理生成国际化程度良好的代码，以及翻译如何融入代理工作流。
+
+## 使用 `useExtracted` [#use-extracted]
+
+[`useExtracted`](/docs/usage/extraction) 专为代理（以及人类）打造：消息直接写在使用它们的位置，而 `next-intl` 负责将其提取到消息目录中。
+
+```tsx
+import {useExtracted} from 'next-intl';
+
+function InlineMessages() {
+  const t = useExtracted();
+  return <h1>{t('Look ma, no keys!')}</h1>;
+}
+```
+
+这种方式对代理有显著的好处：
+
+- **局部推理**：添加、更新或移除消息只需编辑单个文件——无需将冗长的消息目录读入上下文窗口。
+- **无需命名键**：代理无需想出键名，从而避免不一致的命名规范。
+- **始终同步**：目录会自动更新，因此代理不会忘记添加消息，也不会遗留无用消息。
+- **便于重构**：在组件之间移动代码无需重构命名空间或键。
+
+在[介绍性博客文章](/blog/use-extracted)中了解更多信息。
+
+## 与 `useTranslations` 一起使用 [#use-translations]
+
+如果你正在使用 [`useTranslations`](/docs/usage/translations)，可以考虑在 `CLAUDE.md` 或 `AGENTS.md` 之类的文件中添加说明，以确保你的代理遵循项目约定：
+
+```markdown filename="AGENTS.md"
+## 国际化
+
+- 所有面向用户的字符串都通过 `next-intl` 中的 `useTranslations` 渲染，
+  绝不在组件中硬编码。
+- `useTranslations` 引用的每条消息都应与 `messages/en.json` 中的条目匹配，
+  其他语言环境由翻译人员处理。
+- 使用描述性强但简短的键名，例如 `title` 和 `description`，而不是重复使用
+  当前的源字符串。
+- 使用 ICU 参数而不是字符串拼接，为翻译人员灵活调整句子中词语的顺序提供便利。
+- ...
+```
+
+请务必根据项目的约定调整这些说明。
+
+## 翻译消息 [#translating-messages]
+
+虽然代理可以协助完成国际化的许多工作，但翻译消息目录通常不是它们特别擅长的任务：
+
+1. **缺少上下文**：单独的目录条目无法说明消息在应用中何时以及如何使用，这往往会导致翻译偏离原意。
+2. **一致性**：目录内部以及不同会话之间的术语往往会逐渐出现偏差，尤其是随着应用持续发展。
+3. **语言细微差异**：通用代理可能会对目标语言的复数规则等方面进行猜测，从而导致不易察觉的细微错误。
+4. **上下文污染**：为多个区域设置编辑目录会占用上下文窗口，其中大部分内容与代理的主要任务无关。
+
+为了应对这些问题，创建了 [eloqnt/studio](https://studio.eloqnt.dev)，作为 `next-intl` 的配套工具。它是一款 CLI 工具，可以分析源代码，为消息补充使用上下文，应用针对各区域设置的风格指南，并在翻译生成后对其进行验证。
+
+本地化内容是否已经超出你的代码仓库承载范围？通过使用 <PartnerContentLink href="https://crowdin.com/">Crowdin</PartnerContentLink> 等翻译管理系统，你可以利用审核工作流、第三方集成、协作工具等更多功能。

@@ -13,13 +13,13 @@ import {CourseVideoBanner} from '@/components/CourseBanner';
 
 ### `i18n/request.ts` 和 `getRequestConfig` [#i18n-request]
 
-`i18n/request.ts` 可用于为**仅服务器端**代码提供配置，即服务器组件、服务器操作及类似功能。配置通过 `getRequestConfig` 函数提供，并且如果您使用[基于 locale 的路由](/docs/routing)，将提供一个 `requestLocale` 参数。
+`i18n/request.ts` 可用于为**仅限服务器端**的代码提供配置，即服务器组件、服务器操作及相关功能。配置通过 `getRequestConfig` 函数提供，并且在您需要在调用位置覆盖 `locale` 时，可以选择性地提供 `locale` 参数。
 
 ```tsx filename="i18n/request.ts"
 import {getRequestConfig} from 'next-intl/server';
 import {routing} from '@/i18n/routing';
 
-export default getRequestConfig(async ({requestLocale}) => {
+export default getRequestConfig(async ({locale}) => {
   // ...
 
   return {
@@ -33,6 +33,23 @@ export default getRequestConfig(async ({requestLocale}) => {
 配置对象会针对每个请求创建一次，内部使用 React 的 [`cache`](https://react.dev/reference/react/cache)。第一个使用国际化的组件会调用 `getRequestConfig` 定义的函数。
 
 由于该函数在服务器组件的渲染过程中执行，您可以调用像 [`cookies()`](https://nextjs.org/docs/app/api-reference/functions/cookies) 和 [`headers()`](https://nextjs.org/docs/app/api-reference/functions/headers) 这样的函数来返回特定请求的配置。
+
+<Details id="server-request-locale">
+<summary>`requestLocale` 参数是什么？</summary>
+
+在 Next.js 引入 `next/root-params` 之前，`requestLocale` 参数用于从中间件读取 `[locale]` 段，并且可以选择通过 [`setRequestLocale`](/docs/routing/setup#with-setrequestlocale-legacy) 覆盖该值。
+
+这被视为遗留功能，目前不再推荐使用。
+
+如果您仍在使用 `setRequestLocale`，该参数通常对应于中间件匹配到的 `[locale]` 段。
+
+不过，需要考虑以下三种特殊情况：
+
+1. **覆盖**：当向 `getTranslations({locale: 'en'})` 等[可等待函数](/docs/environments/actions-metadata-route-handlers)显式传入 `locale` 时，将使用该值而不是该段的值。
+1. **`undefined`**：当 `[locale]` 段之外的页面进行渲染时，该值可能为 `undefined`（例如位于 `app/page.tsx` 的语言选择页面）。
+1. **无效值**：由于 `[locale]` 段实际上会充当未知路由的兜底匹配（例如 `/unknown.txt`），因此应将无效值替换为有效的语言区域设置。此外，在这种情况下，您可能还需要在[根布局](/docs/routing/setup#layout)中调用 `notFound()` 来中止渲染。
+
+</Details>
 
 ### `NextIntlClientProvider`
 
@@ -141,27 +158,6 @@ export default async function RootLayout({children}) {
 <Tabs items={['i18n/request.ts', 'Provider']}>
 <Tabs.Tab>
 
-根据您是否使用[基于 locale 的路由](/docs/routing)，您可以从 `requestLocale` 参数读取 locale，或者自行提供一个值：
-
-**使用基于 locale 的路由：**
-
-```tsx filename="i18n/request.ts"
-export default getRequestConfig(async ({requestLocale}) => {
-  // 通常对应于 `[locale]` 路由段
-  const requested = await requestLocale;
-  const locale = hasLocale(routing.locales, requested)
-    ? requested
-    : routing.defaultLocale;
-
-  return {
-    locale
-    // ...
-  };
-});
-```
-
-**不使用基于 locale 的路由：**
-
 ```tsx filename="i18n/request.ts"
 export default getRequestConfig(async () => {
   // 提供静态 locale，读取用户设置，
@@ -174,17 +170,6 @@ export default getRequestConfig(async () => {
   };
 });
 ```
-
-<Details id="server-request-locale">
-<summary>`requestLocale` 参数可以包含哪些值？</summary>
-
-虽然 `requestLocale` 参数通常对应于由中间件匹配到的 `[locale]` 路由段，但有三个特殊情况需要考虑：
-
-1. **覆盖**：若显式向可等待函数（如 `getTranslations({locale: 'en'})`）传递了 `locale`，则使用此值替代路由段。
-2. **`undefined`**：当页面渲染不在 `[locale]` 路由段下（例如语言选择页面 `app/page.tsx`）时，此值可能为 `undefined`。
-3. **非法值**：由于 `[locale]` 路由段在某种程度上是对未知路由的 catch-all（例如 `/unknown.txt`），非法值应替换为有效 locale。此外，您可能希望在[根布局](/docs/routing/setup#layout)调用 `notFound()` 以中止渲染。
-
-</Details>
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -355,7 +340,7 @@ const messages = {
 };
 ```
 
-注意，`next-intl` 的 [VSCode 集成](/docs/workflows/vscode-integration) 能够帮助您在单个大型文件中管理消息。如果您仅是出于组织考虑拆分文件，建议使用 VSCode 插件而不是拆分。
+请注意，针对 `next-intl` 的[编辑器工具](https://learn.next-intl.dev/chapters/03-translations/05-tooling)可以帮助您管理单个大型文件中的消息。如果您纯粹是出于组织管理的原因拆分消息，不妨考虑改用这种方式。
 
 </Details>
 
@@ -644,7 +629,7 @@ function Component() {
 
 您可以通过配置 `onError` 和 `getMessageFallback` 自定义此行为。
 
-<Tabs items={['i18n/request.ts', 'Provider']}>
+<Tabs items={['i18n/request.ts', '提供者']}>
 <Tabs.Tab>
 
 ```tsx filename="i18n/request.ts"

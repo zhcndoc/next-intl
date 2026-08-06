@@ -1,0 +1,360 @@
+---
+title: '在 Next.js 16.3 中使用 next/root-params'
+---
+
+import StayUpdated from '@/components/StayUpdated.mdx';
+import CourseBanner from '@/components/CourseBanner';
+import BlogVimeoVideo from '@/components/BlogVimeoVideo';
+import Details from '@/components/Details';
+
+# 在 Next.js 16.3 中使用 `next/root-params`
+
+<small>2026 年 8 月 4 日 · 作者：Jan Amann</small>
+
+Next.js v16.3 刚刚发布，并带来了一个新功能：`next/root-params`。
+
+这个新 API 填补了[缺失的一环](https://github.com/vercel/next.js/discussions/58862)，使使用 `[locale]` 等顶层动态分段的应用能够在服务端组件中深入读取分段值：
+
+```tsx
+import {locale} from 'next/root-params';
+
+async function Component() {
+  // 终于可以在服务端组件中
+  // 深入读取 params 了！
+  const curLocale = await locale();
+}
+```
+
+这一新增功能对 `next-intl` 来说是一次重大革新。
+
+此前，该库依赖变通方案向服务端组件提供 locale，而现在，这个 API 为 Next.js 中的这一使用场景提供了原生支持，使该库能够与 Next.js 实现更加紧密的集成。
+
+实际上，对于 `next-intl` 的用户来说，这意味着：
+
+1. 无需使用 `setRequestLocale`，即可支持对采用基于 locale 路由的应用进行静态渲染
+2. 与 Next.js 的缓存机制（如 `cacheComponents`）实现更好的集成
+
+不过，首先让我们来看看这个 API 在实践中是如何工作的。
+
+## 根布局简介
+
+<div className="mt-4">
+  <Details>
+    <summary>更喜欢观看视频？</summary>
+    <div className="max-w-[calc(100%-1rem)]">
+      <BlogVimeoVideo
+        src="https://player.vimeo.com/video/1192542770?h=1f120c3595&badge=0&autopause=0&player_id=0&app_id=58479"
+        title="next/root-params 简介"
+      />
+    </div>
+    → 继续阅读[静态渲染](#static-rendering)
+  </Details>
+</div>
+
+以前，Next.js 要求必须在 `app/layout.tsx`（应用的根目录）中存在一个[根布局](https://nextjs.org/docs/app/api-reference/file-conventions/layout#root-layouts)。
+
+现在，你可以将根布局移动到嵌套的 segment 中，即使该 segment 是动态的：
+
+```
+src
+└── app
+    └── [locale]
+        ├── layout.tsx（根布局）
+        └── page.tsx
+```
+
+按照这个扩展后的定义，根布局现在指的是**上方没有其他布局的布局**。
+
+相比之下，具有其他布局祖先的布局则是常规布局：
+
+```
+src
+└── app
+    └── [locale]
+        ├── layout.tsx（根布局）
+        ├── (...)
+        └── news
+            ├── layout.tsx（常规布局）
+            └── page.tsx
+```
+
+借助 `next/root-params`，现在你可以在根布局中渲染的所有服务器组件中读取参数值：
+
+```tsx filename=src/components/LocaleSwitcher.tsx
+import {locale} from 'next/root-params';
+
+export async function LocaleSwitcher() {
+  // 读取 `[locale]` 的值
+  const curLocale = await locale();
+
+  // ...
+}
+```
+
+## 多个根布局
+
+这里就有意思了：借助[路由组](https://nextjs.org/docs/app/building-your-application/routing/route-groups)，你可以为不位于 `[locale]` 片段中的页面提供另一个布局：
+
+```
+src
+└── app
+    ├── [locale]
+    │   ├── layout.tsx
+    │   └── page.tsx
+    └── (unlocalized)
+        ├── layout.tsx
+        └── page.tsx
+```
+
+`[locale]/layout.tsx` 中的布局以及 `(unlocalized)/layout.tsx` 中的布局上方都没有其他布局，因此它们_都_符合根布局的条件。
+
+因此，在这种情况下，`next/root-params` 的返回值将取决于调用该函数的组件是从哪里渲染的。
+
+如果你在两个布局都使用的共享代码中调用 `next/root-params`，就可以采用如下模式：
+
+```tsx filename="src/utils/getLocale.tsx"
+import {locale} from 'next/root-params';
+
+export default async function getLocale() {
+  // 尝试读取 locale，以防当前位于 `[locale]/layout.tsx`
+  let curLocale = await locale();
+
+  // 如果当前位于 `(unlocalized)/layout.tsx`，则使用备用值
+  if (!curLocale) {
+    curLocale = 'en';
+  }
+
+  return curLocale;
+}
+```
+
+这样，你就可以在整个代码库中使用 `getLocale` 函数来读取当前区域设置，而无需担心它是从哪里调用的。
+
+在国际化应用中，例如，当你需要在根路径实现一个必须依赖默认区域设置的国家选择页面时，这会非常有用。一旦用户进入 `[locale]` 片段，就可以改用此参数值来本地化页面内容。
+
+## 静态渲染
+
+如果我们提前知道 `[locale]` 段的值，就可以使用 [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) 函数将这些值提供给 Next.js，以启用静态渲染：
+
+```tsx filename="src/app/[locale]/layout.tsx"
+const locales = ['en', 'de'];
+
+// 在构建时预渲染所有可用的区域设置
+export function generateStaticParams() {
+  return locales.map((locale) => ({locale}));
+}
+
+// ...
+```
+
+请注意，[`dynamicParams = false`](https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config/dynamicParams) 无法与 Cache Components 一起使用。因此，如果你希望将 `locales` 数组视为完整集合，最好为 `[locale]` 段添加运行时验证，并调用 `notFound()` 来防止未知区域设置（见下文）。
+
+## 在 `next-intl` 中利用 `next/root-params`
+
+那么，如何在 `next-intl` 中使用它呢？
+
+与我们上面定义 `getLocale` 函数的方式类似，实际上我们已经有一个中心位置，所有需要获取用户当前区域设置的服务端函数都会调用它：[`i18n/request.ts`](/docs/usage/configuration#server-client-components)。
+
+所以，让我们在这里使用 `next/root-params`：
+
+```tsx filename="src/i18n/request.ts" {1,8}
+import * as rootParams from 'next/root-params';
+import {getRequestConfig} from 'next-intl/server';
+import {hasLocale} from 'next-intl';
+import {routing} from './routing';
+import {notFound} from 'next/navigation';
+
+export default getRequestConfig(async () => {
+  const paramValue = await rootParams.locale();
+
+  let locale;
+  if (hasLocale(routing.locales, paramValue)) {
+    locale = paramValue;
+  } else {
+    // 对未知区域设置进行运行时验证
+    notFound();
+  }
+
+  return {
+    locale
+    // ...
+  };
+});
+```
+
+就是这样——只需对 `i18n/request.ts` 进行一处修改，就可以开始使用 `next/root-params` 了！
+
+---
+
+**不过有一个注意事项**：`next/root-params` 目前无法在路由处理程序或服务端操作中使用。Next.js [计划在未来的版本中增加支持](https://nextjs.org/blog/next-16-3#root-params)。
+
+不过，你可以通过在调用位置传递显式的 `locale` 参数来解决这个问题，例如使用 [`bind`](https://nextjs.org/docs/app/guides/forms#passing-additional-arguments)：
+
+```tsx {3}
+async function action(locale: string) {
+  'use server';
+  const t = await getTranslations({locale, namespace: 'ContactForm'});
+  // ...
+}
+```
+
+……然后在 `getRequestConfig` 中加入这个覆盖值：
+
+```tsx filename="i18n/request.ts"
+// ...
+
+export default getRequestConfig(async ({locale}) => {
+  // 只有在调用方未提供显式覆盖值时，
+  // 才从 `next/root-params` 中读取
+  if (!locale) {
+    const paramValue = await rootParams.locale();
+    if (hasLocale(routing.locales, paramValue)) {
+      locale = paramValue;
+    } else {
+      notFound();
+    }
+  }
+
+  return {
+    locale
+    // ...
+  };
+});
+```
+
+## 春季代码清理时间
+
+通过此次变更，你现在可以通过多种方式简化代码库：
+
+### 移除透传根布局
+
+对于全局 404 页面等特定场景，你之前可能一直在使用透传根布局：
+
+```tsx filename="src/app/layout.tsx"
+export default function RootLayout({children}: LayoutProps<'/'>) {
+  return children;
+}
+```
+
+现在需要移除它，否则它会被识别为根布局，而不是定义在 `src/app/[locale]/layout.tsx` 中的布局。
+
+现在，你可以改用 [`global-not-found`](/docs/environments/error-files#catching-non-localized-requests)。
+
+### 避免读取 `[locale]` 段
+
+由于 `next-intl` 通过 [`useLocale` 和 `getLocale`](/docs/usage/configuration#use-locale) 提供当前语言环境，因此现在可以直接通过这些 API 读取语言环境，而不必再从 `params` 中读取：
+
+```diff filename="src/app/[locale]/layout.tsx"
++ import {getLocale} from 'next-intl/server';
+
+export default async function RootLayout({
+  children,
+-  params
+}: LayoutProps<'/[locale]'>) {
+-  const {locale} = await params;
++  const locale = await getLocale();
+
+  return (
+    <html lang={locale}>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+如果你扩展了 [`Locale` 类型](/docs/workflows/typescript#locale)，现在这里也可以获得类型安全保障：
+
+```tsx
+// ✅ 'en' | 'de'
+const locale = await getLocale();
+```
+
+在底层，如果你在服务器组件中调用 `useLocale` 或 `getLocale`，系统会读取你的 `i18n/request.ts` 配置，并可能使用你定义的回退值。
+
+### 移除手动语言环境覆盖 [#locale-override]
+
+如果你使用的是 `getTranslations` 等异步 API，之前可能会手动传入语言环境，通常是为了在 Metadata API 中启用静态渲染。
+
+现在，你可以移除这一做法，改为依赖从 `i18n/request.ts` 返回的语言环境：
+
+```diff filename="src/app/[locale]/page.tsx"
+export async function generateMetadata(
+-  {params}: PageProps<'/[locale]'>
+) {
+-  const {locale} = await params;
+-  const t = await getTranslations({locale, namespace: 'HomePage'});
++  const t = await getTranslations('HomePage');
+
+  // ...
+}
+```
+
+仍然需要覆盖语言环境的情况包括：
+
+1. 当你在 **路由处理程序** 或 **服务器操作** 中使用 `next-intl` 的函数时，因为 `next/root-params` 目前还不支持这些场景
+2. 如果你的 UI 需要并行渲染来自**多个语言环境**的消息（不常见）
+
+### 静态渲染
+
+如果你之前使用 `setRequestLocale` 来启用静态渲染，现在可以将其移除：
+
+```diff filename="src/[locale]/page.tsx"
+- import {setRequestLocale} from 'next-intl/server';
+
+- export default function Page({params}: PageProps<'/[locale]'>) {
+-   setRequestLocale(params.locale);
++ export default function Page() {
+  // ...
+}
+```
+
+不过请注意，`generateStaticParams` 仍然是必需的。
+
+### 自定义路由设置
+
+`next-intl` 提供了 [`localePrefix`](/docs/routing/configuration#localeprefix)（尤其是 [`prefixes`](/docs/routing/configuration#locale-prefix-prefixes)）等机制，让你能够自定义[路由配置](/docs/routing)。不过，有些应用可能需要更进一步的自定义，超出 `next-intl` 开箱即用的能力范围。
+
+随着 `next/root-params` 的引入，实现自定义路由设置变得前所未有地简单，同时仍然可以使用 `next-intl` 的核心功能，例如 `useTranslations`。
+
+**示例：**
+
+```
+app/
+└── [tenant]
+      ├── layout.tsx
+      └── page.tsx
+```
+
+```tsx filename="src/i18n/request.ts"
+import * as rootParams from 'next/root-params';
+import {getRequestConfig} from 'next-intl/server';
+import {fetchTenant} from '@/services/tenant';
+
+export default getRequestConfig(async () => {
+  const tenantId = await rootParams.tenant();
+  const tenant = await fetchTenant(tenantId);
+  const locale = tenant.locale;
+
+  return {
+    locale
+    // ...
+  };
+});
+```
+
+在这种情况下，如果适用，你可以考虑实现自己的[中间件](/docs/routing/middleware)和[导航 API](/docs/routing/navigation)。
+
+## 立即试试 `next/root-params`！
+
+如果你正在配合 `next-intl` 试用 `next/root-params`，欢迎加入这里的讨论，告诉我你的使用体验：[关于 `next/root-params` 的体验](https://github.com/amannn/next-intl/discussions/1627)。
+
+我很想知道它如何简化你的代码库！
+
+—Jan
+
+<div className="mt-8">
+  <CourseBanner
+    title="想使用 next/root-params 构建一个真实世界的应用吗？"
+    description="通过一个真实世界的项目，掌握整体国际化的艺术，从基础知识到高级模式。"
+  />
+</div>

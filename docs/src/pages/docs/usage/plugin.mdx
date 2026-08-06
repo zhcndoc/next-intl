@@ -62,6 +62,32 @@ const withNextIntl = createNextIntlPlugin({
 
 **注意：** 当使用 [`useExtracted`](/docs/usage/extraction) 时，无需此步骤。
 
+### `srcPath` [#src-path]
+
+使用 `next-intl` 的应用源代码的相对路径（或多个相对路径）
+
+```tsx
+// 使用 `src` 文件夹
+srcPath: './src',
+```
+
+```tsx
+// 不使用 `src` 文件夹
+srcPath: './',
+```
+
+```tsx
+// 包含多个包的 Monorepo
+srcPath: ['./src', '../ui'],
+```
+
+```tsx
+// 依赖外部包
+srcPath: ['./src', './node_modules/@acme/components'],
+```
+
+启用 [`extract`](#extract) 时，此项为必需。
+
 ### `extract` [#extract]
 
 此选项启用使用 [`useExtracted`](/docs/usage/extraction)，可自动从源文件中提取消息。
@@ -69,16 +95,27 @@ const withNextIntl = createNextIntlPlugin({
 ```tsx
 const withNextIntl = createNextIntlPlugin({
   experimental: {
-    extract: {
-      // 定义要提取的源语言环境
-      sourceLocale: 'en'
-    }
+    extract: true
     // ...
   }
 });
 ```
 
 **注意：** `extract` 选项应与 [`messages`](#messages) 和 [`srcPath`](#src-path) 一起使用。
+
+#### `extract.path` [#extract-path]
+
+定义提取消息的写入目录（默认为 [`messages.path`](#messages-path)）：
+
+```tsx
+extract: {
+  path: './messages'
+},
+```
+
+仅当 [`messages.path`](#messages-path) 是数组时，才需要配置此属性。
+
+另见：[Monorepo 和外部包](/docs/usage/extraction#monorepos-external-packages)。
 
 ### `messages` [#messages]
 
@@ -88,9 +125,8 @@ const withNextIntl = createNextIntlPlugin({
 const withNextIntl = createNextIntlPlugin({
   experimental: {
     messages: {
-      format: 'json',
-      locales: 'infer',
       path: './messages',
+      format: 'json',
 
       // 可选
       precompile: true
@@ -99,36 +135,65 @@ const withNextIntl = createNextIntlPlugin({
 });
 ```
 
-配置 `experimental.messages` 时，会设置一个 Turbo- 或 Webpack 加载器，可将消息导入为普通的 JavaScript 对象（详见 [`format`](#format)）。
+配置 `experimental.messages` 会设置 Turbo 或 Webpack 加载器，使消息能够以普通 JavaScript 对象的形式导入（参见 [`messages.format`](#messages-format)）。
 
-#### `path`
+#### `messages.path` [#messages-path]
 
 消息目录的相对路径：
 
 ```tsx
-// ...
-path: './messages';
+// 从此处加载并转换消息
+path: './messages',
 ```
 
-#### `locales`
-
-当使用 [`useExtracted`](/docs/usage/extraction) 时，定义了要与 [`extract.sourceLocale`](/docs/usage/plugin#extract) 保持同步的语言环境消息。
-
-您可以自动检测 `messages.path` 目录下的所有语言环境：
+如果要从外部包加载消息，可以包含多个路径：
 
 ```tsx
-// ...
-locales: 'infer';
+// 包含消息的多个目录
+path: ['./messages', '../packages/ui/messages'],
 ```
 
-或者显式指定（例如使用一个子集）：
+另见：[Monorepo 和外部包](/docs/usage/extraction#monorepos-external-packages)
+
+#### `messages.locales` [#messages-locales]
+
+定义在 [`messages.path`](#messages-path) 中进行互译的语言区域。
+
+使用 [`useExtracted`](/docs/usage/extraction) 时，当检测到 [`messages.sourceLocale`](#messages-source-locale) 发生更改（例如 `en.json`、`de.json` 等）时，此选项定义哪些消息会保持同步。
+
+您可以自动检测 `path` 中的所有语言区域：
 
 ```tsx
-// ...
-locales: ['en', 'de', 'fr'];
+// 检测 `path` 中可用的语言区域
+locales: 'infer',
 ```
 
-#### `format`
+……也可以显式指定它们（例如，只使用其中一部分）：
+
+```tsx
+// 提取到这些语言区域
+locales: ['en', 'de', 'fr'],
+```
+
+……或者传入空数组以不提取任何消息：
+
+```tsx
+// 不提取任何消息
+locales: [],
+```
+
+在后一种情况下，您可以通过 [`unstable_extractMessages`](/docs/usage/extraction#manual) 手动运行提取。
+
+#### `messages.sourceLocale` [#messages-source-locale]
+
+您的主要语言区域，在使用 [`useExtracted`](/docs/usage/extraction) 时，可能用于定义源代码中的消息。
+
+```tsx
+// 源消息将提取到此处
+sourceLocale: 'en',
+```
+
+#### `messages.format` [#messages-format]
 
 定义消息目录的存储格式（如 `'json'`、`'po'` 或自定义格式）。
 
@@ -150,17 +215,21 @@ locales: ['en', 'de', 'fr'];
 }
 ```
 
-您可以使用诸如 [VSCode 集成](/docs/workflows/vscode-integration)（比如 i18n Ally）进行 JSON 消息的本地编辑。
+请注意，JSON 文件只能存储键值对。要为消息提供更多上下文，例如文件引用和描述，您可以使用 [PO 文件](#formats-po)，或创建[自定义格式](#formats-custom)来存储其他元数据。
 
-注意，JSON 文件只能存储键值对。如果需要为消息提供更多上下文信息（如文件引用和描述），可使用 [PO 文件](#formats-po) 或创建一个包含附加元数据的 [自定义格式](#formats-custom)。
+<Callout>
+
+可以使用 [eloqnt/studio](https://studio.eloqnt.dev) 等工具通过 AI 生成翻译。
+
+</Callout>
 
 ##### PO 格式 [#formats-po]
 
 若使用此选项，您的消息文件示例如下：
 
 ```po
-#. Advance to the next slide
-#: src/components/Carousel.tsx:13
+#. 转到下一张幻灯片
+#: src/components/Carousel.tsx
 msgid "carousel.next"
 msgstr "Right"
 ```
@@ -168,15 +237,21 @@ msgstr "Right"
 或者在使用 [`useExtracted`](/docs/usage/extraction) 时，使用自动生成的键：
 
 ```po
-#. Advance to the next slide
-#: src/components/Carousel.tsx:13
+#. 转到下一张幻灯片
+#: src/components/Carousel.tsx
 msgid "5VpL9Z"
 msgstr "Right"
 ```
 
-除了消息键和文本之外，该格式还支持可选的描述和对所有使用此消息模块的文件的引用。
+除了消息键和标签本身之外，此格式还支持可选的描述和文件引用，用于引用使用该消息的模块。
 
-您可以使用例如 [Poedit](https://poedit.net/) 等工具来本地编辑 .po 文件。
+**注意：** 默认的 PO 格式只输出路径引用（不包含行号），以避免产生嘈杂的差异。如果您还希望存储行号，可以创建一个[自定义格式](#formats-custom)来输出此格式。
+
+<Callout>
+
+可以使用 [eloqnt/studio](https://studio.eloqnt.dev) 等工具通过 AI 生成翻译。
+
+</Callout>
 
 ##### 自定义格式 [#formats-custom]
 
@@ -226,16 +301,15 @@ Node.js 从 v22.18 开始原生支持 TypeScript 执行，如上示例所需。�
 
 </Callout>
 
-#### `precompile`
+#### `messages.precompile` [#messages-precompile]
 
 作为性能优化，您可以在构建时提前预编译消息，从而获得更小的包体积和更快的运行时消息格式化：
 
-```tsx {7}
+```tsx {6}
 const withNextIntl = createNextIntlPlugin({
   experimental: {
     messages: {
       path: './messages',
-      locales: 'infer',
       format: 'json',
       precompile: true
     }
@@ -247,7 +321,7 @@ const withNextIntl = createNextIntlPlugin({
 根据所提供的选项，导入消息时将自动进行预编译：
 
 ```tsx
-// ✅ 会被 Turbo- 或 Webpack 加载器预处理
+// ✅ 会被 Turbo 或 Webpack 加载器预处理
 const messages = (await import(`../../messages/en.json`)).default;
 ```
 
@@ -294,42 +368,6 @@ export default getRequestConfig(async () => {
 });
 ```
 
-如果使用此方式，确保 `icu-minify` 版本与您所使用的 `next-intl` 版本依赖的版本一致，以保证兼容性。
+如果使用此方式，请确保 `icu-minify` 版本与您所使用的 `next-intl` 版本依赖的版本一致，以保证兼容性。
 
 </Details>
-
-### `srcPath` [#src-path]
-
-此选项定义消息应从哪个源路径提取。
-
-```tsx
-const withNextIntl = createNextIntlPlugin({
-  experimental: {
-    srcPath: './src'
-    // ...
-  }
-});
-```
-
-如果项目划分在多个文件夹中，您可以提供一个路径数组：
-
-```tsx
-// 不使用 `src` 文件夹
-srcPath: './',
-```
-
-```tsx
-// Monorepo 多包结构
-srcPath: ['./src', '../ui'],
-```
-
-```tsx
-// 依赖于外部包
-srcPath: ['./src', './node_modules/@acme/components'],
-```
-
-注意，`node_modules`、`.next` 和 `.git` 目录会自动被排除提取，除非它们被显式列在 `srcPath` 数组中。
-
-如果您希望随包提供消息，也可以[手动提取](/docs/usage/extraction#manual)。
-
-**注意：** `srcPath` 选项应与 [`extract`](#extract) 和 [`messages`](#messages) 共同使用。

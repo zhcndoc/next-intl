@@ -105,19 +105,24 @@ export const {Link, redirect, usePathname, useRouter, getPathname} =
 
 ### `src/i18n/request.ts` [#i18n-request]
 
-现在，我们可以在请求配置中读取匹配到的语言环境：
+现在，我们可以在请求配置中从 [`next/root-params`](/blog/nextjs-root-params) 读取匹配的语言环境：
 
 ```tsx filename="src/i18n/request.ts"
+import * as rootParams from 'next/root-params';
+import {notFound} from 'next/navigation';
 import {getRequestConfig} from 'next-intl/server';
 import {hasLocale} from 'next-intl';
 import {routing} from './routing';
 
-export default getRequestConfig(async ({requestLocale}) => {
-  // 通常对应 `[locale]` 段
-  const requested = await requestLocale;
-  const locale = hasLocale(routing.locales, requested)
-    ? requested
-    : routing.defaultLocale;
+export default getRequestConfig(async ({locale}) => {
+  if (!locale) {
+    const paramValue = await rootParams.locale();
+    if (hasLocale(routing.locales, paramValue)) {
+      locale = paramValue;
+    } else {
+      notFound();
+    }
+  }
 
   return {
     locale
@@ -125,6 +130,10 @@ export default getRequestConfig(async ({requestLocale}) => {
   };
 });
 ```
+
+传递给 `getRequestConfig` 的 `locale` 参数可用于需要覆盖当前语言环境的边缘情况。
+
+**注意：** `next/root-params` 默认在 Next.js 16.3 及更高版本中可用。在更早的版本中，需要通过 Next.js 配置中的 `experimental.rootParams` 启用它。
 
 ### `src/app/[locale]/layout.tsx` [#layout]
 
@@ -139,42 +148,68 @@ src
         └── ...
 ```
 
-匹配到的 `locale` 现在可通过 `[locale]` 参数访问：
+</Steps>
+
+完成这些就可以了！
+
+现在，匹配到的 `locale` 已正确应用于 `next-intl` 的所有功能：
 
 ```tsx filename="app/[locale]/layout.tsx"
-import {NextIntlClientProvider, hasLocale} from 'next-intl';
-import {notFound} from 'next/navigation';
-import {routing} from '@/i18n/routing';
+import {useTranslations} from 'next-intl';
 
-type Props = {
-  children: React.ReactNode;
-  params: Promise<{locale: string}>;
-};
-
-export default async function LocaleLayout({children, params}: Props) {
-  // 确保传入的 `locale` 有效
-  const {locale} = await params;
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
+export default function Page() {
+  // ✅ 使用来自 `i18n/request.ts` 的语言环境
+  const t = useTranslations();
 
   // ...
 }
 ```
 
-</Steps>
-
-就是这么简单！从这里开始，你可以根据具体需求[配置路由](/docs/routing/configuration)。
+接下来，您可以[配置路由](/docs/routing/configuration)以满足您的具体需求。
 
 如果遇到问题，可以查看[App Router 示例](/examples#app-router)，了解一个可运行的示例应用。
 
 ## 静态渲染
 
-使用基于语言环境的路由时，当在服务器组件中使用像 `useTranslations` 这类 API，`next-intl` 目前会选择动态渲染。我们计划未来移除这一限制，但作为临时方案，`next-intl` 提供了一个临时 API 来启用静态渲染。
+### 使用 `next/root-params`
+
+当你按照上面的 `next/root-params` 设置说明操作后，你的应用会自动具备静态渲染资格。由于我们对 `[locale]` 参数使用了动态路由段，因此需要使用 [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params)，以便在构建时渲染路由。
+
+根据需求，你可以在布局或页面中添加 `generateStaticParams`：
+
+1. **布局**：为该布局下的所有页面启用静态渲染（例如 `app/[locale]/layout.tsx`）
+2. **单个页面**：为特定页面启用静态渲染（例如 `app/[locale]/page.tsx`）
+
+**示例：**
+
+```tsx
+import {routing} from '@/i18n/routing';
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({locale}));
+}
+```
+
+<Details id="generatestaticparams-locales">
+<summary>我需要从 `generateStaticParams` 返回所有语言环境吗？</summary>
+
+如果你只希望在构建时渲染部分语言环境，或完全不在构建时渲染语言环境，可以选择性地返回需要的语言环境（详见 Next.js 文档中的[静态渲染](https://nextjs.org/docs/app/api-reference/functions/generate-static-params#static-rendering)）。
+
+</Details>
+
+### 使用 `setRequestLocale`（旧版）
+
+<Callout type="warning">
+
+`setRequestLocale` 是一个旧版 API，在引入 `next/root-params` 之前添加。目前仍然支持它以保持向后兼容，但建议改用 `next/root-params`。
+
+</Callout>
+
+使用基于语言环境的路由时，当在服务器组件中使用 `useTranslations` 等 API，`next-intl` 目前会选择动态渲染。这是我们计划在未来移除的限制，但作为临时解决方案，`next-intl` 提供了一个临时 API，可用于启用静态渲染。
 
 <Steps>
 
-### 添加 `generateStaticParams`
+#### 添加 `generateStaticParams`
 
 由于我们使用动态路由段 `[locale]`，需要使用 [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params)，以便在构建时渲染路由。
 
@@ -200,7 +235,7 @@ export function generateStaticParams() {
 
 </Details>
 
-### 在所有相关布局和页面中添加 `setRequestLocale`
+#### 在所有相关布局和页面中添加 `setRequestLocale`
 
 `next-intl` 提供了一个 API，可用于将布局和页面通过 `params` 接收到的语言环境传递给该请求中渲染的所有服务器组件。
 
@@ -268,7 +303,7 @@ export default function IndexPage({params}) {
 <Details id="setrequestlocale-background">
 <summary>为何需要此 API？</summary>
 
-Next.js 目前没有提供 API 让服务器组件中任意位置读取路由参数如 `locale`（详见 [`vercel/next.js`#58862](https://github.com/vercel/next.js/discussions/58862)）。而 `locale` 是 `next-intl` 所有 API 的基础，通过整个组件树传递该参数显得不够方便。
+Next.js 目前没有提供 API，让服务器组件在任意位置读取路由参数（如 `locale`）（详见 [`vercel/next.js`#58862](https://github.com/vercel/next.js/discussions/58862)）。而 `locale` 是 `next-intl` 所有 API 的基础，通过整个组件树传递该参数显得不够方便。
 
 因此，`next-intl` 使用其中间件，在传入请求中添加 `x-next-intl-locale` 头，存储协商出的语言环境。此方式可以通过 `headers().get('x-next-intl-locale')` 在任意位置读取语言环境。
 
@@ -278,11 +313,11 @@ Next.js 目前没有提供 API 让服务器组件中任意位置读取路由参�
 
 </Details>
 
-### 在元数据中使用 `locale` 参数
+#### 在元数据中使用 `locale` 参数
 
 除了页面的渲染外，页面元数据也需要满足静态渲染条件。
 
-为此，可以将 Next.js 通过 `params` 传递的 `locale` 转发给 [next-intl 的可等待函数](/docs/environments/server-client-components#async-components)。
+为此，可以将 Next.js 通过 `params` 传递的 `locale` 转发给 [next-intl 的异步函数](/docs/environments/server-client-components#async-components)。
 
 ```tsx filename="page.tsx"
 import {getTranslations} from 'next-intl/server';

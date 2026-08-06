@@ -153,14 +153,13 @@ format(compiled, 'en', {count: 2});
 
 只需开启一个开关：
 
-```tsx filename="next.config.ts" {10-11}
+```tsx filename="next.config.ts" {9-10}
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin({
   experimental: {
     messages: {
       path: './messages',
-      locales: 'infer',
       format: 'json',
 
       // 启用预编译
@@ -189,7 +188,7 @@ export default withNextIntl();
 1. **本地内容使用 MDX**：比如版权声明页和类似页面，将本地化内容组织到如 `content.en.mdx`、`content.es.mdx` 文件中，管理起来要简单得多。
 2. **远程内容使用 CMS**：内容管理系统通常包含一种可移植格式，可以以与 HTML 解耦的方式表达富文本，方便你将内容用于移动端等多种场景（参考例如 [Sanity 的 Portable Text](https://www.sanity.io/docs/developer-guides/presenting-block-text)）。
 
-另一种传统上` t.raw `被（滥）用的场景是处理消息数组。推荐的模式一直是为每条字符串使用单独消息（参见[消息数组](/docs/usage/translations#arrays-of-messages)）。此模式还有个好处是可以被[静态分析](/docs/workflows/messages)支持。
+另一种传统上 `t.raw` 被（滥）用的场景是处理消息数组。推荐的模式一直是为每条字符串使用单独消息（参见[消息数组](/docs/usage/translations#arrays-of-messages)）。此模式还有个好处是可以被[静态分析](/docs/workflows/messages)支持。
 
 相关地，新引入的 [`useExtracted`](/blog/use-extracted) 也不支持 `t.raw`，因为它本身就不符合这套范式。
 

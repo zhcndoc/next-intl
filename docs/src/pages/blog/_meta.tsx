@@ -2,6 +2,14 @@ export default {
   index: {
     title: '概述'
   },
+  'nextjs-root-params': {
+    title: 'Using next/root-params in Next.js 16.3',
+    display: 'hidden'
+  },
+  precompilation: {
+    title: 'Ahead-of-time compilation for next-intl',
+    display: 'hidden'
+  },
   'use-extracted': {
     title: 'useExtracted: The Tailwind of i18n?',
     display: 'hidden'

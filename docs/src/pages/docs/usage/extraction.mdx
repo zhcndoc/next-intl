@@ -48,7 +48,7 @@ function InlineMessages() {
 **链接：**
 
 - [介绍博客文章](/blog/use-extracted)
-- [示例应用](/examples#app-router-extracted)
+- [示例应用](/examples#app-router-extracted)。
 
 ## 入门
 
@@ -60,13 +60,8 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin({
   experimental: {
-    // 源文件的相对路径
-    srcPath: './src',
-
-    extract: {
-      // 定义提取到哪个语言
-      sourceLocale: 'en'
-    },
+    // 启用 useExtracted 的使用
+    extract: true,
 
     messages: {
       // 目录的相对路径
@@ -75,9 +70,16 @@ const withNextIntl = createNextIntlPlugin({
       // 格式为 'json'、'po' 或自定义格式（见下文）
       format: 'json',
 
-      // 'infer' 表示根据 `path` 中匹配的文件自动检测语言，或显式指定语言数组
-      locales: 'infer'
-    }
+      // 可填写 'infer'，根据 `path` 中匹配的文件自动检测语言区域，
+      // 也可填写明确的语言区域数组
+      locales: 'infer',
+
+      // 定义哪个语言区域包含规范源字符串
+      sourceLocale: 'en'
+    },
+
+    // 源代码文件的相对路径
+    srcPath: './src'
   }
 });
 
@@ -99,11 +101,11 @@ import {unstable_extractMessages} from 'next-intl/extractor';
 
 await unstable_extractMessages({
   srcPath: './src',
-  sourceLocale: 'en',
   messages: {
     path: './messages',
-    format: 'json',
-    locales: 'infer'
+    format: 'po',
+    locales: 'infer',
+    sourceLocale: 'en'
   }
 });
 
@@ -111,6 +113,8 @@ console.log('✔ 消息已提取');
 ```
 
 这在你开发包（例如组件库）时非常有用，此时你没有运行 Next.js 开发服务器，但想连同包一起提供消息。
+
+另请参阅：[单仓库和外部包](#monorepos-external-packages)
 
 </Details>
 
@@ -268,12 +272,273 @@ it('renders', () => {
 
 ## 格式 [#formats]
 
-消息可被提取为 [`.json`](/docs/usage/plugin#formats-json)、[`.po`](/docs/usage/plugin#formats-po)，或 [自定义文件格式](/docs/usage/plugin#formats-custom)—详情请见 [`messages.format`](/docs/usage/plugin#format) 配置。
+消息可以提取为 [`.json`](/docs/usage/plugin#formats-json)、[`.po`](/docs/usage/plugin#formats-po)，或使用[自定义文件格式](/docs/usage/plugin#formats-custom)——有关配置详情，请参阅 [`messages.format`](/docs/usage/plugin#messages-format)。
 
 **建议：** 由于 `useExtracted` 会自动生成键，推荐使用 **PO 文件**，因为它们支持为消息提供更多上下文信息，如文件引用和描述，对（AI）译者很有帮助。
 
 <Callout>
 
-基于 AI 的翻译可以通过类似 [Crowdin](/docs/workflows/localization-management) 的翻译管理系统自动化完成。
+基于 AI 的翻译可以使用 [eloqnt/studio](https://studio.eloqnt.dev) 等工具实现自动化。
+
+</Callout>
+
+## 静态分析 [#static-analysis]
+
+消息提取依赖于[静态分析](https://en.wikipedia.org/wiki/Static_program_analysis)。
+
+实际上，这意味着：
+
+1. `t` 必须将字面字符串作为其消息参数
+2. `t` 必须在从 `useExtracted` 或 `getExtracted` 获取它的同一函数体中调用
+
+**有效用法：**
+
+```tsx
+import {useExtracted} from 'next-intl';
+
+function Example({name}) {
+  // ✅ 使 `t` 在此组件中可用
+  const t = useExtracted();
+
+  // ✅ 支持字符串字面量
+  t('Hello there!');
+
+  // ✅ 可以使用参数传入动态值
+  t('Hello {name}!', {name});
+
+  function onClick() {
+    // ✅ 支持在事件处理函数中使用
+    t('You clicked the button!');
+  }
+
+  // ✅ 支持在 JSX 中使用
+  return <button onClick={onClick}>{t('Click me')}</button>;
+}
+```
+
+相比之下，以下是**不支持**的模式示例：
+
+```tsx
+import {useExtracted} from 'next-intl';
+
+function Example({key}) {
+  const t = useExtracted();
+
+  // ❌ `key` 只有在运行时才可知
+  t(key);
+
+  // ❌ 将 `t` 传递给另一个函数
+  getName(t);
+}
+
+// ❌ 重新导出该 hook
+export const useExtractedExport = useExtracted;
+
+async function AsyncExample() {
+  // ❌ 将 `t` 传递给 `Promise.all`
+  const [t] = await Promise.all([getExtracted()]);
+
+  // 注意：`getExtracted` 在内部进行了缓存，即使是
+  // 第一次调用通常也耗时不到 1 毫秒。
+  // 因此，无需将其并行化。
+}
+```
+
+请注意，`useExtracted` 可以在组件中调用，也可以在 hook 中调用——如果你想共享提取出的标签，这可能会很有用。
+
+<Details id="enum-values">
+<summary>如何翻译类似枚举的值？</summary>
+
+由于消息需要支持静态分析，因此不支持像 `t(status)` 这样的查找。相反，你可以在 `t` 处于作用域内的位置，将每个值映射到一个内联消息。
+
+在服务器端，异步函数可以通过 `getExtracted` 获取 `t`：
+
+```tsx
+import {getExtracted} from 'next-intl/server';
+
+type OrderStatus = 'pending' | 'shipped' | 'delivered';
+
+async function getOrderStatusLabels(): Promise<Record<OrderStatus, string>> {
+  const t = await getExtracted();
+
+  return {
+    pending: t('Pending'),
+    shipped: t('Shipped'),
+    delivered: t('Delivered')
+  };
+}
+```
+
+返回结果是一个普通的字符串对象，因此也可以将其传递给客户端组件：
+
+```tsx
+export default async function OrdersPage() {
+  const statusLabels = await getOrderStatusLabels();
+  return <OrderList statusLabels={statusLabels} />;
+}
+```
+
+如果标签只在客户端需要，可以改用 hook。请注意，该 hook 可以返回一个接收待翻译值的函数：
+
+```tsx
+import {useExtracted} from 'next-intl';
+
+function useOrderStatusLabel() {
+  const t = useExtracted();
+
+  return function getOrderStatusLabel(status: OrderStatus) {
+    switch (status) {
+      case 'pending':
+        return t('Pending');
+      case 'shipped':
+        return t('Shipped');
+      case 'delivered':
+        return t('Delivered');
+    }
+  };
+}
+```
+
+```tsx
+function OrderStatus({status}: {status: OrderStatus}) {
+  const getOrderStatusLabel = useOrderStatusLabel();
+  return <span>{getOrderStatusLabel(status)}</span>;
+}
+```
+
+由于返回的是字符串，因此可以在任何地方使用该标签——不仅可以在 JSX 中使用，也可以用于例如 `aria-label`、排序或 toast 消息。
+
+或者，如果你更喜欢使用单条消息，可以使用 [`select`](/docs/usage/translations#selecting-enum-based-values)。
+
+</Details>
+
+<Details id="zod">
+<summary>如何本地化 Zod 的验证错误？</summary>
+
+[Zod](https://zod.dev/) schema 通常定义在模块作用域中，而 `t` 在那里不可用。
+
+推荐的做法是让 schema 与语言环境无关，然后在 `t` 处于作用域内的位置，将它生成的结构化错误转换为消息——可以通过每次解析时使用的错误映射，也可以通过共享的异步辅助函数来实现。
+
+参见：[使用 Zod 进行验证时，如何本地化错误消息？](/docs/environments/actions-metadata-route-handlers#server-actions-zod)
+
+</Details>
+
+## Monorepo 和外部包 [#monorepos-external-packages]
+
+无论你的应用引入的是调用 `useExtracted` 的外部模块、monorepo 中的同级包，还是安装在 `node_modules` 中的可复用库，通常都有两种设置方式可供选择。
+
+### 1. 不将消息随外部包一起发布
+
+一些团队使用 monorepo 和外部包只是为了组织上的便利，但从最终部署的角度来看，只有一个“入口点”：即一个最终会被部署并使用所有包的 Next.js 应用。
+
+此时，配置 [`srcPath`](/docs/usage/plugin#src-path) 以包含外部包的源代码目录：
+
+```tsx
+const withNextIntl = createNextIntlPlugin({
+  experimental: {
+    extract: true,
+    messages: {
+      path: './messages',
+      format: 'json',
+      locales: 'infer',
+      sourceLocale: 'en'
+    },
+    srcPath: [
+      // 第一方消息
+      './src',
+
+      // monorepo 中的同级包
+      '../ui/src',
+
+      // `node_modules` 中已安装的包
+      './node_modules/@acme/components'
+    ]
+  }
+});
+```
+
+这样会将第一方消息和外部包消息都提取到主应用目录中。
+
+### 2. 将消息随外部包一起发布
+
+如果你的共享包会被多个应用使用，那么你可能希望在所有使用方之间复用消息。
+
+为此，你可以在构建过程中使用 [`unstable_extractMessages`](/docs/usage/extraction#manual) 执行一次性提取，以提取共享消息：
+
+```tsx
+import {unstable_extractMessages} from 'next-intl/extractor';
+
+await unstable_extractMessages({
+  srcPath: './src',
+  messages: {
+    path: './messages',
+    format: 'po',
+    locales: 'infer',
+    sourceLocale: 'en'
+  }
+});
+```
+
+在使用该包的应用中，你可以配置 [`extract.path`](/docs/usage/plugin#extract-path) 以仅提取第一方消息，同时使用 [`messages.path`](/docs/usage/plugin#messages-path) 包含外部包的消息：
+
+```tsx filename="next.config.ts"
+const withNextIntl = createNextIntlPlugin({
+  experimental: {
+    // 仅提取第一方消息
+    extract: {
+      path: './messages'
+    },
+
+    // 加载时转换第一方消息和外部消息
+    // （例如对于 .po 文件）
+    messages: {
+      path: [
+        // 第一方消息
+        './messages',
+
+        // monorepo 中的同级包
+        '../ui/messages',
+
+        // `node_modules` 中已安装的包
+        './node_modules/@acme/components/messages'
+      ],
+
+      // 取决于你的偏好
+      format: 'po',
+      locales: 'infer',
+      sourceLocale: 'en'
+    },
+
+    srcPath: './src'
+  }
+});
+```
+
+此外，你还应使用 [`transpilePackages`](https://nextjs.org/docs/app/api-reference/config/next-config-js/transpilePackages)，以便在外部包中将 `useExtracted` 编译为 `useTranslations`：
+
+```tsx filename="next.config.ts"
+const nextConfig = {
+  // ...
+  transpilePackages: ['@acme/ui', '@acme/components']
+};
+
+// ...
+```
+
+之后，你可以在 [`getRequestConfig`](/docs/usage/configuration#messages) 中将第一方消息与外部消息合并：
+
+```tsx filename="i18n/request.ts"
+const messages = {
+  ...(await import(`@acme/ui/messages/${locale}.po`)).default,
+  ...(await import(`@acme/components/messages/${locale}.po`)).default,
+  ...(await import(`../../messages/${locale}.po`)).default
+};
+
+// ...
+```
+
+<Callout>
+
+为避免不同包之间的键发生冲突，可以考虑使用[命名空间](#namespaces)。
 
 </Callout>

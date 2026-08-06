@@ -1,34 +1,81 @@
 import Callout from '@/components/Callout';
-import Image from 'next/image';
 
-# 验证消息
+# 消息检查
 
-为了确保消息的质量和完整性，您可以使用 [i18n-check](https://github.com/lingualdev/i18n-check)。
+为了确保消息的质量和完整性，你可以使用 [`@eloqnt/cli`](https://studio.eloqnt.dev) 对其进行检查。
 
-这个 CLI 可帮助您验证以下问题：
+此工具专为 `next-intl` 打造，使用 AST 级别的分析来发现缺少翻译、ICU 参数不一致等常见问题。
 
-1. 目标语言中缺失的翻译
-2. 翻译中 ICU 参数使用不一致
+## 开始使用
 
-**用法：**
+**安装 `@eloqnt/cli`：**
 
 ```bash
-npx @lingual/i18n-check@latest --source en --locales messages
+npm install @eloqnt/cli --save-dev
 ```
 
-**输出：**
+**添加 `.eloqnt/config.ts`：**
+
+```tsx filename=".eloqnt/config.ts"
+import {defineConfig} from '@eloqnt/cli';
+
+export default defineConfig({
+  srcPath: './src',
+  messages: {
+    path: './messages',
+    locales: 'infer',
+    sourceLocale: 'en',
+    format: 'json'
+  }
+});
+```
+
+请参阅 `@eloqnt/cli` 文档中的[配置](https://studio.eloqnt.dev/docs/configuration)。
+
+**运行 `lint` 命令：**
+
+```bash
+npx eloqnt lint
+```
+
+**输出示例：**
 
 ```
-发现缺失的键！
-┌────────────────────┬───────────────────────────────┐
-│ 文件               │ 键                           │
-├────────────────────┼───────────────────────────────┤
-│  messages/de.json  │  NewsArticle.title            │
-└────────────────────┴───────────────────────────────┘
+messages/de.json
+│
+│  "XOBPYD": "1.000 Teams sind bereits live"
+│            ─┬─────────────────────────────
+│             ╰─ Missing ICU argument: {count} (inconsistent-args)
+│
+│  "mCBO12": "Sign up today"
+│            ─┬─────────────
+│             ╰─ Missing translation in de.json (missing-translation)
 ```
 
-<Callout>
+## 格式
 
-您还可以使用 [`--unused`](https://github.com/lingualdev/i18n-check#--unused--u) 标志检测定义在消息中的键，但在代码库中未被引用的键（目前为实验功能）。
+开箱即用地支持 `.json` 和 `.po` catalog，因此该工具既适用于 [`useTranslations`](/docs/usage/translations)，也适用于 [`useExtracted`](/docs/usage/extraction)。
 
-</Callout>
+如果你将[自定义格式](/docs/usage/plugin#formats-custom)与 `useExtracted` 一起使用，也可以为 `@eloqnt/cli` 进行如下配置：
+
+```ts filename=".eloqnt/config.ts"
+import {defineConfig} from '@eloqnt/cli';
+
+export default defineConfig({
+  messages: {
+    format: {
+      codec: './StructuredJSONCodec.ts',
+      extension: '.json'
+    }
+    // ...
+  }
+});
+```
+
+请参阅 `@eloqnt/cli` 文档中的[自定义格式](https://studio.eloqnt.dev/docs/configuration#format)。
+
+## GitHub Actions
+
+`eloqnt lint` 可以集成到 GitHub Actions 等持续集成系统中，同时还可以选择性地补全缺失的翻译。
+
+请参阅 `@eloqnt/cli` 文档中的 [GitHub Actions](https://studio.eloqnt.dev/docs/guides/github-actions)。

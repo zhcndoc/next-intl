@@ -3,6 +3,48 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 4.13.5 (2026-08-04)
+
+### Bug Fixes
+
+* Deprecate `setRequestLocale` and add blog post on `next/root-params` ([#1632](https://github.com/amannn/next-intl/issues/1632)) ([1446d0d](https://github.com/amannn/next-intl/commit/1446d0d21534958644a1c81af0a0854544f21900)) – by @amannn
+
+## 4.13.4 (2026-07-23)
+
+### Bug Fixes
+
+* Avoid `usePathname()` reads for non-locale-switching links, avoiding unnecessary `<Suspense>` wrappers with partial prefetching ([#2362](https://github.com/amannn/next-intl/issues/2362)) ([82de47f](https://github.com/amannn/next-intl/commit/82de47fb87adddb1f75dae6ac3321f9b95f62269)) – by @ceolinwill
+
+## 4.13.3 (2026-07-21)
+
+### Bug Fixes
+
+* Next.js 16.3 compatibility preparation (only update locale cookie for document requests and not prefetches) ([#2355](https://github.com/amannn/next-intl/issues/2355)) ([0555ace](https://github.com/amannn/next-intl/commit/0555aceebb2efddcdbef1062130daf1d0c146164)) – by @amannn
+
+## 4.13.2 (2026-07-10)
+
+### Bug Fixes
+
+* Correctly format plural/select branches that are only `#` or empty ([#2356](https://github.com/amannn/next-intl/issues/2356)) ([cc34d9a](https://github.com/amannn/next-intl/commit/cc34d9acd015937e462a5af93638af8fe5454ef7)) – by @spokodev
+
+## 4.13.1 (2026-06-30)
+
+### Bug Fixes
+
+* Handle ICU escape sequences around `<` consistently in dev and production ([#2352](https://github.com/amannn/next-intl/issues/2352)) ([4025d1f](https://github.com/amannn/next-intl/commit/4025d1f106ce245ad2887449001e626bee76402f)) – by @amannn
+
+## 4.13.0 (2026-05-28)
+
+### Features
+
+* Use URL-safe base64 for auto-generated message keys of `useExtracted` ([#2330](https://github.com/amannn/next-intl/issues/2330)) ([a003d3a](https://github.com/amannn/next-intl/commit/a003d3ae81819a5ba646daed0f45f3106e1eee1b)) – by @spokodev
+
+## 4.12.0 (2026-05-13)
+
+### Features
+
+* Improvements for `useExtracted` ([#2316](https://github.com/amannn/next-intl/issues/2316)) ([bff2f96](https://github.com/amannn/next-intl/commit/bff2f966fc906e13075e8b2066ba33c1163980cf)) – by @amannn
+
 ## 4.11.2 (2026-05-11)
 
 ### Bug Fixes

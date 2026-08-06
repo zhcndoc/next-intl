@@ -1,7 +1,7 @@
 export default {
-  typescript: 'TypeScript',
-  'localization-management': 'Crowdin',
-  'vscode-integration': 'VSCode 集成',
-  storybook: 'Storybook',
-  messages: '验证消息'
+  typescript: 'TypeScript augmentation',
+  'localization-management': 'Localization management with Crowdin',
+  agents: 'AI agents',
+  messages: 'Linting messages',
+  storybook: 'Storybook'
 };
