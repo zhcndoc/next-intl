@@ -45,6 +45,7 @@ const withNextra = nextra({
 });
 
 export default withNextra({
+  output: 'standalone',
   transpilePackages: ['react-tweet'],
   redirects: () => [
     // Index pages
