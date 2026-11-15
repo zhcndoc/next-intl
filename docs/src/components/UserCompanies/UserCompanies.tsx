@@ -1,30 +1,36 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import adidasRunningLogo from './adidas-running.svg';
+import autodeskLogo from './autodesk-logo.svg';
 import bigcommerceLogo from './bigcommerce-logo.svg';
 import boltLogo from './bolt-logo.svg';
+import chanelLogo from './chanel-logo.svg';
+import coderabbitLogo from './coderabbit-logo.svg';
+import deepseekLogo from './deepseek-logo.svg';
 import elevenlabsLogo from './elevenlabs-logo.svg';
 import ethereumLogo from './ethereum-logo.svg';
+import grafanaLogo from './grafana-logo.svg';
 import hashicorpLogo from './hashicorp-logo.svg';
 import icelandairLogo from './icelandair-logo.svg';
-import mistralLogo from './mistral-logo.svg';
 import nodejsLogo from './nodejs-logo.svg';
-import qasaLogo from './qasa-logo.svg';
+import philipsLogo from './philips-logo.svg';
+import postmanLogo from './postman-logo.svg';
 import solanaLogo from './solana-logo.svg';
-import soundtrackLogo from './soundtrack-logo.svg';
 import speechifyLogo from './speechify-logo.svg';
-import todoistLogo from './todoist-logo.svg';
+import starbucksLogo from './starbucks-logo.svg';
+import supercellLogo from './supercell-logo.svg';
+import teamviewerLogo from './teamviewer-logo.svg';
+import texasInstrumentsLogo from './texas-instruments-logo.svg';
 import uberLogo from './uber-logo.svg';
-import ubisoftLogo from './ubisoft-logo.svg';
+import unityLogo from './unity-logo.svg';
 import vintedgoLogo from './vintedgo-logo.svg';
 import watershedLogo from './watershed-logo.svg';
 
 const companies = [
   {
-    name: 'Adidas Running',
-    logo: adidasRunningLogo,
-    scale: 0.9,
-    url: 'https://www.runtastic.com/'
+    name: 'Autodesk',
+    logo: autodeskLogo,
+    scale: 1.1,
+    url: 'https://www.autodesk.com'
   },
   {
     name: 'BigCommerce Catalyst',
@@ -35,8 +41,26 @@ const companies = [
   {
     name: 'Bolt',
     logo: boltLogo,
-    scale: 0.85,
+    scale: 0.8,
     url: 'https://bolt.eu'
+  },
+  {
+    name: 'Chanel',
+    logo: chanelLogo,
+    scale: 0.9,
+    url: 'https://www.chanel.com'
+  },
+  {
+    name: 'CodeRabbit',
+    logo: coderabbitLogo,
+    scale: 1.1,
+    url: 'https://www.coderabbit.ai'
+  },
+  {
+    name: 'DeepSeek',
+    logo: deepseekLogo,
+    scale: 1.1,
+    url: 'https://www.deepseek.com'
   },
   {
     name: 'ElevenLabs',
@@ -51,6 +75,12 @@ const companies = [
     url: 'https://ethereum.org'
   },
   {
+    name: 'Grafana Labs',
+    logo: grafanaLogo,
+    scale: 1.1,
+    url: 'https://grafana.com'
+  },
+  {
     name: 'HashiCorp',
     logo: hashicorpLogo,
     url: 'https://www.hashicorp.com'
@@ -62,22 +92,21 @@ const companies = [
     url: 'https://www.icelandair.com'
   },
   {
-    name: 'Mistral',
-    logo: mistralLogo,
-    scale: 1.1,
-    url: 'https://mistral.ai'
-  },
-  {
     name: 'Node.js',
     logo: nodejsLogo,
     scale: 1.3,
     url: 'https://nodejs.org'
   },
   {
-    name: 'Qasa',
-    logo: qasaLogo,
-    scale: 0.75,
-    url: 'https://qasa.com'
+    name: 'Philips',
+    logo: philipsLogo,
+    scale: 1.1,
+    url: 'https://www.philips.com'
+  },
+  {
+    name: 'Postman',
+    logo: postmanLogo,
+    url: 'https://www.postman.com'
   },
   {
     name: 'Solana',
@@ -86,22 +115,33 @@ const companies = [
     url: 'https://solana.com'
   },
   {
-    name: 'Soundtrack',
-    logo: soundtrackLogo,
-    scale: 1.1,
-    url: 'https://www.soundtrack.io'
-  },
-  {
     name: 'Speechify',
     logo: speechifyLogo,
     scale: 1.15,
     url: 'https://speechify.com'
   },
   {
-    name: 'Todoist',
-    logo: todoistLogo,
-    scale: 0.9,
-    url: 'https://todoist.com'
+    name: 'Starbucks',
+    logo: starbucksLogo,
+    scale: 1.1,
+    url: 'https://www.starbucks.co.uk'
+  },
+  {
+    name: 'Supercell',
+    logo: supercellLogo,
+    scale: 0.8,
+    url: 'https://supercell.com'
+  },
+  {
+    name: 'TeamViewer',
+    logo: teamviewerLogo,
+    url: 'https://www.teamviewer.com'
+  },
+  {
+    name: 'Texas Instruments',
+    logo: texasInstrumentsLogo,
+    scale: 1.5,
+    url: 'https://www.ti.com'
   },
   {
     name: 'Uber',
@@ -110,10 +150,10 @@ const companies = [
     url: 'https://jobs.uber.com'
   },
   {
-    name: 'Ubisoft',
-    logo: ubisoftLogo,
-    scale: 0.95,
-    url: 'https://www.ubisoft.com'
+    name: 'Unity',
+    logo: unityLogo,
+    scale: 0.9,
+    url: 'https://unity.com'
   },
   {
     name: 'VintedGo',

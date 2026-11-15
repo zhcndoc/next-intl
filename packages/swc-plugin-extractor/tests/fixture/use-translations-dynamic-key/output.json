@@ -1,0 +1,17 @@
+[
+  {
+    "id": "Namespace",
+    "ranges": {
+      "argument": {
+        "end": 247,
+        "start": 244
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 9,
+      "path": "input.js"
+    },
+    "type": "translation"
+  }
+]

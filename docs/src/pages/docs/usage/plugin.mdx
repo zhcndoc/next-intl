@@ -219,7 +219,7 @@ sourceLocale: 'en',
 
 <Callout>
 
-可以使用 [eloqnt/studio](https://studio.eloqnt.dev) 等工具通过 AI 生成翻译。
+可以使用 [eloqnt/cli](https://cli.eloqnt.dev) 等工具通过 AI 生成翻译。
 
 </Callout>
 
@@ -230,8 +230,9 @@ sourceLocale: 'en',
 ```po
 #. 转到下一张幻灯片
 #: src/components/Carousel.tsx
-msgid "carousel.next"
-msgstr "Right"
+msgctxt "carousel.next"
+msgid "Right"
+msgstr "Rechts"
 ```
 
 或者在使用 [`useExtracted`](/docs/usage/extraction) 时，使用自动生成的键：
@@ -239,17 +240,18 @@ msgstr "Right"
 ```po
 #. 转到下一张幻灯片
 #: src/components/Carousel.tsx
-msgid "5VpL9Z"
-msgstr "Right"
+msgctxt "5VpL9Z"
+msgid "Right"
+msgstr "Rechts"
 ```
 
-除了消息键和标签本身之外，此格式还支持可选的描述和文件引用，用于引用使用该消息的模块。
+无论哪种情况，键都存储在 `msgctxt` 中，而原始源字符串可通过 `msgid` 获取。此外，该格式还支持可选的描述和使用此消息的模块文件引用。
 
 **注意：** 默认的 PO 格式只输出路径引用（不包含行号），以避免产生嘈杂的差异。如果您还希望存储行号，可以创建一个[自定义格式](#formats-custom)来输出此格式。
 
 <Callout>
 
-可以使用 [eloqnt/studio](https://studio.eloqnt.dev) 等工具通过 AI 生成翻译。
+可以使用 [eloqnt/cli](https://cli.eloqnt.dev) 等工具通过 AI 生成翻译。
 
 </Callout>
 
@@ -268,10 +270,6 @@ export default defineCodec(() => ({
   },
 
   encode(messages, context) {
-    // ...
-  },
-
-  toJSONString(content, context) {
     // ...
   }
 }));
@@ -293,7 +291,9 @@ const withNextIntl = createNextIntlPlugin({
 });
 ```
 
-另外可参考内置的 [`codecs`](https://github.com/amannn/next-intl/tree/main/packages/next-intl/src/extractor/format/codecs) 以获取灵感，以及提供的类型和 JSDoc 说明。
+此外，也可以通过已安装软件包的名称引用 codec（例如 `codec: '@eloqnt/format-po'`）。
+
+另请参阅内置 codec [`@eloqnt/format-po`](https://cli.eloqnt.dev/docs/formats/po) 和 [`@eloqnt/format-json`](https://cli.eloqnt.dev/docs/formats/json)，从中获取灵感，也可查看提供的类型定义和 JSDoc 参考。
 
 <Callout>
 

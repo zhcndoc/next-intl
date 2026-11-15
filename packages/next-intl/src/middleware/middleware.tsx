@@ -18,6 +18,7 @@ import resolveLocale from './resolveLocale.js';
 import syncCookie from './syncCookie.js';
 import {
   applyBasePath,
+  decodePathname,
   formatPathname,
   formatTemplatePathname,
   getBestMatchingDomain,
@@ -47,8 +48,7 @@ export default function createMiddleware<
   return function middleware(request: NextRequest) {
     let unsafeExternalPathname: string;
     try {
-      // Resolve potential foreign symbols (e.g. /ja/%E7%B4%84 → /ja/約))
-      unsafeExternalPathname = decodeURI(request.nextUrl.pathname);
+      unsafeExternalPathname = decodePathname(request.nextUrl.pathname);
     } catch {
       // In case an invalid pathname is encountered, forward
       // it to Next.js which in turn responds with a 400
@@ -137,8 +137,7 @@ export default function createMiddleware<
             request.nextUrl.protocol;
 
           const redirectDomainPort = redirectDomain.split(':')[1] as
-            | string
-            | undefined;
+            string | undefined;
           urlObj.port =
             redirectDomainPort ?? request.headers.get('x-forwarded-port') ?? '';
         }
@@ -183,8 +182,7 @@ export default function createMiddleware<
 
     let unprefixedInternalPathname = unprefixedExternalPathname;
     const pathnames = (resolvedRouting as any).pathnames as
-      | AppPathnames
-      | undefined;
+      AppPathnames | undefined;
     if (pathnames) {
       let resolvedTemplateLocale: AppLocales[number] | undefined;
       [resolvedTemplateLocale, internalTemplateName] = getInternalTemplate(

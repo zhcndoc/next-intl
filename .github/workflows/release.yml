@@ -1,66 +1,80 @@
 name: release
 
+# A single workflow file so npm Trusted Publishing can be configured against it.
 on:
   push:
     branches:
-      - main
-  # Manual recovery for a release whose npm publish failed partway through.
-  #
-  # The push-triggered release below bumps versions, commits, tags and creates
-  # the GitHub release, and only THEN publishes each package to npm. If npm fails
-  # mid-publish (e.g. a transient `504 Gateway Timeout`), some packages end up
-  # live at the new version while others are left behind — but the version bump
-  # and tag are already pushed.
-  #
-  # Do NOT re-run the failed release job in that case: it would run `lerna
-  # publish` again and bump a brand-new version. Instead, dispatch this workflow
-  # with `ref` set to the release tag that failed to fully publish (e.g.
-  # `v4.13.4`). It runs `lerna publish from-package`, which publishes only the
-  # packages whose version is missing from the registry and skips the rest — it
-  # never bumps versions or creates tags.
-  #
-  # This lives in the same file as the automatic release on purpose: npm Trusted
-  # Publishing is bound to a specific workflow filename, so recovery must run
-  # from `release.yml` to be authorized to publish (a separate workflow file
-  # produces an unrecognized OIDC identity and npm rejects the publish).
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: 'Release tag/commit to publish from (e.g. v4.13.4)'
-        required: true
+      - main # Stable releases (latest)
+      - next # Prereleases of the next major
+
+permissions: {}
+
+# A queued run checks out the tip of its branch, so it also releases what a
+# running one didn't get to
+concurrency: ${{ github.workflow }}-${{ github.ref_name }}
 
 jobs:
-  main:
+  release:
+    name: release (${{ github.ref_name }})
     runs-on: ubuntu-latest
+    env:
+      DIST_TAG: ${{ github.ref_name == 'next' && 'next' || 'latest' }}
+    # npm's trusted publisher config requires this environment
+    environment: npm-publish
     permissions:
-      contents: write
-      id-token: write
+      contents: write # Push version commits and tags, create GitHub releases
+      id-token: write # npm trusted publishing
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # On push this is empty and checkout uses the triggering commit; on
-          # manual recovery it checks out the given release tag.
-          ref: ${{ github.event.inputs.ref }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+          ref: ${{ github.ref_name }}
+          # Existing tags let changesets tag only the new versions
+          fetch-tags: true
+          # Pushes the version commit and tags with these credentials
+          persist-credentials: true
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          cache: 'pnpm'
           node-version: 22.x
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install -g npm@latest # Trusted publishers
-      - run: pnpm install
-      - run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-      # Automatic release: bump versions, tag and publish on a fix/feat commit.
-      - run: pnpm run release
-        if: "${{github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'fix: ') || startsWith(github.event.head_commit.message, 'feat: ') || startsWith(github.event.head_commit.message, 'feat!: '))}}"
+          # Fresh install from the registry, so a poisoned cache can't run in a job that can publish
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile
+      - env:
+          ACTOR: ${{ github.actor }}
+        run: |
+          git config --global user.name "$ACTOR"
+          git config --global user.email "$ACTOR@users.noreply.github.com"
+      # `changeset version` fails if there are no changesets. After `pre exit`,
+      # they're in `.changeset/pre/` until the stable release.
+      - if: hashFiles('.changeset/*.md') != '' || (env.DIST_TAG == 'latest' && hashFiles('.changeset/pre.json') != '')
+        run: pnpm run version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No NODE_AUTH_TOKEN since we use Trusted Publishers
-      # Manual recovery: publish only the packages missing from the registry.
-      - run: pnpm exec lerna publish from-package --yes
-        if: "${{github.event_name == 'workflow_dispatch'}}"
+      # Empty if no changesets were merged
+      - id: version
+        run: |
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: Version packages"
+            pnpm changeset git-tag
+            git push --follow-tags
+          fi
+          echo "tags=$(git tag --points-at HEAD | xargs)" >> "$GITHUB_OUTPUT"
+      # Uploads the new versions to npm, but they only go live once a maintainer
+      # approves them with 2FA (see CONTRIBUTORS.md)
+      - if: steps.version.outputs.tags
+        run: pnpm -r --filter './packages/**' stage publish --provenance --no-git-checks --tag "$DIST_TAG"
+      # Only next-intl gets a GitHub release, the other packages have their
+      # changelogs. A draft, so it's only published once the npm versions are
+      # live. Notes are the changelog entry.
+      - if: steps.version.outputs.tags
+        run: |
+          tag=$(git tag --points-at HEAD "$PACKAGE@*")
+          [ -n "$tag" ] || exit 0
+          dir=$(dirname "$(grep -l "\"name\": \"$PACKAGE\"" packages/*/package.json)")
+          awk -v heading="## ${tag##*@}" '$0 == heading {found=1; next} /^## / {found=0} found' "$dir/CHANGELOG.md" > notes.md
+          gh release create "$tag" --draft --verify-tag --prerelease="$PRERELEASE" --title "$tag" --notes-file notes.md
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No NODE_AUTH_TOKEN since we use Trusted Publishers
+          PACKAGE: next-intl
+          PRERELEASE: ${{ env.DIST_TAG != 'latest' }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

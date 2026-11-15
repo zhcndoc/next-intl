@@ -1,0 +1,21 @@
+[
+  {
+    "id": "Account.name",
+    "ranges": {
+      "argument": {
+        "end": 131,
+        "start": 125
+      },
+      "id": {
+        "end": 131,
+        "start": 125
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 5,
+      "path": "input.js"
+    },
+    "type": "translation"
+  }
+]

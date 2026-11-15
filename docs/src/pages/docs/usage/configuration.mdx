@@ -37,7 +37,7 @@ export default getRequestConfig(async ({locale}) => {
 <Details id="server-request-locale">
 <summary>`requestLocale` 参数是什么？</summary>
 
-在 Next.js 引入 `next/root-params` 之前，`requestLocale` 参数用于从中间件读取 `[locale]` 段，并且可以选择通过 [`setRequestLocale`](/docs/routing/setup#with-setrequestlocale-legacy) 覆盖该值。
+在 Next.js 引入 [`next/root-params`](/blog/nextjs-root-params) 之前，`requestLocale` 参数用于从中间件读取 `[locale]` 段，并允许通过 [`setRequestLocale`](/docs/routing/setup#with-setrequestlocale-legacy) 覆盖该值。
 
 这被视为遗留功能，目前不再推荐使用。
 

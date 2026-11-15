@@ -1,0 +1,42 @@
+[
+  {
+    "description": null,
+    "id": "0KGiQf",
+    "message": "Hello there!",
+    "ranges": {
+      "argument": {
+        "end": 265,
+        "start": 251
+      },
+      "message": {
+        "end": 265,
+        "start": 251
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 10,
+      "path": "input.js"
+    },
+    "type": "extracted"
+  },
+  {
+    "id": "Navigation.title",
+    "ranges": {
+      "argument": {
+        "end": 281,
+        "start": 274
+      },
+      "id": {
+        "end": 281,
+        "start": 274
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 11,
+      "path": "input.js"
+    },
+    "type": "translation"
+  }
+]

@@ -1,7 +1,4 @@
-import {
-  usePathname as useNextPathname,
-  useRouter as useNextRouter
-} from 'next/navigation.js';
+import {useRouter as useNextRouter} from 'next/navigation.js';
 import {useMemo} from 'react';
 import {type Locale, useLocale} from 'use-intl';
 import type {
@@ -26,13 +23,12 @@ export default function createNavigation<
   const AppDomains extends DomainsConfig<AppLocales> = never
 >(
   routing?: [AppPathnames] extends [never]
-    ?
-        | RoutingConfigSharedNavigation<
-            AppLocales,
-            AppLocalePrefixMode,
-            AppDomains
-          >
-        | undefined
+    ? | RoutingConfigSharedNavigation<
+          AppLocales,
+          AppLocalePrefixMode,
+          AppDomains
+        >
+      | undefined
     : RoutingConfigLocalizedNavigation<
         AppLocales,
         AppLocalePrefixMode,
@@ -72,7 +68,6 @@ export default function createNavigation<
   function useRouter() {
     const router = useNextRouter();
     const curLocale = useLocale();
-    const nextPathname = useNextPathname();
 
     return useMemo(() => {
       function createHandler<
@@ -103,12 +98,7 @@ export default function createNavigation<
             args.push(rest);
           }
 
-          syncLocaleCookie(
-            config.localeCookie,
-            nextPathname,
-            curLocale,
-            nextLocale
-          );
+          syncLocaleCookie(config.localeCookie, curLocale, nextLocale);
 
           fn(...args);
         };
@@ -132,7 +122,7 @@ export default function createNavigation<
           typeof router.prefetch
         >(router.prefetch)
       };
-    }, [curLocale, nextPathname, router]);
+    }, [curLocale, router]);
   }
 
   return {

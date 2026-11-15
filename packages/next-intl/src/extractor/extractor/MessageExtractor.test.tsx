@@ -25,7 +25,7 @@ it('can extract with source maps', async () => {
   );
 
   expect(result.map).toMatchInlineSnapshot(
-    `"{"version":3,"sources":["test.tsx"],"sourcesContent":["import {useExtracted} from 'next-intl';\\n\\n    function Component() {\\n      const t = useExtracted();\\n      t(\\"Hello!\\");\\n    }\\n  "],"names":["useExtracted","Component","t"],"mappings":"AAAA,SAAQA,oCAAY,QAAO,YAAY;AAEnC,SAASC;IACP,MAAMC,IAAIF;IACVE,EAAE;AACJ"}"`
+    `"{"version":3,"sources":["/project/test.tsx"],"sourcesContent":["import {useExtracted} from 'next-intl';\\n\\n    function Component() {\\n      const t = useExtracted();\\n      t(\\"Hello!\\");\\n    }\\n  "],"names":["useExtracted","Component","t"],"mappings":"AAAA,SAAQA,oCAAY,QAAO,YAAY;AAEnC,SAASC;IACP,MAAMC,IAAIF;IACVE,EAAE;AACJ"}"`
   );
 
   expect(result.map).not.toContain('<anon>');
@@ -54,6 +54,7 @@ it('extracts same message used multiple times in one file as separate source mes
         "id": "OpKKos",
         "message": "Hello!",
         "reference": {
+          "column": 11,
           "line": 7,
           "path": "test.tsx",
         },
@@ -63,6 +64,51 @@ it('extracts same message used multiple times in one file as separate source mes
         "id": "OpKKos",
         "message": "Hello!",
         "reference": {
+          "column": 17,
+          "line": 8,
+          "path": "test.tsx",
+        },
+      },
+    ]
+  `);
+});
+
+it('supports destructuring from `Promise.all`', async () => {
+  const result = await process(
+    `import {getExtracted, getTranslations} from 'next-intl/server';
+
+    async function Component() {
+      const [t, nav] = await Promise.all([
+        getExtracted(),
+        getTranslations('Navigation')
+      ]);
+      t('Hello!');
+      nav('title');
+    }
+  `
+  );
+
+  expect(result.code).toMatchInlineSnapshot(`
+    "import { getTranslations as getTranslations$1, getTranslations } from 'next-intl/server';
+    async function Component() {
+        const [t, nav] = await Promise.all([
+            getTranslations$1(),
+            getTranslations('Navigation')
+        ]);
+        t("OpKKos", void 0, void 0, "Hello!");
+        nav('title');
+    }
+    "
+  `);
+
+  expect(result.messages).toMatchInlineSnapshot(`
+    [
+      {
+        "description": null,
+        "id": "OpKKos",
+        "message": "Hello!",
+        "reference": {
+          "column": 6,
           "line": 8,
           "path": "test.tsx",
         },
@@ -94,6 +140,7 @@ it('keeps descriptions on separate source message uses', async () => {
         "id": "jvo0vs",
         "message": "Save",
         "reference": {
+          "column": 11,
           "line": 7,
           "path": "test.tsx",
         },
@@ -103,6 +150,7 @@ it('keeps descriptions on separate source message uses', async () => {
         "id": "jvo0vs",
         "message": "Save",
         "reference": {
+          "column": 11,
           "line": 8,
           "path": "test.tsx",
         },
@@ -138,6 +186,7 @@ it('does not add a fallback message in production', async () => {
           "id": "-YJVTi",
           "message": "Hey!",
           "reference": {
+            "column": 6,
             "line": 5,
             "path": "test.tsx",
           },

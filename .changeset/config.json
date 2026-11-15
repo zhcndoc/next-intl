@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "amannn/next-intl",
+      "template": "\n\n- {summary} ({pull}, {commit}, {authors})"
+    }
+  ],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "privatePackages": {
+    "version": false,
+    "tag": false
+  },
+  "bumpVersionsWithWorkspaceProtocolOnly": true,
+  "format": false
+}

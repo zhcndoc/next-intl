@@ -4,3 +4,26 @@ packages:
   - 'e2e/*'
   - 'docs'
   - 'tools'
+
+linkWorkspacePackages: true
+preferWorkspacePackages: true
+
+minimumReleaseAge: 4320 # 3 days
+minimumReleaseAgeExclude:
+  - '@eloqnt/*' # own packages, so fixes across both repos don't wait
+minimumReleaseAgeExcludePrune: true
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 525600 # 1 year: older backports (e.g. semver@5.7.2) often have less provenance than releases before them
+
+overrides:
+  '@babel/parser': 7.21.9
+
+patchedDependencies:
+  nextra-theme-docs: patches/nextra-theme-docs.patch
+
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  core-js-pure: false
+  esbuild: true
+  sharp: true

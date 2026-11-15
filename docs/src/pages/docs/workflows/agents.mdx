@@ -54,6 +54,6 @@ function InlineMessages() {
 3. **语言细微差异**：通用代理可能会对目标语言的复数规则等方面进行猜测，从而导致不易察觉的细微错误。
 4. **上下文污染**：为多个区域设置编辑目录会占用上下文窗口，其中大部分内容与代理的主要任务无关。
 
-为了应对这些问题，创建了 [eloqnt/studio](https://studio.eloqnt.dev)，作为 `next-intl` 的配套工具。它是一款 CLI 工具，可以分析源代码，为消息补充使用上下文，应用针对各区域设置的风格指南，并在翻译生成后对其进行验证。
+为解决这些问题，创建了 [eloqnt/cli](https://cli.eloqnt.dev)，作为 `next-intl` 的配套工具。它是一款 CLI 工具，可分析源代码，为消息补充使用上下文，应用各语言地区的风格指南，并在翻译生成后对其进行验证。
 
 本地化内容是否已经超出你的代码仓库承载范围？通过使用 <PartnerContentLink href="https://crowdin.com/">Crowdin</PartnerContentLink> 等翻译管理系统，你可以利用审核工作流、第三方集成、协作工具等更多功能。

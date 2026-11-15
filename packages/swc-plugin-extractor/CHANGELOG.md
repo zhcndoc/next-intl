@@ -3,6 +3,96 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 4.15.1 (2026-11-12)
+
+### Bug Fixes
+
+* Point docs links in error messages to their current URLs ([#2466](https://github.com/amannn/next-intl/issues/2466)) ([b3941b2](https://github.com/amannn/next-intl/commit/b3941b20561dcdd4e25dc1be5a730825df3e0125)) – by @amannn
+
+## 4.15.0 (2026-11-11)
+
+### Features
+
+* `next-intl@4.15` ([#2452](https://github.com/amannn/next-intl/issues/2452)) ([8073942](https://github.com/amannn/next-intl/commit/80739428e1f7075517ab82a29f20d5e235b6d561)) – by @amannn
+
+## 4.14.10 (2026-11-10)
+
+### Bug Fixes
+
+* Support built-in date, time and number styles in precompiled messages ([#2459](https://github.com/amannn/next-intl/issues/2459)) ([761b09b](https://github.com/amannn/next-intl/commit/761b09b49beab136a80851c08a8b0d3602025b6a)) – by @amannn
+
+## 4.14.9 (2026-10-02)
+
+### Bug Fixes
+
+* Improvements for `useExtracted` ([#2431](https://github.com/amannn/next-intl/issues/2431)) ([0454168](https://github.com/amannn/next-intl/commit/0454168ca3ad22ffee095c4941f2c5679433880e)) – by @amannn
+
+## 4.14.8 (2026-09-29)
+
+### Bug Fixes
+
+* Keep source order for `useExtracted` messages on the same line ([#2426](https://github.com/amannn/next-intl/issues/2426)) ([3ef2e6a](https://github.com/amannn/next-intl/commit/3ef2e6afc33ca5c541890f14f7b71a16357d98f6)) – by @amannn
+
+## 4.14.7 (2026-09-24)
+
+### Bug Fixes
+
+* Add optional `@types/react` peer dependency to support global virtual stores of package managers ([#2421](https://github.com/amannn/next-intl/issues/2421)) ([8df0500](https://github.com/amannn/next-intl/commit/8df05005fb91e438f18f32c865ed0865737a604a)) – by @unrevised6419
+
+## 4.14.6 (2026-09-21)
+
+### Bug Fixes
+
+* Emit source ranges for `useTranslations` key references in SWC plugin ([#2420](https://github.com/amannn/next-intl/issues/2420)) ([5209b97](https://github.com/amannn/next-intl/commit/5209b973fd60a4664c8c6e25771988bbd7eb10c6)) – by @amannn
+
+## 4.14.5 (2026-09-14)
+
+### Bug Fixes
+
+* Avoid reading the pathname in `useRouter` and `Link` to work better with Cache Components ([#2415](https://github.com/amannn/next-intl/issues/2415)) ([ed97a92](https://github.com/amannn/next-intl/commit/ed97a92d1592baf1babea05b618dc4bb663c45c1)) – by @amannn
+
+## 4.14.4 (2026-09-11)
+
+### Bug Fixes
+
+* Improve base path detection for setting a cookie ([#2410](https://github.com/amannn/next-intl/issues/2410)) ([f04681d](https://github.com/amannn/next-intl/commit/f04681d2121d850649f5f4fae5232100d78c143f)) – by @soroush5
+
+## 4.14.3 (2026-09-10)
+
+### Bug Fixes
+
+* Keep `$` patterns in route param values literally ([#2406](https://github.com/amannn/next-intl/issues/2406)) ([a97b35e](https://github.com/amannn/next-intl/commit/a97b35e97c4d14248b06d34de6a29c27c400067b)) – by @soroush5
+
+## 4.14.2 (2026-09-01)
+
+### Bug Fixes
+
+* Allow `@eloqnt/*` patches to resolve by moving to `^0.1.0` ranges ([#2398](https://github.com/amannn/next-intl/issues/2398)) ([4d18120](https://github.com/amannn/next-intl/commit/4d18120bf3c14ad2beda836659c6854a03c4f368)) – by @amannn
+
+## 4.14.1 (2026-08-28)
+
+### Bug Fixes
+
+* Unbreak `experimental.messages` without a `messages.sourceLocale` ([#2395](https://github.com/amannn/next-intl/issues/2395)) ([67fca94](https://github.com/amannn/next-intl/commit/67fca941e943e8fa273fbc8a7f362354f6804d35)) – by @amannn
+
+## 4.14.0 (2026-08-27)
+
+### Features
+
+* `useExtracted` improvements ([#2346](https://github.com/amannn/next-intl/issues/2346)) ([4ccf3b8](https://github.com/amannn/next-intl/commit/4ccf3b80a143c192ccfbe576817e2e7fe98aec24)) – by @amannn
+
+## 4.13.7 (2026-08-17)
+
+### Bug Fixes
+
+* Pin `@swc/core` to a range that is compatible with the extractor plugin ([#2389](https://github.com/amannn/next-intl/issues/2389)) ([a37d8aa](https://github.com/amannn/next-intl/commit/a37d8aaec094620cc1f8c345023db833eeebbbed)) – by @amannn
+
+## 4.13.6 (2026-08-10)
+
+### Bug Fixes
+
+* Deprecate `requestLocale` param of `getRequestConfig` ([#2380](https://github.com/amannn/next-intl/issues/2380)) ([ae770af](https://github.com/amannn/next-intl/commit/ae770af84983fdd2ed8f9a3d9acca5a7275b2b0f)) – by @amannn
+
 ## 4.13.5 (2026-08-04)
 
 ### Bug Fixes

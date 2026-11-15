@@ -407,6 +407,8 @@ export const routing = defineRouting({
 
 这样仅用语言前缀和可能匹配的[域名](#domains)来确定语言。
 
+如果不依赖设置语言 cookie，可以考虑将其[关闭](#locale-cookie)。
+
 ### `localeCookie` [#locale-cookie]
 
 如果用户切换了与 `accept-language` 头不匹配的语言，`next-intl` 会设置名为 `NEXT_LOCALE` 的会话 cookie，包含最近检测到的语言，用于[记住用户语言](/docs/routing/middleware#locale-detection)偏好。
@@ -483,6 +485,8 @@ export const routing = defineRouting({
   alternateLinks: false
 });
 ```
+
+如果想自行提供备用链接，例如可以通过[网站地图](/docs/environments/actions-metadata-route-handlers#sitemap)，或使用 [Metadata API](/docs/environments/actions-metadata-route-handlers#metadata-api)。
 
 **了解更多：**
 

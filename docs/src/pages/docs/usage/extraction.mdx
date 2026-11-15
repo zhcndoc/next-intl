@@ -278,7 +278,7 @@ it('renders', () => {
 
 <Callout>
 
-基于 AI 的翻译可以使用 [eloqnt/studio](https://studio.eloqnt.dev) 等工具实现自动化。
+可以使用 [eloqnt/cli](https://cli.eloqnt.dev) 等工具自动生成 AI 翻译。
 
 </Callout>
 
@@ -316,6 +316,20 @@ function Example({name}) {
 }
 ```
 
+虽然性能上无需这样做，`Promise.all` 也受到支持：
+
+```tsx
+import {getExtracted} from 'next-intl/server';
+import {getPost} from '@/lib';
+
+async function AsyncExample() {
+  // ✅ Destructuring from `Promise.all` is supported
+  const [t, post] = await Promise.all([getExtracted(), getPost()]);
+
+  // ...
+}
+```
+
 相比之下，以下是**不支持**的模式示例：
 
 ```tsx
@@ -333,15 +347,6 @@ function Example({key}) {
 
 // ❌ 重新导出该 hook
 export const useExtractedExport = useExtracted;
-
-async function AsyncExample() {
-  // ❌ 将 `t` 传递给 `Promise.all`
-  const [t] = await Promise.all([getExtracted()]);
-
-  // 注意：`getExtracted` 在内部进行了缓存，即使是
-  // 第一次调用通常也耗时不到 1 毫秒。
-  // 因此，无需将其并行化。
-}
 ```
 
 请注意，`useExtracted` 可以在组件中调用，也可以在 hook 中调用——如果你想共享提取出的标签，这可能会很有用。

@@ -1,7 +1,6 @@
 import {createRequire} from 'module';
 import path from 'path';
-import {transform} from '@swc/core';
-import type {SourceMessage} from '../types.js';
+import type {SourceExtractedMessage} from '../types.js';
 import {getDefaultProjectRoot, normalizePathToPosix} from '../utils.js';
 import LRUCache from './LRUCache.js';
 
@@ -12,7 +11,7 @@ export default class MessageExtractor {
   private projectRoot: string;
   private sourceMap: boolean;
   private compileCache = new LRUCache<{
-    messages: Array<SourceMessage>;
+    messages: Array<SourceExtractedMessage>;
     code: string;
     map?: string;
   }>(750);
@@ -31,7 +30,7 @@ export default class MessageExtractor {
     absoluteFilePath: string,
     source: string
   ): Promise<{
-    messages: Array<SourceMessage>;
+    messages: Array<SourceExtractedMessage>;
     code: string;
     map?: string;
   }> {
@@ -45,6 +44,10 @@ export default class MessageExtractor {
     if (!source.includes('useExtracted') && !source.includes('getExtracted')) {
       return {messages: [], code: source};
     }
+
+    // Load lazily so that importing the plugin doesn't require loading the
+    // SWC native binding when no files use `useExtracted`.
+    const {transform} = await import('@swc/core');
 
     const filePath = normalizePathToPosix(
       path.relative(this.projectRoot, absoluteFilePath)
@@ -73,15 +76,28 @@ export default class MessageExtractor {
         }
       },
       sourceMaps: this.sourceMap,
-      sourceFileName: filePath,
+      // Is converted into a relative path by Next.js when
+      // the final source map is generated
+      sourceFileName: absoluteFilePath,
       filename: filePath
     });
 
     // TODO: Improve the typing of @swc/core
     const output = (result as any).output as string;
-    const messages = JSON.parse(
-      JSON.parse(output).results
-    ) as Array<SourceMessage>;
+    // The plugin emits a tagged union of extracted messages and
+    // `useTranslations` usages; this extractor only consumes the former.
+    const messages = (
+      JSON.parse(JSON.parse(output).results) as Array<
+        {type: 'extracted' | 'translation'} & SourceExtractedMessage
+      >
+    )
+      .filter((item) => item.type === 'extracted')
+      .map((item) => ({
+        id: item.id,
+        message: item.message,
+        description: item.description,
+        reference: item.reference
+      }));
 
     const extractionResult = {
       code: result.code,

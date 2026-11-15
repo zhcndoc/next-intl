@@ -26,13 +26,12 @@ type SearchParamValue = ParsedUrlQueryInput[keyof ParsedUrlQueryInput];
 type HrefOrHrefWithParamsImpl<Pathname, Other> =
   Pathname extends `${string}[[...${string}`
     ? // Optional catch-all
-        | Pathname
-        | ({pathname: Pathname; params?: StrictParams<Pathname>} & Other)
+      Pathname | ({pathname: Pathname; params?: StrictParams<Pathname>} & Other)
     : Pathname extends `${string}[${string}`
       ? // Required catch-all & regular params
         {pathname: Pathname; params: StrictParams<Pathname>} & Other
       : // No params
-          Pathname | ({pathname: Pathname} & Other);
+        Pathname | ({pathname: Pathname} & Other);
 
 // For `Link`
 export type HrefOrUrlObjectWithParams<Pathname> = HrefOrHrefWithParamsImpl<
@@ -144,7 +143,7 @@ export function compileLocalizedPathname<AppLocales extends Locales, Pathname>({
             replacer = String(paramValue);
           }
 
-          compiled = compiled.replace(new RegExp(regexp, 'g'), replacer);
+          compiled = compiled.replace(new RegExp(regexp, 'g'), () => replacer);
         });
       }
 
@@ -244,14 +243,12 @@ export function getRoute<AppLocales extends Locales>(
   return pathname as keyof Pathnames<AppLocales>;
 }
 
-export function getBasePath(
-  pathname: string,
-  windowPathname = window.location.pathname
-) {
-  if (pathname === '/') {
-    return windowPathname;
-  } else {
-    return windowPathname.replace(pathname, '');
+export function getBasePath() {
+  try {
+    // Provided via `env` setting in `next.config.js` via the plugin
+    return process.env._next_intl_base_path || '';
+  } catch {
+    return '';
   }
 }
 

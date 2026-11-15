@@ -1,11 +1,23 @@
 [
   {
+    "description": null,
     "id": "-YJVTi",
     "message": "Hey!",
-    "description": null,
+    "ranges": {
+      "argument": {
+        "end": 114,
+        "start": 108
+      },
+      "message": {
+        "end": 114,
+        "start": 108
+      }
+    },
     "reference": {
-      "path": "input.js",
-      "line": 5
-    }
+      "column": 2,
+      "line": 5,
+      "path": "input.js"
+    },
+    "type": "extracted"
   }
 ]

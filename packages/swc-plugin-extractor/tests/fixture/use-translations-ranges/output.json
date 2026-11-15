@@ -1,0 +1,112 @@
+[
+  {
+    "id": "Pöll.yes",
+    "ranges": {
+      "argument": {
+        "end": 201,
+        "start": 196
+      },
+      "id": {
+        "end": 201,
+        "start": 196
+      }
+    },
+    "reference": {
+      "column": 16,
+      "line": 7,
+      "path": "input.js"
+    },
+    "type": "translation"
+  },
+  {
+    "id": "Pöll.no",
+    "ranges": {
+      "argument": {
+        "end": 210,
+        "start": 206
+      },
+      "id": {
+        "end": 210,
+        "start": 206
+      }
+    },
+    "reference": {
+      "column": 26,
+      "line": 7,
+      "path": "input.js"
+    },
+    "type": "translation"
+  },
+  {
+    "id": "Pöll.template",
+    "ranges": {
+      "argument": {
+        "end": 290,
+        "start": 280
+      },
+      "id": {
+        "end": 290,
+        "start": 280
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 10,
+      "path": "input.js"
+    },
+    "type": "translation"
+  },
+  {
+    "id": "Pöll.rich",
+    "ranges": {
+      "argument": {
+        "end": 308,
+        "start": 302
+      },
+      "id": {
+        "end": 308,
+        "start": 302
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 11,
+      "path": "input.js"
+    },
+    "type": "translation"
+  },
+  {
+    "id": "Pöll.wrapped",
+    "ranges": {
+      "argument": {
+        "end": 363,
+        "start": 354
+      },
+      "id": {
+        "end": 363,
+        "start": 354
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 12,
+      "path": "input.js"
+    },
+    "type": "translation"
+  },
+  {
+    "id": "Pöll",
+    "ranges": {
+      "argument": {
+        "end": 467,
+        "start": 453
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 17,
+      "path": "input.js"
+    },
+    "type": "translation"
+  }
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "id": "Namespace.title",
+    "ranges": {
+      "argument": {
+        "end": 228,
+        "start": 221
+      },
+      "id": {
+        "end": 228,
+        "start": 221
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 8,
+      "path": "input.js"
+    },
+    "type": "translation"
+  },
+  {
+    "id": "global",
+    "ranges": {
+      "argument": {
+        "end": 243,
+        "start": 235
+      },
+      "id": {
+        "end": 243,
+        "start": 235
+      }
+    },
+    "reference": {
+      "column": 2,
+      "line": 9,
+      "path": "input.js"
+    },
+    "type": "translation"
+  }
+]
